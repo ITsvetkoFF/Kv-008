@@ -1,0 +1,81 @@
+Request handlers
+1. создается экземпляр обработчика
+2. вызывается метод initialize(), который присоединяет атрибуты к экземпляру
+    атрибути задаем третим элементом (словарем) в URLSpec (например, атрибут database)
+
+    class ProfileHandler(RequestHandler):
+        def initialize(self, database):
+            self.database = database
+
+        def get(self, username):
+            ...
+
+    app = Application([(r'/user/(.*)', ProfileHandler, dict(database=database))])
+
+3. вызывается метод prepare() (перед вызовом методов get(), post() etc.) -- переопределяем его для общей инициализации (независимо
+    от метода, который будет вызван в дальнейшем).
+4. on_finish() -- вызывается по окончании запроса (ответ уже отправлен клиенту), для cleanup, logging
+
+INPUT
+RequestHandler.get_argument() --> unicode string
+RequestHandler.get_query_argument()
+RequestHandler.get_body_argument()
+RequestHandler.request -- tornado.httputils.HTTPServerRequest object
+RequestHandler.path_args -- содержит аргументы, который будут переданы HTTP verb методам (можно использовать в prepare())
+
+OUTPUT
+write() (записать вывод в буфер)-- если передаем сюда словарь, тогда он будет закодиров в JSON и будет добавлен хедер application/json
+flush() -- вытолкнуть буфер в сеть
+finish() -- закончить соединение
+render() -- предоставить заполненый шаблон
+redirect()
+send_error() -- если буфер еще не вытолкнут в сеть, тогда этот метод сработает
+application -- ссылка на объект Application
+current_user -- автентифицированный пользователь по этому запросу -- кэшированная версия get_current_user()
+
+
+Application configuration
+экземпляр этого класса передается httpserver.HTTPServer
+отвечает за глобальные настройки приложения
+содержит таблицу путей -- сопоставляет запросам обработчики
+    когда прилетает запрос, мы идем по списку и ищем совпадение по регулярному выражение, а затем инстанциируем класс обработчика
+    если передать в кортеж (URLSpec) третим аргументом словарь, он будет использовать для инициализации экземпляра обработчика (initialize())
+        application = web.Application([(r"/static/(.*)", web.StaticFileHandler, {"path": "/var/www"})])
+        можно также передать путь к папке статиков именованным аргументом при вызове Application
+settings -- словарь настроек приложения
+
+listen() -- запустить HTTPServer для нашего приложения на заданном порту (это альтернатива созданию экземпляра HTTPServer и вызова его метода listen)
+IOLoop.instance().start() -- запускаем сервер
+
+reverse_url(name, *args) --> URL path for the handler named name (handler must be an URLSpec instance) args -- вместо выцепленных групп в регулярном выражении
+log_request(handler) -- записываем обработанный запрос в журнал
+
+
+Non-blocking HTTP server (single-threaded)
+Обычно приложения мало взаимодействуют напрямую с этим классом, помимо запуска сервера в начале процесса.
+Три варианта инициализации HTTPServer:
+1. listen -- simple single process
+    server = HTTPServer(app)
+    server.listen(8888)
+    IOLoop.instance().start()
+2. bind / start -- simple multi-process
+    server = HTTPServer(app)
+    server.bind(8888)
+    server.start(0)  # Forks multiple sub-processes
+    IOLoop.instance().start()
+3. add_sockets -- advanced multi-process
+
+
+v1_0/handlers
+
+oauth.py
+http://hueniverse.com/oauth/ --
+    For example, a web user (resource owner) can grant a printing service (client) access to her private
+    photos stored at a photo sharing service (server), without sharing her username and password with the printing service.  Instead,
+    she authenticates directly with the photo sharing service which issues the printing service delegation-specific credentials.
+http://habrahabr.ru/company/mailru/blog/115163/ --
+    OAuth 2.0 — протокол авторизации, позволяющий выдать одному сервису (приложению) права на доступ к ресурсам пользователя на другом
+    сервисе. Протокол избавляет от необходимости доверять приложению логин и пароль, а также позволяет выдавать ограниченный набор прав,
+    а не все сразу.
+
+

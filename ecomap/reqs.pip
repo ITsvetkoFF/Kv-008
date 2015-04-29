@@ -1,0 +1,14 @@
+Tornado==3.2.2
+Sphinx
+Fabric
+WTForms
+Celery
+SQLAlchemy
+
+ipdb
+ipython
+nose
+pyquery
+python-oauth2
+futures
+psycopg2
