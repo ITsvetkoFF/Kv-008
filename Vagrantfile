@@ -10,6 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "iodose/eco_ubuntu"
   config.vm.network :forwarded_port, guest: 8000, host: 8001
+  config.vm.network :forwarded_port, guest: 5432, host: 8002
   config.vm.synced_folder "./ecomap", "/project_data"
   config.ssh.username = "vagrant"
   config.ssh.password = "vagrant"
