@@ -1,22 +1,70 @@
---CREATE TYPE ;
+CREATE TYPE Status AS ENUM ('User', 'Administrator', 'Unregistered user');
+CREATE TYPE ActivityType AS ENUM ('added', 'removed', 'updated');
+CREATE TYPE SeverityTypes AS ENUM ('', '', '', '', '');
 
-CREATE TABLE activities
+CREATE TABLE PhotosActivity
 (
-    id SERIAL PRIMARY KEY NOT NULL,
-    content VARCHAR,
-    date TIMESTAMP NOT NULL,
-    activitytype_id INT NOT NULL,
-    user_id INT NOT NULL,
-    problem_id INT NOT NULL,
-  FOREIGN KEY (activitytype_id) REFERENCES activitytypes (id),
-  FOREIGN KEY (user_id) REFERENCES users (id),
-  FOREIGN KEY (problem_id) REFERENCES problems (id)
+  id SERIAL PRIMARY KEY NOT NULL,
+  photo_id INT NOT NULL,
+  problem_id INT NOT NULL,
+  user_id INT NOT NULL,
+  date DATE NOT NULL,
+  activity_type ActivityType NOT NULL,
+  FOREIGN KEY (photo_id) REFERENCES photos(id),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (problem_id) REFERENCES problems(id)
 );
 
-CREATE TABLE activitytypes
+CREATE TABLE Region
 (
-    id SERIAL PRIMARY KEY NOT NULL,
-    type VARCHAR(100) NOT NULL
+  id SERIAL PRIMARY KEY NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  location GEOMETRY NOT NULL,
+);
+
+CREATE TABLE ProblemActivities
+(
+  id SERIAL PRIMARY KEY NOT NULL,
+  problem_id INT NOT NULL,
+  data JSON NOT NULL,
+  user_id INT NOT NULL,
+  date DATE NOT NULL,
+  activity_type ActivityType NOT NULL,
+  FOREIGN KEY (problem_id) REFERENCES problems(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE VotesActivities
+(
+  id SERIAL PRIMARY KEY NOT NULL,
+  problem_id INT NOT NULL,
+  user_id INT NOT NULL,
+  date DATE NOT NULL,
+  FOREIGN KEY (problem_id) REFERENCES problems(id),
+  FOREIGN KEY (user_id) REFERENCES problems(id)
+);
+
+CREATE TABLE CommentsActivities
+(
+  id SERIAL PRIMARY KEY NOT NULL,
+  problem_id INT NOT NULL,
+  user_id INT NOT NULL,
+  commet_id INT NOT NULL,
+  date DATE NOT NULL,
+  activity_type ActivityType NOT NULL,
+  FOREIGN KEY (problem_id) REFERENCES problems(id),
+  FOREIGN KEY (commet_id) REFERENCES comments(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE comments
+(
+  id SERIAL PRIMARY KEY NOT NULL,
+  content TEXT NOT NULL,
+  user_id INT NOT NULL,
+  problem_id INT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (problem_id) REFERENCES problems(id)
 );
 
 CREATE TABLE permissions
@@ -29,7 +77,7 @@ CREATE TABLE photos
 (
     id SERIAL PRIMARY KEY NOT NULL,
     link VARCHAR(200) NOT NULL,
-    status INT NOT NULL,
+    status Status NOT NULL,
     coment VARCHAR(500) NOT NULL,
     problem_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -42,14 +90,15 @@ CREATE TABLE problems
     id SERIAL PRIMARY KEY NOT NULL,
     title VARCHAR(100) NOT NULL,
     content VARCHAR NOT NULL,
-    proposal INT NOT NULL,
-    severity INT NOT NULL,
-    moderation INT NOT NULL,
+    proposal TEXT NOT NULL,
+    severity SeverityTypes NOT NULL,
     votes INT NOT NULL,
-    location INT NOT NULL,
-    status INT NOT NULL,
+    location GEOMETRY NOT NULL,
+    status Status NOT NULL,
     problemtype_id INT NOT NULL,
-  FOREIGN KEY (problemtype_id) REFERENCES problemtypes(id)
+  region_id int NOT NULL,
+  FOREIGN KEY (problemtype_id) REFERENCES problemtypes(id),
+  FOREIGN KEY (region_id) REFERENCES Region(id)
 );
 
 CREATE TABLE problemtypes
@@ -66,6 +115,7 @@ CREATE TABLE rolepermission
   FOREIGN KEY (permission_id) REFERENCES permissions(id),
   FOREIGN KEY (role_id) REFERENCES userroles(id)
 );
+
 CREATE TABLE solutions
 (
     problem_id INT NOT NULL,
@@ -73,7 +123,8 @@ CREATE TABLE solutions
     problemmaager_id INT NOT NULL,
     id SERIAL PRIMARY KEY NOT NULL,
   FOREIGN KEY (administrator_id) REFERENCES users(id),
-  FOREIGN KEY (problemmaager_id) REFERENCES users(id)
+  FOREIGN KEY (problemmaager_id) REFERENCES users(id),
+  FOREIGN KEY (problem_id) REFERENCES problems(id)
 );
 
 CREATE TABLE userroles
