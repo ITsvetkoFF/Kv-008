@@ -82,6 +82,7 @@ target/
 .idea/*
 
 .gitignore
-*.DS_Store
 
 ecomap/api/.DS_Store
+
+ecomap/api/v1_0/.DS_Store
