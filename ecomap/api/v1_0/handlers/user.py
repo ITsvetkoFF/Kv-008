@@ -64,7 +64,7 @@ class UserAPIHandler(BaseAPIHandler):
     @tornado.web.authenticated
     def get(self):
         name = tornado.escape.xhtml_escape(self.current_user)
-        return self.write('Hello, ' + name)
+        return self.write({'user': name})
 
     @tornado.web.authenticated
     def post(self):

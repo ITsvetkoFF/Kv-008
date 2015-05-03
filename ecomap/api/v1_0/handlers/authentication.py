@@ -1,6 +1,28 @@
 import tornado.web
 import tornado.auth
-from tornado.escape import json_encode
+
+
+class LoginHandler(tornado.web.RequestHandler):
+
+    def get(self):
+        self.write("""\
+        <html>
+        <body>
+        <form action="/auth/login" method="POST">
+        Name: <input type="text" name="name">
+        <input type="submit" value="Sign in"><br>
+        </form>
+        <p>Sign in with <a href="/auth/login/facebook">Facebook</a> or
+        <a href="#">Gmail</a></p>
+        </body>
+        </html>\
+        """)
+
+    def post(self):
+        user_name = self.get_argument('name')
+        if user_name:
+            self.set_secure_cookie('user_name', user_name)
+            self.redirect('/api/v1/user')
 
 
 class FacebookLoginHandler(tornado.web.RequestHandler,
@@ -21,7 +43,7 @@ class FacebookLoginHandler(tornado.web.RequestHandler,
         if self.get_argument('code', None):
             print 'authorization code found ==> getting access_token'
             self.get_authenticated_user(
-                redirect_uri='http://localhost:8001/auth/facebook',
+                redirect_uri='http://localhost:8001/auth/login/facebook',
                 client_id=self.settings['facebook_api_key'],
                 client_secret=self.settings['facebook_secret'],
                 code=self.get_argument('code'),
@@ -35,11 +57,10 @@ class FacebookLoginHandler(tornado.web.RequestHandler,
 
         print 'getting authorization code'
         self.authorize_redirect(
-            redirect_uri='http://localhost:8001/auth/facebook',
+            redirect_uri='http://localhost:8001/auth/login/facebook',
             client_id=self.settings['facebook_api_key'],
             extra_params={'scope': 'public_profile,email'}
         )
-
 
     def _on_facebook_login(self, user):
         if not user:

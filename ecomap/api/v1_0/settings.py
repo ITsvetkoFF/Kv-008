@@ -13,4 +13,4 @@ class LocalSettings(object):
     FACEBOOK_API_KEY = '903837986321574'
     FACEBOOK_SECRET = '0f4ec5b2458b64b51fc64aacdbdef3d9'
     COOKIE_SECRET = 'mycookiesecret'
-    LOGIN_URL = '/auth/facebook'
+    LOGIN_URL = '/login'
