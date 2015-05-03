@@ -1,6 +1,8 @@
 # coding: utf-8
 import json
 import oauth2
+import tornado.web
+import tornado.escape
 
 from api.v1_0.handlers.base import BaseAPIHandler
 from api.v1_0.models.user import User
@@ -59,14 +61,19 @@ class OAuth2APIHandler(BaseAPIHandler):
 
 class UserAPIHandler(BaseAPIHandler):
 
+    @tornado.web.authenticated
     def get(self):
-        return self.write({'user': 'get'})
+        name = tornado.escape.xhtml_escape(self.current_user)
+        return self.write('Hello, ' + name)
 
+    @tornado.web.authenticated
     def post(self):
         return self.write({'user': 'post'})
 
+    @tornado.web.authenticated
     def delete(self):
         return self.write({'user': 'delete'})
 
+    @tornado.web.authenticated
     def put(self, user):
         return self.write({'user': 'put'})

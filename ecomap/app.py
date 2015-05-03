@@ -15,21 +15,6 @@ from api.v1_0.handlers.urls import APIUrls
 
 if __name__ == "__main__":
 
-    # api/v1_0/settings.py
-    #
-    # DEBUG = True
-    # BIND_PORT = 5000
-    # BIND_ADDR = '127.0.0.1'
-    # PSQL_LOGIN = 'test_user'
-    # PSQL_PASSWORD = 'qwerty'
-    # PSQL_HOST = 'localhost'
-    # PSQL_PORT = 5432
-    # PSQL_DBNAME = 'test_db'
-    #
-    # these are all in settings dictionary
-    #
-    # TORNADO_START is not in LocalSettings class
-
     settings = get_normalized_settings()
     # APIUrls is in v1_0/handlers/urls.py -- path table
     application = Application(handlers=APIUrls, **settings)
@@ -47,4 +32,5 @@ if __name__ == "__main__":
         server.bind(settings['bind_port'], settings['bind_addr'] )
         server.start(settings['tornado_start'])
 
+    print 'starting server...'
     IOLoop.instance().start()
