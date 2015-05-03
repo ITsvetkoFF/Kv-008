@@ -9,20 +9,24 @@ class LoginHandler(tornado.web.RequestHandler):
         <html>
         <body>
         <form action="/auth/login" method="POST">
-        Name: <input type="text" name="name">
+        Email: <input type="email" name="email"><br>
+        Password: <input type="password" name="password"><br>
         <input type="submit" value="Sign in"><br>
         </form>
         <p>Sign in with <a href="/auth/login/facebook">Facebook</a> or
         <a href="#">Gmail</a></p>
+        <p><a href="#">Register</a></p>
         </body>
         </html>\
         """)
 
     def post(self):
-        user_name = self.get_argument('name')
-        if user_name:
-            self.set_secure_cookie('user_name', user_name)
-            self.redirect('/api/v1/user')
+        email = self.get_argument('email')
+        password= self.get_argument('password')
+
+        # look up the user in the database
+        if email and password:
+            pass
 
 
 class FacebookLoginHandler(tornado.web.RequestHandler,
@@ -40,8 +44,15 @@ class FacebookLoginHandler(tornado.web.RequestHandler,
 
     @tornado.web.asynchronous
     def get(self):
+        # user has authenticated
+        userName = self.get_secure_cookie('user_name')
+        userEmail = self.get_secure_cookie('email')
+        if userName and userEmail:
+            self.redirect('/api/v1/user')
+            return
+
+        # user has authorized our access to her email
         if self.get_argument('code', None):
-            print 'authorization code found ==> getting access_token'
             self.get_authenticated_user(
                 redirect_uri='http://localhost:8001/auth/login/facebook',
                 client_id=self.settings['facebook_api_key'],
@@ -50,24 +61,35 @@ class FacebookLoginHandler(tornado.web.RequestHandler,
                 callback=self._on_facebook_login
             )
             return
-        elif self.get_secure_cookie('access_token'):
-            print 'access_token found ==> redirecting to /api/v1/user'
-            self.redirect('/api/v1/user')
-            return
 
-        print 'getting authorization code'
+        # a new user, getting authorization
         self.authorize_redirect(
             redirect_uri='http://localhost:8001/auth/login/facebook',
             client_id=self.settings['facebook_api_key'],
-            extra_params={'scope': 'public_profile,email'}
+            extra_params={'scope': 'email'}
         )
 
+    # getting user profile information
     def _on_facebook_login(self, user):
         if not user:
             self.clear_all_cookies()
             raise tornado.web.HTTPError(500, 'Facebook authentication failed')
 
-        self.set_secure_cookie('user_name', str(user['name']))
-        self.set_secure_cookie('access_token', str(user['access_token']))
-        print 'cookies set ==> redirecting to /api/v1/user'
+        # getting user profile from Facebook (we need her email)
+        self.facebook_request(
+            path='/me',
+            access_token=user['access_token'],
+            callback=self._save_user_profile
+        )
+
+    # settings cookies
+    def _save_user_profile(self, user):
+        if not user:
+            raise tornado.web.HTTPError(500, 'Facebook user '
+                                             'profile access failed')
+
+        # self.write(user)
+        # self.finish()
+        self.set_secure_cookie('user_name', user['name'])
+        self.set_secure_cookie('email', user['email'])
         self.redirect('/api/v1/user')
