@@ -18,7 +18,6 @@ from fabric.context_managers import shell_env, lcd
 from fabric.colors import green, red
 
 from api.v1_0.models.user import Base
-from api.utils.settings import get_normalized_settings
 from api.utils.db import get_db_engine
 
 
@@ -70,6 +69,8 @@ def init_db():
     """
     Creates tables by SQLAlchemy models
     """
-    settings = get_normalized_settings()
+    with open('settings.json') as json_settings:
+        settings = json.load(json_settings)
+
     engine = get_db_engine(settings)
     Base.metadata.create_all(bind=engine)

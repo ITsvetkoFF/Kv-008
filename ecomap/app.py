@@ -1,25 +1,21 @@
 #!/usr/bin/env python
 # coding: utf-8
-import sys
-import os
-
+import json
 from tornado.httpserver import HTTPServer
 from tornado.web import Application
 from tornado.log import enable_pretty_logging
 from tornado.ioloop import IOLoop
 
 from api.utils.db import get_db_session
-from api.utils.settings import get_normalized_settings
-from api.v1_0.handlers.urls import APIUrls
+from api.v1_0.urls.urls import UrlsTable
 
 
 if __name__ == "__main__":
 
-    settings = get_normalized_settings()
-    # APIUrls is in v1_0/handlers/urls.py -- path table
-    application = Application(handlers=APIUrls, **settings)
-    # attaching database here -- used to initialize request handlers
-    # see base.py db property
+    with open('settings.json') as json_settings:
+        settings = json.load(json_settings)
+
+    application = Application(handlers=UrlsTable, **settings)
     application.db = get_db_session(settings)
 
     if settings['debug']:
