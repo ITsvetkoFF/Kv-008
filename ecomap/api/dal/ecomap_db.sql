@@ -5,10 +5,10 @@ CREATE USER ecouser WITH password 'ecouser';
 GRANT ALL privileges ON DATABASE ecomap_db TO ecouser;
 
 ALTER ROLE ecouser SUPERUSER;
-\connect 'ecomap_db' ecouser;
+\connect 'ecomap_db';
 CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_topology;
-ALTER ROLE ecouser NOSUPERUSER;
+-- ALTER ROLE ecouser NOSUPERUSER;
 SET SCHEMA 'public';
 
 CREATE TYPE Status AS ENUM ('USER', 'ADMINISTRATOR', 'UNREGISTERED_USER');
