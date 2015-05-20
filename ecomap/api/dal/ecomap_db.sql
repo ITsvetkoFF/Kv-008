@@ -34,7 +34,7 @@ CREATE TABLE users
 (
     id SERIAL PRIMARY KEY NOT NULL,
     name VARCHAR(64) NOT NULL,
-    surname VARCHAR(64) NOT NULL,
+    surname VARCHAR(64) NULL,
     email VARCHAR(128) NOT NULL,
     password VARCHAR NOT NULL,
     userrole_id INT NOT NULL,
@@ -57,6 +57,7 @@ CREATE TABLE problems
     proposal TEXT NOT NULL,
     severity SeverityTypes NOT NULL,
     votes INT NOT NULL,
+    location GEOMETRY NOT NULL,
     status Status NOT NULL,
     problemtype_id INT NOT NULL,
     region_id int NOT NULL,
