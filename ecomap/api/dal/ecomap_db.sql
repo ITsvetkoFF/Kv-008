@@ -114,7 +114,7 @@ CREATE TABLE votes_activities
   date DATE NOT NULL,
 
   FOREIGN KEY (problem_id) REFERENCES problems(id),
-  FOREIGN KEY (user_id) REFERENCES problems(id)
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE comments
