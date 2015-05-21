@@ -4,38 +4,16 @@ import tornado.web
 import tornado.auth
 import tornado.escape
 
-from api.v1_0.handlers.base import BaseAPIHandler
+from ecomap.api.v1_0.handlers.base import BaseHandler
 
 
-class LoginHandler(BaseAPIHandler):
-
-    def get(self):
-        self.write("""\
-        <html>
-        <body>
-        <form action="/auth/login" method="POST">
-        Email: <input type="email" name="email"><br>
-        Password: <input type="password" name="password"><br>
-        <input type="submit" value="Sign in"><br>
-        </form>
-        <p>Sign in with <a href="/auth/login/facebook">Facebook</a> or
-        <a href="/auth/login/google">Gmail</a></p>
-        <p><a href="/auth/register">Register</a></p>
-        </body>
-        </html>\
-        """)
-
-    def post(self):
-        email = self.get_argument('email')
-        password= self.get_argument('password')
-
-        # look up the user in the database
-        if email and password:
-            pass
+class RegisterHandler(BaseHandler):
+    def get(self, user_id):
+        self.set_cookie('user_id', user_id)
+        self.redirect('/api/v1/user')
 
 
-class FacebookLoginHandler(BaseAPIHandler,
-                           tornado.auth.FacebookGraphMixin):
+class FacebookLoginHandler(BaseHandler, tornado.auth.FacebookGraphMixin):
     """This class implements Facebook authentication using the Graph API.
 
     Authentication scheme
@@ -57,7 +35,7 @@ class FacebookLoginHandler(BaseAPIHandler,
             return
 
         # user has authorized our access to her email
-        uri = 'http://{}:{}/auth/login/facebook'\
+        uri = 'http://{}:{}/auth/login/facebook' \
             .format(self.settings['hostname'], self.settings['bind_port'])
         if self.get_argument('code', None):
             self.get_authenticated_user(
@@ -100,13 +78,12 @@ class FacebookLoginHandler(BaseAPIHandler,
         self.redirect(self.settings['default_redirect'])
 
 
+# Google auth
 
-#  Google auth
-
-class GoogleLoginHandler(BaseAPIHandler, tornado.auth.GoogleOAuth2Mixin):
+class GoogleLoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
     @tornado.gen.coroutine
     def get(self):
-        uri = 'http://{}:{}/auth/login/google'\
+        uri = 'http://{}:{}/auth/login/google' \
             .format(self.settings['hostname'], self.settings['bind_port'])
 
         if self.get_argument('code', False):
@@ -116,8 +93,8 @@ class GoogleLoginHandler(BaseAPIHandler, tornado.auth.GoogleOAuth2Mixin):
             )
             # request for user profile (user_name, email)
             yield self.google_request(path='/me',
-                            access_token=user['access_token'],
-                            callback=self._save_user_profile)
+                                      access_token=user['access_token'],
+                                      callback=self._save_user_profile)
 
         else:
             yield self.authorize_redirect(
@@ -141,15 +118,17 @@ class GoogleLoginHandler(BaseAPIHandler, tornado.auth.GoogleOAuth2Mixin):
         callback = functools.partial(self._on_google_request, callback)
         http = self.get_auth_http_client()
         if post_args is not None:
-            http.fetch(url, method="POST", body=urllib_parse.urlencode(post_args),
+            http.fetch(url, method="POST",
+                       body=urllib_parse.urlencode(post_args),
                        callback=callback)
         else:
             http.fetch(url, callback=callback)
 
     def _on_google_request(self, future, response):
         if response.error:
-            future.set_exception(tornado.auth.AuthError("Erorr response %s fetching %s" %
-                                           (response.error, response.request.url)))
+            future.set_exception(
+                tornado.auth.AuthError("Erorr response %s fetching %s" %
+                                       (response.error, response.request.url)))
             return
 
         future.set_result(tornado.escape.json_decode(response.body))
@@ -162,4 +141,3 @@ class GoogleLoginHandler(BaseAPIHandler, tornado.auth.GoogleOAuth2Mixin):
         self.set_secure_cookie('user_name', user['displayName'])
         self.set_secure_cookie('email', user['emails'][0]['value'])
         self.redirect(self.settings['default_redirect'])
-
