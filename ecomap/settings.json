@@ -1,10 +1,11 @@
 {
     "debug": true,
+    "tornado_start": 0,
     "bind_port": 8000,
-    "bind_addr": "0.0.0.0",
+    "bind_address": "0.0.0.0",
     "hostname": "localhost",
     "psql_login": "ecouser",
-    "psql_password": "3c0map$008kv",
+    "psql_password": "ecouser",
     "psql_host": "localhost",
     "psql_port": 5432,
     "psql_dbname": "ecomap_db",
@@ -13,9 +14,7 @@
     "google_oauth": {"key":"150681302088-ur41bo6crvgi1aiu5ase82u14ru0kfpt.apps.googleusercontent.com",
                      "secret":"QDlVRbsGM98VQihKtF1XYr2Q"},
     "cookie_secret": "3I02LGzImS446U5lQ8GzTcCy104Sm8",
-    "login_url": "/auth/login",
-    "tornado_start": 0,
-    "xsrf_cookies": "True",
+    "login_url": "/auth/login/",
     "default_redirect":"/api/v1/user"
 
 }

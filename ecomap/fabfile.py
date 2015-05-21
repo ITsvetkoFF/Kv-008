@@ -17,8 +17,8 @@ from fabric.api import local as fab_run
 from fabric.context_managers import shell_env, lcd
 from fabric.colors import green, red
 
-from api.v1_0.models.user import Base
-from api.utils.db import get_db_engine
+from api.v1_0.models import Base
+from api.utils.database import database_session
 
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))

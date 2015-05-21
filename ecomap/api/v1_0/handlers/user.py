@@ -2,25 +2,27 @@
 import tornado.web
 import tornado.escape
 
-from api.v1_0.handlers.base import BaseAPIHandler
-from api.v1_0.models.user import User
+from ecomap.api.v1_0.handlers.base import BaseHandler
+from ecomap.api.utils.oper_allowed import operation_allowed
 
 
-class UserAPIHandler(BaseAPIHandler):
-
+class UserAPIHandler(BaseHandler):
     @tornado.web.authenticated
+    @operation_allowed
     def get(self):
-        email = self.get_secure_cookie('email')
-        return self.write({'user_name': self.current_user, 'email': email})
+        return self.write({self.request.path: 'get'})
 
     @tornado.web.authenticated
+    @operation_allowed
     def post(self):
-        return self.write({'user': 'post'})
+        return self.write({self.request.path: 'post'})
 
     @tornado.web.authenticated
+    @operation_allowed
     def delete(self):
-        return self.write({'user': 'delete'})
+        return self.write({self.request.path: 'delete'})
 
     @tornado.web.authenticated
+    @operation_allowed
     def put(self, user):
-        return self.write({'user': 'put'})
+        return self.write({self.request.path: 'put'})

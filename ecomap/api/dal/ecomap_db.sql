@@ -32,12 +32,12 @@ CREATE TABLE user_roles
 
 CREATE TABLE users
 (
-    id SERIAL PRIMARY KEY NOT NULL,
-    name VARCHAR(64) NOT NULL,
-    surname VARCHAR(64) NULL,
-    email VARCHAR(128) NOT NULL,
-    password VARCHAR NOT NULL,
-    userrole_id INT NOT NULL,
+  id SERIAL PRIMARY KEY NOT NULL,
+  name VARCHAR(64) NOT NULL,
+  surname VARCHAR(64) NOT NULL,
+  email VARCHAR(128) NOT NULL,
+  password VARCHAR NOT NULL,
+  userrole_id INT NOT NULL,
 
     FOREIGN KEY (userrole_id) REFERENCES user_roles(id)
 );
@@ -51,16 +51,16 @@ CREATE TABLE region
 
 CREATE TABLE problems
 (
-    id SERIAL PRIMARY KEY NOT NULL,
-    title VARCHAR(100) NOT NULL,
-    content VARCHAR NOT NULL,
-    proposal TEXT NOT NULL,
-    severity SeverityTypes NOT NULL,
-    votes INT NOT NULL,
-    location GEOMETRY NOT NULL,
-    status Status NOT NULL,
-    problemtype_id INT NOT NULL,
-    region_id int NOT NULL,
+  id SERIAL PRIMARY KEY NOT NULL,
+  title VARCHAR(100) NOT NULL,
+  content VARCHAR NOT NULL,
+  proposal TEXT NOT NULL,
+  severity SeverityTypes NOT NULL,
+  votes INT NOT NULL,
+  location GEOMETRY NOT NULL,
+  status Status NOT NULL,
+  problemtype_id INT NOT NULL,
+  region_id int NOT NULL,
 
   FOREIGN KEY (problemtype_id) REFERENCES problem_types(id),
   FOREIGN KEY (region_id) REFERENCES region(id)
@@ -114,7 +114,7 @@ CREATE TABLE votes_activities
   date DATE NOT NULL,
 
   FOREIGN KEY (problem_id) REFERENCES problems(id),
-  FOREIGN KEY (user_id) REFERENCES users(id)
+  FOREIGN KEY (user_id) REFERENCES problems(id)
 );
 
 CREATE TABLE comments
