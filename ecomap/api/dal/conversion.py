@@ -9,7 +9,25 @@ from fabric.api import local
 
 Base = declarative_base()
 metadata = Base.metadata
-engine = create_engine('postgresql+psycopg2://postgres:db2567819@localhost/ecomap_db')
+
+URL = '{db_type}://{username}:{password}@{host}/{database}?charset={charset}'
+
+MYSQL_URL = URL.format(db_type='mysql',
+                       username='root',
+                       password='root',
+                       host='localhost',
+                       database='Enviromap',
+                       charset='utf8')
+
+PSQL_URL = URL.format(db_type='postgresql+psycopg2',
+                      username='postgres',
+                      password='postgres',
+                      host='localhost',
+                      database='ecomap_db',
+                      charset='')
+
+
+engine = create_engine(PSQL_URL)
 Session = sessionmaker(bind=engine)
 
 
@@ -82,14 +100,18 @@ class ProblemActivity(Base):
 
 
 class MigrateDB(object):
-    def __init__(self, url):
-        self.mysql_db = sqlsoup.SQLSoup(str(url))
+    def __init__(self):
+        self.mysql_db = sqlsoup.SQLSoup(MYSQL_URL)
         self.session = Session()
         self.actType = {}
         self.delId = []
 
-    def clear_tables(self):
+    def fill_test_region_id(self):
         region_data = Region(id=999, name='test', location='POLYGON((0 0,0 0,0 0,0 0,0 0))')
+        self.session.add(region_data)
+        self.session.commit()
+
+    def clear_tables(self):
         self.session.execute('DELETE FROM votes_activities;')
         self.session.execute('DELETE FROM comments;')
         self.session.execute('DELETE FROM problem_activities;')
@@ -98,11 +120,10 @@ class MigrateDB(object):
         self.session.execute('DELETE FROM region;')
         self.session.execute('DELETE FROM users;')
         self.session.execute('DELETE FROM user_roles;')
-        self.session.add(region_data)
         self.session.commit()
 
-    def create_dump(self, file_name):
-        local("pg_dump ecomap_db > %s.sql" % file_name)
+    def create_dump(self, db_name, file_name):
+        local("pg_dump %s > %s.sql" % (db_name, file_name))
 
     def migrate_user_roles(self):
         user_roles = self.mysql_db.UserRoles.all()
@@ -184,11 +205,15 @@ class MigrateDB(object):
 
 def main():
     # Init configs
-    ecomap_db = MigrateDB('mysql://root:root@localhost/Enviromap?charset=utf8&use_unicode=0')
+    ecomap_db = MigrateDB()
     # -----
 
     # clear tables
     ecomap_db.clear_tables()
+    # -----
+
+    # test region for updated table "problems"
+    ecomap_db.fill_test_region_id()
     # -----
 
     # UserRoles
@@ -216,7 +241,7 @@ def main():
     # -----
 
     # Dump psql
-    ecomap_db.create_dump('ecomap_db_dump')
+    ecomap_db.create_dump(db_name='ecomap_db', file_name='ecomap_db_dump')
     # -----
 
 if __name__ == '__main__':
