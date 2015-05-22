@@ -7,6 +7,9 @@ __all__ = [
     'run',
     'test',
     'upgrade',
+    'create_database',
+    'import_dump',
+    'drop_database',
 ]
 
 import os
@@ -74,3 +77,44 @@ def init_db():
 
     engine = get_db_engine(settings)
     Base.metadata.create_all(bind=engine)
+
+
+def create_database():
+    """
+    Create empty database
+    """
+    db_name = str(raw_input('Choose database (default "test_db"): ')) or 'test_db'
+    fab_run('sudo -u postgres psql -c "CREATE DATABASE %s"' % db_name)
+
+
+def import_dump():
+    """
+    Import dump to database
+    """
+    while True:
+        try:
+            db_name = str(raw_input('Choose database (default "test_db"): ')) or 'test_db'
+            dump_name = str(raw_input('Dump name(only name): '))
+            fab_run('sudo -u postgres psql  %s < ../ecomap/api/dal/dumps/%s.sql' % (db_name, dump_name))
+            break
+        except:
+            answer = str(raw_input("Incorrect dump name. Try again? y/N: "))
+            if answer == 'y':
+                continue
+            else:
+                break
+
+
+def drop_database():
+    """
+    Drop selected database
+    """
+    try:
+        db_name = str(raw_input('Choose database: '))
+        if db_name is '':
+            raise ValueError
+        fab_run('sudo -u postgres psql -c "DROP DATABASE IF EXISTS %s"' % db_name)
+    except ValueError:
+        print "Database does not selected."
+    except:
+        print "Database %s does not exists." % db_name
