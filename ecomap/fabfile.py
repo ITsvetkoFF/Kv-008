@@ -83,8 +83,14 @@ def create_database():
     """
     Create empty database
     """
-    db_name = str(raw_input('Choose database (default "test_db"): ')) or 'test_db'
-    fab_run('sudo -u postgres psql -c "CREATE DATABASE %s"' % db_name)
+    try:
+        db_name = str(raw_input('Choose database name: '))
+        if db_name == '':
+            raise BaseException
+    except BaseException:
+        print "---> Database name not selected"
+    finally:
+        fab_run('sudo -u postgres psql -c "CREATE DATABASE %s"' % db_name)
 
 
 def import_dump():
@@ -93,7 +99,7 @@ def import_dump():
     """
     while True:
         try:
-            db_name = str(raw_input('Choose database (default "test_db"): ')) or 'test_db'
+            db_name = str(raw_input('Choose database (default "ecomap_db"): ')) or 'ecomap_db'
             dump_name = str(raw_input('Dump name(only name): '))
             fab_run('sudo -u postgres psql  %s < ../ecomap/api/dal/dumps/%s.sql' % (db_name, dump_name))
             break
@@ -115,6 +121,6 @@ def drop_database():
             raise ValueError
         fab_run('sudo -u postgres psql -c "DROP DATABASE IF EXISTS %s"' % db_name)
     except ValueError:
-        print "Database does not selected."
+        print "---> Database does not selected."
     except:
-        print "Database %s does not exists." % db_name
+        print "---> Database %s does not exists." % db_name
