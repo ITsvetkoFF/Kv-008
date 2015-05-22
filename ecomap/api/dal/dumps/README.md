@@ -4,7 +4,7 @@
  ```
  fab create_database
 
- Choose database name: <set db or default>
+ Choose database name: <set db>
 
  ```
  * For dump import
