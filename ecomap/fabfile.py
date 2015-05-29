@@ -9,19 +9,14 @@ __all__ = [
     'upgrade',
     'create_database',
     'import_dump',
-    'drop_database',
+    'drop_database'
 ]
 
 import os
 
-from fabric.utils import puts
-from fabric.contrib.console import confirm
 from fabric.api import local as fab_run
-from fabric.context_managers import shell_env, lcd
-from fabric.colors import green, red
 
-from api.v1_0.models import Base
-from api.utils.database import database_session
+from api.v1_0.models import Base, engine
 
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -72,11 +67,14 @@ def init_db():
     """
     Creates tables by SQLAlchemy models
     """
-    with open('settings.json') as json_settings:
-        settings = json.load(json_settings)
-
-    engine = get_db_engine(settings)
-    Base.metadata.create_all(bind=engine)
+    fab_run('sudo -u postgres psql -c "DROP DATABASE IF EXISTS ecomap_db;"')
+    fab_run('sudo -u postgres psql -c "DROP ROLE IF EXISTS ecouser;"')
+    fab_run('sudo -u postgres psql -c "CREATE DATABASE ecomap_db;"')
+    fab_run('sudo -u postgres psql -c "CREATE USER ecouser WITH PASSWORD \'ecouser\';"')
+    fab_run('sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ecouser;"')
+    fab_run('sudo -u postgres psql ecomap_db -c "CREATE EXTENSION postgis;"')
+    fab_run('sudo -u postgres psql ecomap_db -c "CREATE EXTENSION postgis_topology;"')
+    Base.metadata.create_all(engine)
 
 
 def create_database():
@@ -85,7 +83,7 @@ def create_database():
     """
     try:
         db_name = str(raw_input('Choose database name: '))
-        if db_name == '':
+        if db_name is False:
             raise BaseException
     except BaseException:
         print "---> Database name not selected"
@@ -117,7 +115,7 @@ def drop_database():
     """
     try:
         db_name = str(raw_input('Choose database: '))
-        if db_name is '':
+        if db_name is False:
             raise ValueError
         fab_run('sudo -u postgres psql -c "DROP DATABASE IF EXISTS %s"' % db_name)
     except ValueError:
