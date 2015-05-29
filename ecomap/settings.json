@@ -1,20 +1,24 @@
 {
-    "debug": true,
-    "tornado_start": 0,
-    "bind_port": 8000,
-    "bind_address": "0.0.0.0",
-    "hostname": "localhost",
-    "psql_login": "ecouser",
-    "psql_password": "ecouser",
-    "psql_host": "localhost",
-    "psql_port": 5432,
-    "psql_dbname": "ecomap_db",
-    "facebook_api_key": "903837986321574",
-    "facebook_secret": "0f4ec5b2458b64b51fc64aacdbdef3d9",
-    "google_oauth": {"key":"150681302088-ur41bo6crvgi1aiu5ase82u14ru0kfpt.apps.googleusercontent.com",
-                     "secret":"QDlVRbsGM98VQihKtF1XYr2Q"},
-    "cookie_secret": "3I02LGzImS446U5lQ8GzTcCy104Sm8",
-    "login_url": "/auth/login/",
-    "default_redirect":"/api/v1/user"
+  "debug": true,
+  "tornado_start": 0,
+  "bind_port": 8000,
+  "bind_address": "0.0.0.0",
+  "hostname": "localhost",
+  "psql_login": "ecouser",
+  "psql_password": "ecouser",
+  "psql_host": "localhost",
+  "psql_port": 5432,
+  "psql_dbname": "ecomap_db",
+  "cookie_secret": "3I02LGzImS446U5lQ8GzTcCy104Sm8",
+  "login_url": "/auth/login/",
+  "default_redirect": "/api/v1/user",
 
+  "facebook_oauth": {
+    "key": "903837986321574",
+    "secret": "0f4ec5b2458b64b51fc64aacdbdef3d9"
+  },
+  "google_oauth": {
+    "key": "150681302088-ur41bo6crvgi1aiu5ase82u14ru0kfpt.apps.googleusercontent.com",
+    "secret": "QDlVRbsGM98VQihKtF1XYr2Q"
+  }
 }

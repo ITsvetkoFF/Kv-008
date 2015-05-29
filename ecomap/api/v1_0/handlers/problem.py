@@ -1,7 +1,7 @@
 from ecomap.api.v1_0.handlers.base import BaseHandler
 
 
-class ProblemAPIHandler(BaseHandler):
+class ProblemsAPIHandler(BaseHandler):
     def get(self, problem_id=None):
         """Get a list of problems from the database. If problem_id is
         not None, get the problem identified by problem_id and write it to
@@ -9,6 +9,7 @@ class ProblemAPIHandler(BaseHandler):
 
     def post(self):
         """Store a new problem to the database."""
+
 
     def put(self, problem_id):
         """Edit the problem, identified by problem_id."""
