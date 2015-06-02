@@ -1,4 +1,4 @@
-from ecomap.api.v1_0.handlers.base import BaseHandler
+from api.v1_0.handlers.base import BaseHandler
 
 
 class ProblemsAPIHandler(BaseHandler):

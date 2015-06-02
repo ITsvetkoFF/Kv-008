@@ -29,7 +29,7 @@ class ProblemType(Base):
 class Role(Base):
     __tablename__ = 'roles'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
 
 
@@ -152,7 +152,7 @@ class Permission(Base):
     modifier = Column(Enum(*enum_modifiers, name='modifiers'), nullable=False)
 
 
-class RolesPermission(Base):
+class RolePermission(Base):
     __tablename__ = 'roles_permissions'
 
     id = Column(Integer, primary_key=True)

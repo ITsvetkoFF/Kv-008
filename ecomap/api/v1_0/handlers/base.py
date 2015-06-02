@@ -1,7 +1,7 @@
 # coding: utf-8
 import tornado.web
 import tornado.escape
-from api.v1_0.models.user2resource import *
+from api.v1_0.models import Resource, UserRole, Permission, RolePermission
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -23,6 +23,7 @@ class BaseHandler(tornado.web.RequestHandler):
             try:
                 json_data = tornado.escape.json_decode(self.request.body)
                 self.request.arguments.update(json_data)
+
             except ValueError:
                 message = 'Unable to parse JSON.'
                 self.send_error(400, message=message)

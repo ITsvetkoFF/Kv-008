@@ -6,7 +6,7 @@ import tornado.escape
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.models.user2resource import User
+from api.v1_0.models import User
 from api.utils.db import session_scope
 
 
