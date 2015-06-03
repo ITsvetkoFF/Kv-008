@@ -74,7 +74,7 @@ class ProblemActivityFactory(SQLAlchemyModelFactory):
     tagged 'ADDED'."""
 
     class Meta:
-        model = ProblemActivity
+        model = ProblemsActivity
         sqlalchemy_session = session
 
     problem = None
@@ -94,7 +94,7 @@ class PhotoFactory(SQLAlchemyModelFactory):
 
 class PhotoActivityFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = PhotoActivity
+        model = PhotosActivity
         sqlalchemy_session = session
 
     photo = factory.SubFactory(PhotoFactory)
