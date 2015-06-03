@@ -97,7 +97,7 @@ class Photo(Base):
     comment = Column(Text)
 
 
-class PhotoActivity(Base):
+class PhotosActivity(Base):
     __tablename__ = 'photos_activities'
 
     id = Column(Integer, primary_key=True)
@@ -115,7 +115,7 @@ class PhotoActivity(Base):
     user = relationship('User')
 
 
-class ProblemActivity(Base):
+class ProblemsActivity(Base):
     __tablename__ = 'problems_activities'
 
     id = Column(Integer, primary_key=True)
@@ -131,7 +131,7 @@ class ProblemActivity(Base):
     user = relationship('User')
 
 
-class VoteActivity(Base):
+class VotesActivity(Base):
     __tablename__ = 'votes_activities'
 
     id = Column(Integer, primary_key=True)
@@ -152,7 +152,7 @@ class Comment(Base):
     content = Column(Text, nullable=False)
 
 
-class CommentActivity(Base):
+class CommentsActivity(Base):
     __tablename__ = 'comments_activities'
 
     id = Column(Integer, primary_key=True)
