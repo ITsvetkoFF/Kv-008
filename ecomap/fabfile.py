@@ -9,14 +9,17 @@ __all__ = [
     'upgrade',
     'create_database',
     'import_dump',
-    'drop_database'
+    'drop_database',
+    'populate_db'
 ]
 
 import os
 
 from fabric.api import local as fab_run
 
-from api.v1_0.models import Base, engine
+from api.v1_0.models import Base
+from api.utils.db import get_db_engine
+from api import settings
 
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -71,10 +74,16 @@ def init_db():
     fab_run('sudo -u postgres psql -c "DROP ROLE IF EXISTS ecouser;"')
     fab_run('sudo -u postgres psql -c "CREATE DATABASE ecomap_db;"')
     fab_run('sudo -u postgres psql -c "CREATE USER ecouser WITH PASSWORD \'ecouser\';"')
-    fab_run('sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ecouser;"')
+    fab_run('sudo -u postgres psql -c "ALTER USER ecouser SUPERUSER;"')
     fab_run('sudo -u postgres psql ecomap_db -c "CREATE EXTENSION postgis;"')
     fab_run('sudo -u postgres psql ecomap_db -c "CREATE EXTENSION postgis_topology;"')
-    Base.metadata.create_all(engine)
+    Base.metadata.create_all(get_db_engine(settings))
+
+
+def populate_db():
+    """Populate database with fake data."""
+    fab_run('export PYTHONPATH=":/ecomap"')
+    fab_run('python factories.py')
 
 
 def create_database():

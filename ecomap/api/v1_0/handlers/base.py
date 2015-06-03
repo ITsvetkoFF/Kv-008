@@ -1,13 +1,19 @@
 # coding: utf-8
+
 import tornado.web
 import tornado.escape
-from api.v1_0.models.user2resource import *
+
+from api.v1_0.models import *
 
 
 class BaseHandler(tornado.web.RequestHandler):
-    @property
-    def db_sess(self):
-        return self.application.db_sess
+    def initialize(self):
+        print "session initialized"
+        self.sess = self.application.db_sess()
+
+    def on_finish(self):
+        print "session closed"
+        self.sess.close()
 
     def get_current_user(self):
         user_id = self.get_cookie('user_id')
@@ -33,16 +39,10 @@ class BaseHandler(tornado.web.RequestHandler):
         self.write(error_dict)
 
     def get_action_modifier(self):
-        resource_id, = self.db_sess.query(Resource.id).filter_by(
-            name=self.request.path).one()
-        print 'resource_id=%s' % resource_id
-        action = self.request.method
-        print 'action=%s' % action
+        current_user = self.sess.query(User).get(self.current_user)
 
-        for role_id, in self.db_sess.query(UserRole.role_id).filter_by(
-                user_id=self.current_user):
-            for perm_id, in self.db_sess.query(
-                    RolePermission.permission_id).filter_by(role_id=role_id):
-                perm = self.db_sess.query(Permission).get(perm_id)
-                if perm.resource_id == resource_id and perm.action == action:
+        for role in current_user.roles:
+            for perm in role.permissions:
+                if (perm.resource.name == self.__class__.__name__ and
+                            perm.action == self.request.method):
                     return perm.modifier

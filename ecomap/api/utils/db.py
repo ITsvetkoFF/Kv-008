@@ -23,25 +23,7 @@ def get_db_engine(settings):
     return engine
 
 
-def get_db_session(settings, engine):
-    Session = sessionmaker(bind=engine)
-    return Session()
-
-
-@contextmanager
-def session_scope(self):
-    """Provide a transactional scope around a series of operations."""
-    session = self.db_sess
-    try:
-        yield session
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    # finally:
-    #     session.close()
-
-# def run_my_program():
-#     with session_scope() as session:
-#         ThingOne().go(session)
-#         ThingTwo().go(session)
+def get_db_session(settings):
+    eng = get_db_engine(settings)
+    Session = sessionmaker(bind=eng)
+    return Session
