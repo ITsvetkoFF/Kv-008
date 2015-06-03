@@ -25,4 +25,5 @@ APIUrls = [
 
     URLSpec(r'/api/v1/admin/roles', admin.RolesHandler),
     URLSpec(r'/api/v1/admin/roles/(\d+)', admin.RolesHandler),
+    URLSpec(r'/api/v1/admin/roles/(\d+)/resources', admin.ResourcesHandler),
 ]

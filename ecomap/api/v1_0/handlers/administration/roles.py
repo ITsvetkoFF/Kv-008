@@ -1,15 +1,15 @@
-import json
+import tornado
 
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.models import Role, Resource
+from api.v1_0.models import Role
 
 
 class RolesHandler(BaseHandler):
+
     def get(self, role_id=None, *args, **kwargs):
         if role_id is None:
-            temp = json.dumps({'roles': [{'name': role.name,
-                                          'id': role.id} for role in self.db_sess.query(Role).all()]})
-            print temp.__class__, temp
+            temp = tornado.escape.json_encode({'roles': [{'name': role.name,
+                                                          'id': role.id} for role in self.db_sess.query(Role).all()]})
             self.write(temp)
         else:
             return self.redirect(url=self.request.path + '/resources/')
