@@ -114,7 +114,7 @@ class CommentFactory(SQLAlchemyModelFactory):
 
 class CommentActivityFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = CommentActivity
+        model = CommentsActivity
         sqlalchemy_session = session
 
     problem = None
@@ -154,7 +154,7 @@ class SolutionFactory(SQLAlchemyModelFactory):
 
 class VoteActivityFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = VoteActivity
+        model = VotesActivity
         sqlalchemy_session = session
 
     problem = None
