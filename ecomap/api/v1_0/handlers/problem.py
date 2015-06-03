@@ -1,7 +1,10 @@
-from ecomap.api.v1_0.handlers.base import BaseHandler
+from datetime import datetime
+
+from api.v1_0.handlers.base import BaseHandler
+from api.v1_0.models import VoteActivity
 
 
-class ProblemsAPIHandler(BaseHandler):
+class ProblemsHandler(BaseHandler):
     def get(self, problem_id=None):
         """Get a list of problems from the database. If problem_id is
         not None, get the problem identified by problem_id and write it to
@@ -16,6 +19,16 @@ class ProblemsAPIHandler(BaseHandler):
 
     def delete(self, problem_id):
         """Delete a problem from the database by given problem id."""
-        problem = self.db_sess.query(Problem).get(problem_id)
-        self.db_sess.delete(problem)
-        self.db_sess.commit()
+
+
+class ProblemVoteHandler(BaseHandler):
+    def post(self, problem_id):
+        new_vote = VoteActivity(
+            problem_id=int(problem_id),
+            user_id=self.current_user,
+            datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        )
+
+        self.sess.add(new_vote)
+        self.sess.commit()
+

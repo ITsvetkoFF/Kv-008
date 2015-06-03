@@ -2,7 +2,7 @@
 import tornado.web
 import tornado.escape
 
-from ecomap.api.v1_0.handlers.base import BaseHandler
+from api.v1_0.handlers.base import BaseHandler
 
 
 class UserAPIHandler(BaseHandler):
