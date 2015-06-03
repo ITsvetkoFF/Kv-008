@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.models import VoteActivity
+from api.v1_0.models import VotesActivity
 
 
 class ProblemsHandler(BaseHandler):
@@ -23,7 +23,7 @@ class ProblemsHandler(BaseHandler):
 
 class ProblemVoteHandler(BaseHandler):
     def post(self, problem_id):
-        new_vote = VoteActivity(
+        new_vote = VotesActivity(
             problem_id=int(problem_id),
             user_id=self.current_user,
             datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')

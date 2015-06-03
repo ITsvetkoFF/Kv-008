@@ -186,7 +186,7 @@ if __name__ == '__main__':
     user_admin = UserFactory(first_name='user', last_name='admin')
     user_admin.roles.append(role_admin)
 
-    for i in xrange(100):
+    for i in xrange(10):
         problem = ProblemFactory()
         user = UserFactory()
         user.roles.append(role_user)
