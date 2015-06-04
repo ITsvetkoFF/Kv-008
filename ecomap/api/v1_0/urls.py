@@ -7,8 +7,9 @@ import api.v1_0.handlers.administration as admin
 from api.v1_0.handlers.user import UserAPIHandler
 from api.v1_0.handlers.auth import FacebookAuthHandler, GoogleAuthHandler, \
     RegisterHandler, LoginHandler, LogoutHandler
-from api.v1_0.handlers.problem import ProblemVoteHandler
+from api.v1_0.handlers.problem import ProblemVoteHandler, ProblemsHandler
 from docs import DOCS_ROOT
+from testmodule import TestHandler
 
 APIUrls = [
     URLSpec(r'/api/v1/login', LoginHandler),
@@ -21,6 +22,8 @@ APIUrls = [
             name='register'),
     URLSpec(r'/api/v1/user', UserAPIHandler),
     URLSpec(r'/api/v1/problems/(\d+)/vote', ProblemVoteHandler),
+    URLSpec(r'/api/v1/problems/(\d+)',ProblemsHandler ),
+    URLSpec(r'/api/v1/test/(\d+)', TestHandler),
 
     URLSpec(r'/api/docs/(.*)', StaticFileHandler,
             {'path': os.path.join(DOCS_ROOT, 'build', 'html')}),
