@@ -15,5 +15,4 @@ class RolesHandler(BaseHandler):
         query = Role(name=self.request.arguments['role_name'])
         self.sess.add(query)
         self.sess.commit()
-        print(tornado.escape.json_encode({'role_id': query.id}))
         self.write(tornado.escape.json_encode({'role_id': query.id}))
