@@ -2,14 +2,14 @@ DROP DATABASE IF EXISTS ecomap_db;
 DROP ROLE IF EXISTS ecouser;
 CREATE DATABASE ecomap_db;
 CREATE USER ecouser WITH PASSWORD 'ecouser';
-ALTER USER ecouser SUPERUSER;
+ALTER ROLE ecouser WITH SUPERUSER;
 
-\CONNECT 'ecomap_db';
+\c 'ecomap_db';
 CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_topology;
 SET SCHEMA 'public';
 
-CREATE TYPE Status AS ENUM ('SOLVED', 'UNSOLVED');
+CREATE TYPE Status AS ENUM ('USER', 'ADMINISTRATOR', 'UNREGISTERED_USER');
 CREATE TYPE ActivityType AS ENUM ('ADDED', 'REMOVED', 'UPDATED');
 CREATE TYPE SeverityTypes AS ENUM ('1', '2', '3');
 CREATE TYPE Modifiers AS ENUM ('ANY', 'OWN', 'NONE');
@@ -27,7 +27,7 @@ CREATE TABLE roles
   name VARCHAR(100)       NOT NULL
 );
 
-CREATE TABLE regions
+CREATE TABLE region
 (
   id       SERIAL PRIMARY KEY NOT NULL,
   name     VARCHAR(100)       NOT NULL,
@@ -36,16 +36,14 @@ CREATE TABLE regions
 
 CREATE TABLE users
 (
-  id          SERIAL PRIMARY KEY NOT NULL,
-  first_name  VARCHAR(64)        NOT NULL,
-  last_name   VARCHAR(64)        NOT NULL,
-  email       VARCHAR(128)       NOT NULL,
-  password    VARCHAR            NOT NULL,
-  region_id   INT                NOT NULL,
-  google_id   VARCHAR(30),
-  facebook_id VARCHAR(20),
+  id        SERIAL PRIMARY KEY NOT NULL,
+  name      VARCHAR(64)        NOT NULL,
+  surname   VARCHAR(64)        NOT NULL,
+  email     VARCHAR(128)       NOT NULL,
+  password  VARCHAR            NOT NULL,
+  region_id INT                NOT NULL,
 
-  FOREIGN KEY (region_id) REFERENCES regions (id) ON DELETE CASCADE
+  FOREIGN KEY (region_id) REFERENCES region (id) ON DELETE CASCADE
 );
 
 CREATE TABLE users_roles (
@@ -67,11 +65,11 @@ CREATE TABLE problems
   severity       SeverityTypes      NOT NULL,
   status         Status             NOT NULL,
   problemtype_id INT                NOT NULL,
+  location       GEOGRAPHY          NOT NULL,
   region_id      INT                NOT NULL,
-  location       GEOMETRY           NOT NULL,
 
   FOREIGN KEY (problemtype_id) REFERENCES problem_types (id) ON DELETE CASCADE,
-  FOREIGN KEY (region_id) REFERENCES regions (id) ON DELETE CASCADE
+  FOREIGN KEY (region_id) REFERENCES region (id) ON DELETE CASCADE
 );
 
 CREATE TABLE photos
