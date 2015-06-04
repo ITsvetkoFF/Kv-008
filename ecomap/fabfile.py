@@ -80,10 +80,10 @@ def init_db():
     Base.metadata.create_all(get_db_engine(settings))
 
 
-def populate_db():
+def populate_db(problems_count):
     """Populate database with fake data."""
     fab_run('export PYTHONPATH=":/ecomap"')
-    fab_run('python factories.py')
+    fab_run('python factories.py %s' % problems_count)
 
 
 def create_database():
