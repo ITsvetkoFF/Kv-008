@@ -2,6 +2,8 @@
 import os
 from tornado.web import URLSpec, StaticFileHandler
 
+import api.v1_0.handlers.administration as admin
+
 from api.v1_0.handlers.user import UserAPIHandler
 from api.v1_0.handlers.auth import FacebookAuthHandler, GoogleAuthHandler, \
     RegisterHandler, LoginHandler, LogoutHandler
@@ -21,5 +23,9 @@ APIUrls = [
     URLSpec(r'/api/v1/problems/(\d+)/vote', ProblemVoteHandler),
 
     URLSpec(r'/api/docs/(.*)', StaticFileHandler,
-            {'path': os.path.join(DOCS_ROOT, 'build', 'html')})
+            {'path': os.path.join(DOCS_ROOT, 'build', 'html')}),
+
+    URLSpec(r'/api/v1/admin/roles', admin.RolesHandler),
+    URLSpec(r'/api/v1/admin/roles/(\d+)', admin.RolesHandler),
+    URLSpec(r'/api/v1/admin/roles/(\d+)/resources', admin.ResourcesHandler),
 ]
