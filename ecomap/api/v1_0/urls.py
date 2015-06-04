@@ -11,10 +11,8 @@ from api.v1_0.handlers.problem import ProblemVoteHandler
 from docs import DOCS_ROOT
 
 APIUrls = [
-    URLSpec(r'/api/v1/test', TestHandler),
     URLSpec(r'/api/v1/login', LoginHandler),
     URLSpec(r'/api/v1/logout', LogoutHandler),
-    URLSpec(r'/api/v1/cookie', CookieSetter),
     URLSpec(r'/api/v1/auth/facebook', FacebookAuthHandler,
             name='facebook_auth'),
     URLSpec(r'/api/v1/auth/google', GoogleAuthHandler,

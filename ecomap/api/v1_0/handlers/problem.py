@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.models import VoteActivity
+from api.v1_0.models import VotesActivity
 
 
 class ProblemsHandler(BaseHandler):
