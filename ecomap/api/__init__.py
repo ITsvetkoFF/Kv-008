@@ -1,8 +1,6 @@
 import json
-import os
-import sys
 
+from os.path import dirname, join
 
-with open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
-                       'settings.json')) as json_settings:
+with open(join(dirname(dirname(__file__)), 'settings.json')) as json_settings:
     settings = json.load(json_settings)
