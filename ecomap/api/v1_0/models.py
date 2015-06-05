@@ -216,22 +216,24 @@ problems_activities_t = ProblemsActivity.__table__
 problems_t = Problem.__table__
 votes_activities_t = VotesActivity.__table__
 
-d_p = view("detailed_problem", metadata,
-                select([problems_t.c.id, problems_t.c.title,
-                        problems_t.c.content, problems_t.c.proposal,
-                        problems_t.c.severity, problems_t.c.status,
-                        problems_t.c.problem_type_id, problems_t.c.region_id,
-                        problems_activities_t.c.datetime,
-                        func.count(votes_activities_t.c.id).label('votes_numbers'),
-                        (user_t.c.first_name + user_t.c.last_name).label('name')]).\
-                where( problems_activities_t.c.problem_id == votes_activities_t.c.problem_id).\
-                where(problems_t.c.id==problems_activities_t.c.problem_id).\
-                where(problems_activities_t.c.user_id==user_t.c.id).\
-                group_by( problems_t.c.id,problems_activities_t.c.problem_id, problems_activities_t.c.datetime, user_t.c.first_name, user_t.c.last_name))
+detailed_problem_view = view("detailed_problem", metadata,
+                                select([problems_t.c.id, problems_t.c.title,
+                                        problems_t.c.content, problems_t.c.proposal,
+                                        problems_t.c.severity, problems_t.c.status,
+                                        problems_t.c.problem_type_id, problems_t.c.region_id,
+                                        problems_activities_t.c.datetime,
+                                        func.count(votes_activities_t.c.id).label('votes_numbers'),
+                                        (user_t.c.first_name + user_t.c.last_name).label('name')]).\
+                                where( problems_activities_t.c.problem_id == votes_activities_t.c.problem_id).\
+                                where(problems_t.c.id==problems_activities_t.c.problem_id).\
+                                where(problems_activities_t.c.user_id==user_t.c.id).\
+                                group_by( problems_t.c.id,problems_activities_t.c.problem_id, problems_activities_t.c.datetime, user_t.c.first_name, user_t.c.last_name))
 
 
 
 # the ORM would appreciate this
-assert d_p.primary_key == [d_p.c.id]
+assert detailed_problem_view.primary_key == [detailed_problem_view.c.id]
+
+
 class DetailedProblem(Base):
-    __table__ = d_p
+    __table__ = detailed_problem_view
