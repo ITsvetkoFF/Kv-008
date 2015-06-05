@@ -17,3 +17,4 @@ class User(Base):
     facebook_id = Column(String(100))
 
     roles = relationship('Role', secondary=user_roles)
+    region = relationship('Region')

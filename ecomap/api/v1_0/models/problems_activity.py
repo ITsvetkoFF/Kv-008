@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, DateTime, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from api.v1_0.models import Base, enum_activity_type
 
@@ -18,4 +18,4 @@ class ProblemsActivity(Base):
                            nullable=False)
 
     problem = relationship('Problem')
-    user = relationship('User')
+    user = relationship('User', backref=backref('problem_activities', cascade="all, delete-orphan"))

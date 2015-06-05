@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, DateTime, ForeignKey, Enum
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from api.v1_0.models import Base, enum_activity_type
 
@@ -12,11 +12,11 @@ class PhotosActivity(Base):
                       nullable=False)
     problem_id = Column(Integer, ForeignKey('problems.id', ondelete='CASCADE'),
                         nullable=False)
-    user_id = Column(Integer, ForeignKey(u'users.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey(u'users.id', ondelete='CASCADE'), nullable=False)
     datetime = Column(DateTime, nullable=False)
     activity_type = Column(Enum(*enum_activity_type, name='activitytype'),
                            nullable=False)
 
     photo = relationship('Photo')
     problem = relationship('Problem')
-    user = relationship('User')
+    user = relationship('User', backref=backref('photo_activities', cascade="all, delete-orphan"), single_parent=True)
