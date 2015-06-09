@@ -1,4 +1,5 @@
 import tornado.escape
+import tornado.web
 
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models import Permission, Resource, Role
@@ -26,6 +27,7 @@ class ResourcesHandler(BaseHandler):
                 elif permission.action.upper() == 'DELETE':
                     self.DELETE = permission.modifier
 
+    @tornado.web.authenticated
     def get(self, role_id, *args, **kwargs):
         role = self.sess.query(Role).filter_by(id=role_id).first()
         if role is None:
@@ -42,6 +44,7 @@ class ResourcesHandler(BaseHandler):
         print(answer)
         self.write(tornado.escape.json_encode(answer))
 
+    @tornado.web.authenticated
     def put(self):
         query = Permission(resource_id=self.request.arguments.resource_id,
                            action=self.request.arguments.action,

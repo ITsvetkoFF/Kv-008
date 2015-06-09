@@ -46,3 +46,9 @@ class BaseHandler(tornado.web.RequestHandler):
                 if (perm.resource.name == self.__class__.__name__ and
                             perm.action == self.request.method):
                     return perm.modifier
+
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Credentials", "true")
+        self.set_header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
+        self.set_header("Access-Control-Allow-Headers", "Content-Type, Depth, User-Agent, X-File-Size, X-Requested-With, X-Requested-By, If-Modified-Since, X-File-Name, Cache-Control")
