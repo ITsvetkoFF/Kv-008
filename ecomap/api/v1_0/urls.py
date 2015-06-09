@@ -2,7 +2,7 @@
 import os
 from tornado.web import URLSpec, StaticFileHandler
 
-import api.v1_0.handlers.administration as admin
+#import api.v1_0.handlers.administration as admin
 
 from api.v1_0.handlers.user import UserAPIHandler
 from api.v1_0.handlers.auth import FacebookAuthHandler, GoogleAuthHandler, \

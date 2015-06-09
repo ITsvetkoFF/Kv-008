@@ -1,7 +1,8 @@
 from datetime import datetime
 from tornado import escape
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.models import VotesActivity, DetailedProblem, Problem, ProblemsActivity
+from api.v1_0.models import VotesActivity, DetailedProblem, Problem, \
+    ProblemsActivity
 
 
 class ProblemsHandler(BaseHandler):
@@ -10,70 +11,69 @@ class ProblemsHandler(BaseHandler):
         not None, get the problem identified by problem_id and write it to
         the client."""
 
+        if problem_id != None:
+            problem_data = dict()
+            problem = self.sess.query(DetailedProblem).get(int(problem_id))
+            for c in problem.__table__.columns:
+                if isinstance(getattr(problem, c.name), datetime):
+                    problem_data[c.name] = str(getattr(problem, c.name))
+                else:
+                    problem_data[c.name] = getattr(problem, c.name)
 
-        problem_data = dict()
-        problem = self.sess.query(DetailedProblem).get(int(problem_id))
-        for c in problem.__table__ .columns:
-            if isinstance(getattr(problem, c.name), datetime.datetime):
-                problem_data[c.name] = str(getattr(problem,c.name))
-            else: problem_data[c.name] = getattr(problem,c.name)
-        self.write({problem_id:problem_data})
+            self.write({problem_id: problem_data})
+        else:
+            self.send_error(404, message='Problem not found fqor the given id.')
 
-    def post(self):
+    def post(self, problem_id=None):
         """Store a new problem to the database."""
-        new_Problem = Problem(title=self.request.arguments['title'],
+        problem = Problem(title=self.request.arguments['title'],
                               content=self.request.arguments['content'],
                               proposal=self.request.arguments['proposal'],
                               severity=self.request.arguments['severity'],
                               status=self.request.arguments['status'],
-                              problemtype_id=self.request.arguments['problemtype_id'],
+                              location=self.request.arguments['location'],
+                              problem_type_id=self.request.arguments[
+                                  'problem_type_id'],
                               region_id=self.request.arguments['region_id'])
-        self.sess.add(new_Problem)
+        self.sess.add(problem)
         self.sess.commit()
-        new_ProblemActivity = ProblemsActivity(problem_id=new_Problem.id,
-                                               data=escape.json_decode(self.request.body),
-                                               user_id=self.get_current_user(),
-                                               date=datetime.datetime.now(),
-                                               activity_type="ADDED")
-        self.sess.add(new_ProblemActivity)
+        activity = ProblemsActivity(problem_id=problem.id,
+                                    data=escape.json_decode(self.request.body),
+                                    user_id=self.get_current_user(),
+                                    date=datetime.datetime.now(),
+                                    activity_type="ADDED")
+        self.sess.add(activity)
         self.sess.commit()
-
 
     def put(self, problem_id):
-        """Edit the problem, identified by problem_id."""
 
-        modifire = self.get_action_modifier()
-        if modifire == 'ANY' or (modifire == 'OWN' and self.sess.query(ProblemsActivity.user_id).\
-                filter_by(problem_id=problem_id,activity_type='ADDED')== self.get_current_user()):
+        self.request.arguments['id'] = problem_id
+        self.sess.query(Problem).filter_by(id=int(problem_id)). \
+            update(self.request.arguments)
 
-            self.request.arguments['id']=problem_id
-            self.sess.query(Problem).filter_by(id=int(problem_id)).\
-                                     update(self.request.arguments)
+        self.sess.commit()
 
-            self.sess.commit()
-
-            new_ProblemActivity = ProblemsActivity(problem_id=int(problem_id),
-                                                   data=escape.json_decode(self.request.body),
-                                                   user_id=self.get_current_user(),
-                                                   datetime=datetime.datetime.now(),
-                                                   activity_type="UPDATED")
-            self.sess.add(new_ProblemActivity)
-            self.sess.commit()
-        else:
-            message = 'Unable to parse JSON.'
-            self.send_error(400, message=message)
+        activity = ProblemsActivity(problem_id=int(problem_id),
+                                    data=escape.json_decode(self.request.body),
+                                    user_id=self.get_current_user(),
+                                    datetime=datetime.datetime.now(),
+                                    activity_type="UPDATED")
+        self.sess.add(activity)
+        self.sess.commit()
 
     def delete(self, problem_id):
         """Delete a problem from the database by given problem id."""
-        self.sess.query(Problem).get(int(problem_id)).delete()
+        problem = self.sess.query(Problem).get(int(problem_id))
+        self.sess.delete(problem)
         self.sess.commit()
 
-        new_ProblemActivity = ProblemsActivity(problem_id=int(problem_id),
-                                               data=escape.json_decode(self.request.body),
+        activity = ProblemsActivity(problem_id=int(problem_id),
+                                               data=escape.json_decode(
+                                                   self.request.body),
                                                user_id=self.get_current_user(),
                                                datetime=datetime.datetime.now(),
-                                               activity_type="UPDATED")
-        self.sess.add(new_ProblemActivity)
+                                               activity_type="DELETE")
+        self.sess.add(activity)
         self.sess.commit()
 
 
@@ -87,4 +87,3 @@ class ProblemVoteHandler(BaseHandler):
 
         self.sess.add(new_vote)
         self.sess.commit()
-

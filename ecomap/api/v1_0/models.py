@@ -9,8 +9,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import *
 from create_view import view
 
-
-
 Base = declarative_base()
 
 enum_status = ('SOLVED', 'UNSOLVED')
@@ -209,25 +207,27 @@ class Solution(Base):
     responsible = relationship('User', foreign_keys=[responsible_id])
 
 
-
 metadata = Base.metadata
-user_t = User.__table__
-problems_activities_t = ProblemsActivity.__table__
-problems_t = Problem.__table__
-votes_activities_t = VotesActivity.__table__
+user_t = User.__table__.c
+problems_activity_t = ProblemsActivity.__table__.c
+problems_t = Problem.__table__.c
+votes_activity_t = VotesActivity.__table__.c
 
-detailed_problem_view = view("detailed_problem", metadata,
-                                select([problems_t.c.id, problems_t.c.title,
-                                        problems_t.c.content, problems_t.c.proposal,
-                                        problems_t.c.severity, problems_t.c.status,
-                                        problems_t.c.problem_type_id, problems_t.c.region_id,
-                                        problems_activities_t.c.datetime,
-                                        func.count(votes_activities_t.c.id).label('votes_numbers'),
-                                        (user_t.c.first_name + user_t.c.last_name).label('name')]).\
-                                where( problems_activities_t.c.problem_id == votes_activities_t.c.problem_id).\
-                                where(problems_t.c.id==problems_activities_t.c.problem_id).\
-                                where(problems_activities_t.c.user_id==user_t.c.id).\
-                                group_by( problems_t.c.id,problems_activities_t.c.problem_id, problems_activities_t.c.datetime, user_t.c.first_name, user_t.c.last_name))
+query = select([problems_t.id, problems_t.title,
+                problems_t.content, problems_t.proposal,
+                problems_t.severity, problems_t.status,
+                problems_t.problem_type_id, problems_t.region_id,
+                problems_activity_t.datetime,
+                func.count(votes_activity_t.id).label('votes_numbers'),
+                (user_t.c.first_name + user_t.last_name).label('name')]). \
+    where(problems_activity_t.problem_id == votes_activity_t.problem_id). \
+    where(problems_t.id == problems_activity_t.problem_id). \
+    where(problems_activity_t.user_id == user_t.id). \
+    group_by(problems_t.id, problems_activity_t.problem_id,
+             problems_activity_t.datetime, user_t.first_name,
+             user_t.last_name)
+
+detailed_problem_view = view("detailed_problem", metadata, query)
 
 
 
