@@ -14,6 +14,7 @@ from .comments_activity import CommentsActivity
 from .resource import Resource
 from .permission import Permission
 from .solution import Solution
+from .page import Page
 
 
 
