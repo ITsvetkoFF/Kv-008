@@ -2,7 +2,7 @@
 import os
 from tornado.web import URLSpec, StaticFileHandler
 
-#import api.v1_0.handlers.administration as admin
+import api.v1_0.handlers.administration as admin
 
 from api.v1_0.handlers.user import UserHandler
 from api.v1_0.handlers.auth import FacebookAuthHandler, GoogleAuthHandler, \
@@ -22,7 +22,7 @@ APIUrls = [
             name='register'),
     URLSpec(r'/api/v1/user', UserHandler),
     URLSpec(r'/api/v1/problems/(\d+)/vote', ProblemVoteHandler),
-    URLSpec(r'/api/v1/problems/(\d+)',ProblemsHandler ),
+    URLSpec(r'/api/v1/problems(?:/(\d+))?$',ProblemsHandler ),
     URLSpec(r'/api/v1/test/(\d+)', TestHandler),
 
     URLSpec(r'/api/docs/(.*)', StaticFileHandler,

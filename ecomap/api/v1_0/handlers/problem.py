@@ -12,21 +12,25 @@ class ProblemsHandler(BaseHandler):
         the client."""
 
         if problem_id != None:
-            problem_data = dict()
             problem = self.sess.query(DetailedProblem).get(int(problem_id))
-            for c in problem.__table__.columns:
-                if isinstance(getattr(problem, c.name), datetime):
-                    problem_data[c.name] = str(getattr(problem, c.name))
-                else:
-                    problem_data[c.name] = getattr(problem, c.name)
-
-            self.write({problem_id: problem_data})
+            if problem != None:
+                problem_data = dict()
+                for c in problem.__table__.columns:
+                    if isinstance(getattr(problem, c.name), datetime):
+                        problem_data[c.name] = str(getattr(problem, c.name))
+                    else:
+                        problem_data[c.name] = getattr(problem, c.name)
+                self.write({problem_id: problem_data})
+            else:
+                self.send_error(404,
+                                message='Problem not found for the given id.')
         else:
-            self.send_error(404, message='Problem not found fqor the given id.')
+            self.send_error(404, message='Problem not found for the given id.')
 
-    def post(self, problem_id=None):
+    def post(self, problem_id):
         """Store a new problem to the database."""
-        problem = Problem(title=self.request.arguments['title'],
+        if self.get_action_modifier() != 'NONE':
+            problem = Problem(title=self.request.arguments['title'],
                               content=self.request.arguments['content'],
                               proposal=self.request.arguments['proposal'],
                               severity=self.request.arguments['severity'],
@@ -35,50 +39,72 @@ class ProblemsHandler(BaseHandler):
                               problem_type_id=self.request.arguments[
                                   'problem_type_id'],
                               region_id=self.request.arguments['region_id'])
-        self.sess.add(problem)
-        self.sess.commit()
-        activity = ProblemsActivity(problem_id=problem.id,
-                                    data=escape.json_decode(self.request.body),
-                                    user_id=self.get_current_user(),
-                                    date=datetime.datetime.now(),
-                                    activity_type="ADDED")
-        self.sess.add(activity)
-        self.sess.commit()
+            self.sess.add(problem)
+            self.sess.commit()
+            activity = ProblemsActivity(problem_id=problem.id,
+                                        data=escape.json_decode(self.request.body),
+                                        user_id=self.get_current_user(),
+                                        datetime=datetime.utcnow(),
+                                        activity_type="ADDED")
+            self.sess.add(activity)
+            self.sess.commit()
+        else:
+            message = 'You do not have permission to added problem.'
+            self.send_error(400, message=message)
 
     def put(self, problem_id):
+        modifire = self.get_action_modifier()
+        user_id = self.sess.query(ProblemsActivity.user_id). \
+            filter_by(problem_id=problem_id, activity_type='ADDED').first()
+        print modifire , '======', user_id, '********', self.get_current_user()
+        if modifire == 'ANY' or (
+                        modifire == 'OWN' and user_id[0] == self.get_current_user()):
 
-        self.request.arguments['id'] = problem_id
-        self.sess.query(Problem).filter_by(id=int(problem_id)). \
-            update(self.request.arguments)
+            self.request.arguments['id'] = problem_id
+            self.sess.query(Problem).filter_by(id=int(problem_id)). \
+                update(self.request.arguments)
 
-        self.sess.commit()
+            self.sess.commit()
 
-        activity = ProblemsActivity(problem_id=int(problem_id),
-                                    data=escape.json_decode(self.request.body),
-                                    user_id=self.get_current_user(),
-                                    datetime=datetime.datetime.now(),
-                                    activity_type="UPDATED")
-        self.sess.add(activity)
-        self.sess.commit()
+            activity = ProblemsActivity(problem_id=int(problem_id),
+                                        data=escape.json_decode(self.request.body),
+                                        user_id=self.get_current_user(),
+                                        datetime=datetime.now(),
+                                        activity_type="UPDATED")
+            self.sess.add(activity)
+            self.sess.commit()
+        else:
+            message = 'You do not have permission to update.'
+            self.send_error(400, message=message)
 
     def delete(self, problem_id):
         """Delete a problem from the database by given problem id."""
-        problem = self.sess.query(Problem).get(int(problem_id))
-        self.sess.delete(problem)
-        self.sess.commit()
+        modifire = self.get_action_modifier()
+        user_id = self.sess.query(ProblemsActivity.user_id). \
+            filter_by(problem_id=problem_id, activity_type='ADDED').first()
 
-        activity = ProblemsActivity(problem_id=int(problem_id),
-                                               data=escape.json_decode(
-                                                   self.request.body),
-                                               user_id=self.get_current_user(),
-                                               datetime=datetime.datetime.now(),
-                                               activity_type="DELETE")
-        self.sess.add(activity)
-        self.sess.commit()
+        if modifire == 'ANY' or (
+                        modifire == 'OWN' and user_id[0] == self.get_current_user()):
+
+            activity = ProblemsActivity(problem_id=int(problem_id),
+                                        data=None,
+                                        # escape.json_decode(self.request.body),
+                                        user_id=self.get_current_user(),
+                                        datetime=datetime.now(),
+                                        activity_type='REMOVED')
+            self.sess.add(activity)
+            self.sess.commit()
+
+            self.sess.query(Problem).filter_by(id=int(problem_id)).delete()
+            self.sess.commit()
+        else:
+            message = 'You do not have permission to removed.'
+            self.send_error(400, message=message)
 
 
 class ProblemVoteHandler(BaseHandler):
     def post(self, problem_id):
+
         new_vote = VotesActivity(
             problem_id=int(problem_id),
             user_id=self.current_user,

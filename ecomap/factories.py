@@ -189,7 +189,11 @@ if __name__ == '__main__':
     role_user = RoleFactory(name='user')
     # role_user has no permissions, you need to add some manually
     role_user.permissions.extend(session.query(Permission).filter_by(
-        modifier='NONE').all())
+        modifier='NONE').all()[:5])
+    role_user.permissions.extend(session.query(Permission).filter_by(
+        modifier='OWN').all()[5:]
+    )
+
     user_admin = UserFactory(first_name='user', last_name='admin')
     user_admin.roles.append(role_admin)
 
