@@ -2,7 +2,6 @@ import datetime
 import random
 
 import factory
-
 from factory.alchemy import SQLAlchemyModelFactory
 
 from api import settings
