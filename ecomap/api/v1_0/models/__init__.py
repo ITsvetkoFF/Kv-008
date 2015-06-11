@@ -10,7 +10,6 @@ from .photos_activity import PhotosActivity
 from .problems_activity import ProblemsActivity
 from .votes_activity import VotesActivity
 from .comment import Comment
-from .comments_activity import CommentsActivity
 from .resource import Resource
 from .permission import Permission
 from .solution import Solution
