@@ -9,6 +9,7 @@ from api.v1_0.handlers.auth import FacebookAuthHandler, GoogleAuthHandler, \
     RegisterHandler, LoginHandler, LogoutHandler
 from api.v1_0.handlers.problem import ProblemVoteHandler
 from api.v1_0.handlers.pages import PagesHandler
+from api.v1_0.handlers.comments import CommentsHandler, ProblemCommentsHandler
 from docs import DOCS_ROOT
 
 APIUrls = [
@@ -30,4 +31,6 @@ APIUrls = [
     URLSpec(r'/api/v1/admin/roles/(\d+)/resources', admin.ResourcesHandler),
     URLSpec(r'/api/v1/pages', PagesHandler),
     URLSpec(r'/api/v1/pages/(\d+)', PagesHandler),
+    URLSpec(r'/api/v1/comments/(\d+)', CommentsHandler),
+    URLSpec(r'/api/v1/problems/(\d+)/comments', ProblemCommentsHandler)
 ]
