@@ -2,10 +2,6 @@
 
 import tornado.web
 import tornado.escape
-from wtforms_alchemy import ModelForm
-from wtforms import FloatField
-from api.v1_0.models import Problem
-
 from api.v1_0.models import *
 
 
@@ -56,13 +52,9 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
         self.set_header("Access-Control-Allow-Headers", "Content-Type, Depth, User-Agent, X-File-Size, X-Requested-With, X-Requested-By, If-Modified-Since, X-File-Name, Cache-Control")
 
-    def location(self):
-        x=self.request.arguments["Latitude"]
-        y=self.request.arguments["Longtitude"]
+    def create_location(self):
+        x = self.request.arguments["Latitude"]
+        y = self.request.arguments["Longtitude"]
         return "POINT({0} {1})".format(x,y)
 
-    class ProblemForm(ModelForm):
-        class Meta:
-            model = Problem
-            exclude = ['location']
-        Latitude = FloatField()
+

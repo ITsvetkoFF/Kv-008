@@ -1,12 +1,13 @@
 from datetime import datetime
 from tornado import escape
+from wtforms_json import InvalidData
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models import VotesActivity, DetailedProblem, Problem, \
     ProblemsActivity
+from api.v1_0.validation import ProblemForm
 
 
 class ProblemsHandler(BaseHandler):
-
     def get(self, problem_id=None):
         """Get a list of problems from the database. If problem_id is
         not None, get the problem identified by problem_id and write it to
@@ -31,26 +32,39 @@ class ProblemsHandler(BaseHandler):
     def post(self, problem_id):
         """Store a new problem to the database."""
         if self.get_action_modifier() != 'NONE':
+            try:
+                form = ProblemForm.from_json(self.request.arguments,
+                                             skip_unknown_keys=False)
+            except InvalidData as e:
+                message = e.args
+                self.send_error(400, message=message)
+            for i in form.__dict__.keys():
+                print form.__dict__[i]
 
-            problem = Problem(title=self.request.arguments['title'],
-                              content=self.request.arguments['content'],
-                              proposal=self.request.arguments['proposal'],
-                              severity=self.request.arguments['severity'],
-                              status=self.request.arguments['status'],
-                              location=self.location(),
-                              problem_type_id=self.request.arguments[
-                                  'problem_type_id'],
-                              region_id=self.request.arguments['region_id'])
-            self.sess.add(problem)
-            self.sess.commit()
-            activity = ProblemsActivity(problem_id=problem.id,
-                                        data=escape.json_decode(
-                                            self.request.body),
-                                        user_id=self.get_current_user(),
-                                        datetime=datetime.utcnow(),
-                                        activity_type="ADDED")
-            self.sess.add(activity)
-            self.sess.commit()
+            if form.validate():
+
+                problem = Problem(title=self.request.arguments['title'],
+                                  content=self.request.arguments['content'],
+                                  proposal=self.request.arguments['proposal'],
+                                  severity=self.request.arguments['severity'],
+                                  status=self.request.arguments['status'],
+                                  location=self.create_location(),
+                                  problem_type_id=self.request.arguments[
+                                      'problem_type_id'],
+                                  region_id=self.request.arguments['region_id'])
+                self.sess.add(problem)
+                self.sess.commit()
+                activity = ProblemsActivity(problem_id=problem.id,
+                                            data=escape.json_decode(
+                                                self.request.body),
+                                            user_id=self.get_current_user(),
+                                            datetime=datetime.utcnow(),
+                                            activity_type="ADDED")
+                self.sess.add(activity)
+                self.sess.commit()
+            else:
+                message = form.errors
+                self.send_error(400, message=message)
         else:
             message = 'You have not permission to adde problem_id.'
             self.send_error(400, message=message)
@@ -61,10 +75,19 @@ class ProblemsHandler(BaseHandler):
             filter_by(problem_id=problem_id, activity_type='ADDED').first()
 
         if modifire == 'ANY' or (
-                modifire == 'OWN' and user_id[0] == self.get_current_user()):
-            form = self.ProblemForm(obj=self.request.arguments)
-            print form.validate(), 'LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL'
+                        modifire == 'OWN' and user_id[
+                    0] == self.get_current_user()):
+            try:
+                form = ProblemForm.from_json(self.request.arguments,
+                                             skip_unknown_keys=False)
+            except InvalidData as e:
+                message = e.message
+                self.send_error(400, message=message)
+
             if form.validate():
+                self.request.arguments['location'] = self.create_location()
+                self.request.arguments.pop('Latitude')
+                self.request.arguments.pop('Longtitude')
                 self.request.arguments['id'] = problem_id
                 self.sess.query(Problem).filter_by(id=int(problem_id)). \
                     update(self.request.arguments)
@@ -80,8 +103,8 @@ class ProblemsHandler(BaseHandler):
                 self.sess.add(activity)
                 self.sess.commit()
             else:
-                self.set_status(400)
-                self.write("" % form.errors)
+                message = form.errors
+                self.send_error(400, message=message)
         else:
             message = 'You have not permission to update.'
             self.send_error(400, message=message)
