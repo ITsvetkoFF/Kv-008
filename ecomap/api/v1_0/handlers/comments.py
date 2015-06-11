@@ -1,8 +1,6 @@
 from datetime import datetime
-import json
 
-from api.v1_0.models.user import User
-from api.v1_0.models.comment import Comment
+from api.v1_0.models.models import Comment, User
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.bl.response_helpers import iso8601_conv_with_empty_check, conv_array_to_dict
 
