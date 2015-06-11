@@ -219,7 +219,7 @@ query = select([problems_t.id, problems_t.title,
                 problems_t.problem_type_id, problems_t.region_id,
                 problems_activity_t.datetime,
                 func.count(votes_activity_t.id).label('votes_numbers'),
-                (user_t.c.first_name + user_t.last_name).label('name')]). \
+                (user_t.first_name + user_t.last_name).label('name')]). \
     where(problems_activity_t.problem_id == votes_activity_t.problem_id). \
     where(problems_t.id == problems_activity_t.problem_id). \
     where(problems_activity_t.user_id == user_t.id). \
