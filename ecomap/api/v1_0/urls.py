@@ -8,8 +8,9 @@ from api.v1_0.handlers.user import UserHandler
 from api.v1_0.handlers.auth import FacebookAuthHandler, GoogleAuthHandler, \
     RegisterHandler, LoginHandler, LogoutHandler
 from api.v1_0.handlers.problem import ProblemVoteHandler, ProblemsHandler
+from api.v1_0.handlers.comments import CommentsHandler, ProblemCommentsHandler
+from api.v1_0.handlers.problem import ProblemVoteHandler, ProblemsHandler
 from docs import DOCS_ROOT
-from testmodule import TestHandler
 
 APIUrls = [
     URLSpec(r'/api/v1/login', LoginHandler),
@@ -23,13 +24,15 @@ APIUrls = [
     URLSpec(r'/api/v1/user', UserHandler),
     URLSpec(r'/api/v1/problems/(\d+)/vote', ProblemVoteHandler),
     URLSpec(r'/api/v1/problems(?:/(\d+))?$',ProblemsHandler ),
-    URLSpec(r'/api/v1/test/(\d+)', TestHandler),
+    
 
     URLSpec(r'/api/docs/(.*)', StaticFileHandler,
             {'path': os.path.join(DOCS_ROOT, 'build', 'html')}),
 
     URLSpec(r'/api/v1/admin/roles', admin.RolesHandler),
     URLSpec(r'/api/v1/admin/roles/(\d+)/resources', admin.ResourcesHandler),
-    URLSpec(r'/api/v1/user/(\d+)', UserHandler),
-
+    URLSpec(r'/api/v1/pages', PagesHandler),
+    URLSpec(r'/api/v1/pages/(\d+)', PagesHandler),
+    URLSpec(r'/api/v1/comments/(\d+)', CommentsHandler),
+    URLSpec(r'/api/v1/problems/(\d+)/comments', ProblemCommentsHandler)
 ]
