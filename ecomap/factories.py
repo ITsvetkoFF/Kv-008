@@ -83,7 +83,7 @@ class ProblemActivityFactory(SQLAlchemyModelFactory):
 
     problem = None
     user = None
-    datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    datetime = datetime.datetime.utcnow()
     activity_type = 'ADDED'
 
 
@@ -104,28 +104,21 @@ class PhotoActivityFactory(SQLAlchemyModelFactory):
     photo = factory.SubFactory(PhotoFactory)
     problem = None
     user = None
-    datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    datetime = datetime.datetime.utcnow()
     activity_type = 'ADDED'
 
 
-# class CommentFactory(SQLAlchemyModelFactory):
-#     class Meta:
-#         model = Comment
-#         sqlalchemy_session = session
-#
-#     content = factory.sequence(lambda n: 'comment_%s_content' % n)
-#
-#
-# class CommentActivityFactory(SQLAlchemyModelFactory):
-#     class Meta:
-#         model = CommentsActivity
-#         sqlalchemy_session = session
-#
-#     problem = None
-#     comment = factory.SubFactory(CommentFactory)
-#     user = None
-#     datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-#     activity_type = 'ADDED'
+class CommentFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = Comment
+        sqlalchemy_session = session
+
+    content = factory.sequence(lambda n: 'comment_%s_content' % n)
+    problem = None
+    user = None
+    created_date = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+    modified_date = datetime.datetime.utcnow()
+    modified_user_id = factory.sequence(lambda n: n+1)
 
 
 class ResourceFactory(SQLAlchemyModelFactory):
@@ -163,7 +156,7 @@ class VoteActivityFactory(SQLAlchemyModelFactory):
 
     problem = None
     user = None
-    datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    datetime = datetime.datetime.utcnow()
 
 
 if __name__ == '__main__':
@@ -215,7 +208,7 @@ if __name__ == '__main__':
         kwargs = dict(user=user, problem=problem)
         ProblemActivityFactory(**kwargs)
         PhotoActivityFactory(**kwargs)
-        #CommentActivityFactory(**kwargs)
+        CommentFactory(**kwargs)
         VoteActivityFactory(**kwargs)
 
     session.commit()
