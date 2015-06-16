@@ -38,9 +38,6 @@ class ProblemsHandler(BaseHandler):
             except InvalidData as e:
                 message = e.args
                 self.send_error(400, message=message)
-            for i in form.__dict__.keys():
-                print form.__dict__[i]
-
             if form.validate():
 
                 problem = Problem(title=self.request.arguments['title'],

@@ -108,24 +108,24 @@ class PhotoActivityFactory(SQLAlchemyModelFactory):
     activity_type = 'ADDED'
 
 
-class CommentFactory(SQLAlchemyModelFactory):
-    class Meta:
-        model = Comment
-        sqlalchemy_session = session
-
-    content = factory.sequence(lambda n: 'comment_%s_content' % n)
-
-
-class CommentActivityFactory(SQLAlchemyModelFactory):
-    class Meta:
-        model = CommentsActivity
-        sqlalchemy_session = session
-
-    problem = None
-    comment = factory.SubFactory(CommentFactory)
-    user = None
-    datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    activity_type = 'ADDED'
+# class CommentFactory(SQLAlchemyModelFactory):
+#     class Meta:
+#         model = Comment
+#         sqlalchemy_session = session
+#
+#     content = factory.sequence(lambda n: 'comment_%s_content' % n)
+#
+#
+# class CommentActivityFactory(SQLAlchemyModelFactory):
+#     class Meta:
+#         model = CommentsActivity
+#         sqlalchemy_session = session
+#
+#     problem = None
+#     comment = factory.SubFactory(CommentFactory)
+#     user = None
+#     datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#     activity_type = 'ADDED'
 
 
 class ResourceFactory(SQLAlchemyModelFactory):
@@ -215,7 +215,7 @@ if __name__ == '__main__':
         kwargs = dict(user=user, problem=problem)
         ProblemActivityFactory(**kwargs)
         PhotoActivityFactory(**kwargs)
-        CommentActivityFactory(**kwargs)
+        #CommentActivityFactory(**kwargs)
         VoteActivityFactory(**kwargs)
 
     session.commit()

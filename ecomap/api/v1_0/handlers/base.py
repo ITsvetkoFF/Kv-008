@@ -2,7 +2,6 @@
 
 import tornado.web
 import tornado.escape
-
 from api.v1_0.models import *
 
 
