@@ -83,7 +83,7 @@ class ProblemActivityFactory(SQLAlchemyModelFactory):
 
     problem = None
     user = None
-    datetime = datetime.datetime.now().utcnow()
+    datetime = datetime.datetime.utcnow()
     activity_type = 'ADDED'
 
 
@@ -104,7 +104,7 @@ class PhotoActivityFactory(SQLAlchemyModelFactory):
     photo = factory.SubFactory(PhotoFactory)
     problem = None
     user = None
-    datetime = datetime.datetime.now().utcnow()
+    datetime = datetime.datetime.utcnow()
     activity_type = 'ADDED'
 
 
@@ -117,7 +117,7 @@ class CommentFactory(SQLAlchemyModelFactory):
     problem = None
     user = None
     created_date = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    modified_date = datetime.datetime.now().utcnow()
+    modified_date = datetime.datetime.utcnow()
     modified_user_id = factory.sequence(lambda n: n+1)
 
 
@@ -156,7 +156,7 @@ class VoteActivityFactory(SQLAlchemyModelFactory):
 
     problem = None
     user = None
-    datetime = datetime.datetime.now().utcnow()
+    datetime = datetime.datetime.utcnow()
 
 
 if __name__ == '__main__':
