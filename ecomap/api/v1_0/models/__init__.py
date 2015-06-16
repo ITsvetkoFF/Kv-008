@@ -14,6 +14,7 @@ from .resource import Resource
 from .permission import Permission
 from .solution import Solution
 from .page import Page
+from .detailed_problem import DetailedProblem
 
 
 

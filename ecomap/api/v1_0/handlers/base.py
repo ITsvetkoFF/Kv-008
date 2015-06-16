@@ -2,7 +2,6 @@
 
 import tornado.web
 import tornado.escape
-
 from api.v1_0.models import *
 
 
@@ -52,3 +51,9 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
         self.set_header("Access-Control-Allow-Headers", "Content-Type, Depth, User-Agent, X-File-Size, X-Requested-With, X-Requested-By, If-Modified-Since, X-File-Name, Cache-Control")
+
+    def create_location(self):
+        x = self.request.arguments["Latitude"]
+        y = self.request.arguments["Longtitude"]
+        return "POINT({0} {1})".format(x,y)
+

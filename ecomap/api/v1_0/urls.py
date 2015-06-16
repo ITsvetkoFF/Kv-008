@@ -7,7 +7,7 @@ import api.v1_0.handlers.administration as admin
 from api.v1_0.handlers.user import UserAPIHandler
 from api.v1_0.handlers.auth import FacebookAuthHandler, GoogleAuthHandler, \
     RegisterHandler, LoginHandler, LogoutHandler
-from api.v1_0.handlers.problem import ProblemVoteHandler
+from api.v1_0.handlers.problem import ProblemsHandler, ProblemVoteHandler
 from api.v1_0.handlers.pages import PagesHandler
 from api.v1_0.handlers.comments import CommentsHandler, ProblemCommentsHandler
 from docs import DOCS_ROOT
@@ -26,7 +26,7 @@ APIUrls = [
 
     URLSpec(r'/api/docs/(.*)', StaticFileHandler,
             {'path': os.path.join(DOCS_ROOT, 'build', 'html')}),
-
+    URLSpec(r'/api/v1/problems(?:/(\d+))?$',ProblemsHandler ),
     URLSpec(r'/api/v1/admin/roles', admin.RolesHandler),
     URLSpec(r'/api/v1/admin/roles/(\d+)/resources', admin.ResourcesHandler),
     URLSpec(r'/api/v1/pages', PagesHandler),

@@ -2,6 +2,7 @@ import datetime
 import random
 
 import factory
+
 from factory.alchemy import SQLAlchemyModelFactory
 
 from api import settings
@@ -107,24 +108,24 @@ class PhotoActivityFactory(SQLAlchemyModelFactory):
     activity_type = 'ADDED'
 
 
-class CommentFactory(SQLAlchemyModelFactory):
-    class Meta:
-        model = Comment
-        sqlalchemy_session = session
-
-    content = factory.sequence(lambda n: 'comment_%s_content' % n)
-
-
-class CommentActivityFactory(SQLAlchemyModelFactory):
-    class Meta:
-        model = CommentsActivity
-        sqlalchemy_session = session
-
-    problem = None
-    comment = factory.SubFactory(CommentFactory)
-    user = None
-    datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    activity_type = 'ADDED'
+# class CommentFactory(SQLAlchemyModelFactory):
+#     class Meta:
+#         model = Comment
+#         sqlalchemy_session = session
+#
+#     content = factory.sequence(lambda n: 'comment_%s_content' % n)
+#
+#
+# class CommentActivityFactory(SQLAlchemyModelFactory):
+#     class Meta:
+#         model = CommentsActivity
+#         sqlalchemy_session = session
+#
+#     problem = None
+#     comment = factory.SubFactory(CommentFactory)
+#     user = None
+#     datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#     activity_type = 'ADDED'
 
 
 class ResourceFactory(SQLAlchemyModelFactory):
@@ -188,7 +189,11 @@ if __name__ == '__main__':
     role_user = RoleFactory(name='user')
     # role_user has no permissions, you need to add some manually
     role_user.permissions.extend(session.query(Permission).filter_by(
-        modifier='NONE').all())
+        modifier='NONE').all()[:5])
+    role_user.permissions.extend(session.query(Permission).filter_by(
+        modifier='OWN').all()[5:]
+    )
+
     user_admin = UserFactory(first_name='user', last_name='admin')
     user_admin.roles.append(role_admin)
 
@@ -210,7 +215,7 @@ if __name__ == '__main__':
         kwargs = dict(user=user, problem=problem)
         ProblemActivityFactory(**kwargs)
         PhotoActivityFactory(**kwargs)
-        CommentActivityFactory(**kwargs)
+        #CommentActivityFactory(**kwargs)
         VoteActivityFactory(**kwargs)
 
     session.commit()
