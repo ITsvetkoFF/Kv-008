@@ -17,7 +17,7 @@ class AllProblemsHandler(BaseHandler):
                 id=problem.id,
                 title=problem.title,
                 status=problem.status,
-                date=problem.date,
+                datetime=problem.datetime,
                 problem_type_id=problem.problem_type_id,
                 lat=lat,
                 lon=lon

@@ -16,7 +16,7 @@ query = select(
         problems_t.proposal,
         problems_t.severity,
         problems_t.status,
-        problems_t.location,
+        func.ST_GeogFromWKB(problems_t.location).label('location'),
         problems_t.problem_type_id,
         problems_t.region_id,
         problems_activity_t.datetime,
