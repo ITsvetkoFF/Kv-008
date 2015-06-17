@@ -1,6 +1,6 @@
 from api.v1_0.models import *
 from sqlalchemy import *
-from api.v1_0.bl.create_view import view
+from api.v1_0.bl.view_creator import view
 
 metadata = Base.metadata
 user_t = User.__table__.c
