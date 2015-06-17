@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 
+import api.v1_0.models.resource
 from api.v1_0.models import Base, enum_actions, enum_modifiers
 
 
