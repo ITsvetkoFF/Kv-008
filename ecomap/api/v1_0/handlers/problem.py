@@ -2,9 +2,10 @@ from datetime import datetime
 from tornado import escape
 from wtforms_json import InvalidData
 from api.v1_0.handlers.base import BaseHandler
+from api.v1_0.forms.validation_json import  ProblemForm
+from api.v1_0.bl.response_helpers import create_location
 from api.v1_0.models import VotesActivity, DetailedProblem, Problem, \
     ProblemsActivity
-from api.v1_0.forms.validation_json import  ProblemForm
 
 
 class ProblemsHandler(BaseHandler):
@@ -39,24 +40,27 @@ class ProblemsHandler(BaseHandler):
                 message = e.args
                 self.send_error(400, message=message)
             if form.validate():
-
-                problem = Problem(title=self.request.arguments['title'],
-                                  content=self.request.arguments['content'],
-                                  proposal=self.request.arguments['proposal'],
-                                  severity=self.request.arguments['severity'],
-                                  status=self.request.arguments['status'],
-                                  location=self.create_location(),
-                                  problem_type_id=self.request.arguments[
-                                      'problem_type_id'],
-                                  region_id=self.request.arguments['region_id'])
+                x = self.request.arguments.pop('Latitude')
+                y = self.request.arguments.pop('Longtitude')
+                problem = Problem(
+                    title=self.request.arguments['title'],
+                    content=self.request.arguments['content'],
+                    proposal=self.request.arguments['proposal'],
+                    severity=self.request.arguments['severity'],
+                    status=self.request.arguments['status'],
+                    location=create_location(x,y),
+                    problem_type_id=self.request.arguments[
+                        'problem_type_id'],
+                    region_id=self.request.arguments['region_id'])
                 self.sess.add(problem)
                 self.sess.commit()
-                activity = ProblemsActivity(problem_id=problem.id,
-                                            data=escape.json_decode(
-                                                self.request.body),
-                                            user_id=self.get_current_user(),
-                                            datetime=datetime.utcnow(),
-                                            activity_type="ADDED")
+                activity = ProblemsActivity(
+                    problem_id=problem.id,
+                    data=escape.json_decode(
+                        self.request.body),
+                    user_id=self.get_current_user(),
+                    datetime=datetime.utcnow(),
+                    activity_type="ADDED")
                 self.sess.add(activity)
                 self.sess.commit()
             else:
@@ -82,9 +86,9 @@ class ProblemsHandler(BaseHandler):
                 self.send_error(400, message=message)
 
             if form.validate():
-                self.request.arguments['location'] = self.create_location()
-                self.request.arguments.pop('Latitude')
-                self.request.arguments.pop('Longtitude')
+                x = self.request.arguments.pop('Latitude')
+                y = self.request.arguments.pop('Longtitude')
+                self.request.arguments['location'] = create_location(x,y)
                 self.request.arguments['id'] = problem_id
                 self.sess.query(Problem).filter_by(id=int(problem_id)). \
                     update(self.request.arguments)
@@ -118,11 +122,12 @@ class ProblemsHandler(BaseHandler):
                         modifier == 'OWN' and user_id[
                     0] == self.get_current_user()):
 
-            activity = ProblemsActivity(problem_id=int(problem_id),
-                                        data=None,
-                                        user_id=self.get_current_user(),
-                                        datetime=datetime.utcnow(),
-                                        activity_type='REMOVED')
+            activity = ProblemsActivity(
+                problem_id=int(problem_id),
+                data=None,
+                user_id=self.get_current_user(),
+                datetime=datetime.utcnow(),
+                activity_type='REMOVED')
             self.sess.add(activity)
             self.sess.commit()
 

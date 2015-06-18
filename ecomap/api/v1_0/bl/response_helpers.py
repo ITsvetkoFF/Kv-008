@@ -7,3 +7,7 @@ def iso8601_conv_with_empty_check(date):
 
 def conv_array_to_dict(array):
     return dict(count=len(array), data=array)
+
+
+def create_location( x, y):
+    return "POINT({0} {1})".format(x, y)

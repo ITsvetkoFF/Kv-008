@@ -55,7 +55,3 @@ class BaseHandler(tornado.web.RequestHandler):
             "X-Requested-By, If-Modified-Since, X-File-Name, Cache-Control"
         )
 
-    def create_location(self):
-        x = self.request.arguments["Latitude"]
-        y = self.request.arguments["Longtitude"]
-        return "POINT({0} {1})".format(x, y)
