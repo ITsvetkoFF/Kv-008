@@ -91,12 +91,14 @@ class ProblemsHandler(BaseHandler):
 
                 self.sess.commit()
 
-                activity = ProblemsActivity(problem_id=int(problem_id),
-                                            data=escape.json_decode(
-                                                self.request.body),
-                                            user_id=self.get_current_user(),
-                                            datetime=datetime.utcnow(),
-                                            activity_type="UPDATED")
+                activity = ProblemsActivity(
+                    problem_id=int(problem_id),
+                    data=escape.json_decode(
+                        self.request.body),
+                    user_id=self.get_current_user(),
+                    datetime=datetime.utcnow(),
+                    activity_type="UPDATED"
+                )
                 self.sess.add(activity)
                 self.sess.commit()
             else:
