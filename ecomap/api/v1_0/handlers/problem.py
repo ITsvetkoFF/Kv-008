@@ -67,12 +67,12 @@ class ProblemsHandler(BaseHandler):
             self.send_error(400, message=message)
 
     def put(self, problem_id):
-        modifire = self.get_action_modifier()
+        modifier = self.get_action_modifier()
         user_id = self.sess.query(ProblemsActivity.user_id). \
             filter_by(problem_id=problem_id, activity_type='ADDED').first()
 
-        if modifire == 'ANY' or (
-                        modifire == 'OWN' and user_id[
+        if modifier == 'ANY' or (
+                        modifier == 'OWN' and user_id[
                     0] == self.get_current_user()):
             try:
                 form = ProblemForm.from_json(self.request.arguments,
@@ -110,12 +110,12 @@ class ProblemsHandler(BaseHandler):
 
     def delete(self, problem_id):
         """Delete a problem from the database by given problem id."""
-        modifire = self.get_action_modifier()
+        modifier = self.get_action_modifier()
         user_id = self.sess.query(ProblemsActivity.user_id). \
             filter_by(problem_id=problem_id, activity_type='ADDED').first()
 
-        if modifire == 'ANY' or (
-                        modifire == 'OWN' and user_id[
+        if modifier == 'ANY' or (
+                        modifier == 'OWN' and user_id[
                     0] == self.get_current_user()):
 
             activity = ProblemsActivity(problem_id=int(problem_id),

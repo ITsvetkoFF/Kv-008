@@ -1,5 +1,5 @@
 from api.v1_0.models import *
-from sqlalchemy import *
+from sqlalchemy import*
 from api.v1_0.bl.view_creator import view
 
 metadata = Base.metadata
@@ -23,19 +23,21 @@ query = select(
         func.count(votes_activity_t.id).label('votes_numbers'),
         (user_t.first_name + user_t.last_name).label('name')
     ]
-).where(
-    problems_activity_t.problem_id == votes_activity_t.problem_id
-).where(
-    problems_activity_t.problem_id == problems_t.id
-).where(
-    problems_activity_t.user_id == user_t.id
-).group_by(
+)
+
+j = ProblemsActivity.__table__  # Initial table to join.
+table_list = [Problem.__table__, VotesActivity.__table__, User.__table__]
+for table in table_list:
+    j = j.outerjoin(table)
+query = query.select_from(j)
+query = query.group_by(
     problems_t.id,
     problems_activity_t.problem_id,
     problems_activity_t.datetime,
     user_t.first_name,
-    user_t.last_name
+    user_t.last_name,
 )
+
 
 detailed_problem_view = view("detailed_problem", metadata, query)
 
