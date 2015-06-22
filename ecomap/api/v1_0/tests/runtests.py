@@ -4,7 +4,6 @@ import unittest
 TEST_MODULES = [
     'api.v1_0.tests.test_auth',
     'api.v1_0.tests.test_comments',
-    # 'api.v1_0.tests.test_comments'
 ]
 
 
