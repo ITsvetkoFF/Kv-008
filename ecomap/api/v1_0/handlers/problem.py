@@ -2,6 +2,7 @@ import os
 import random
 import string
 import imghdr
+import json
 
 import datetime
 from os.path import join
@@ -170,11 +171,16 @@ class ProblemPhotosHandler(BaseHandler):
     @check_if_exists(Problem)
     def get(self, problem_id):
         photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
-        # build a dict from photo data
-        self.write(
-            {photo.id: {'name': photo.name, 'comment': photo.comment} for
-             photo in photos}
-        )
+        response_data = [dict(
+                photo_id=photo.id,
+                name=photo.name,
+                datetime=str(photo.datetime),
+                comment=photo.comment,
+                problem_id=photo.problem_id,
+                user_id=photo.user_id
+            ) for photo in photos]
+
+        self.write(json.dumps(response_data))
 
     @check_if_exists(Problem)
     def post(self, problem_id):
