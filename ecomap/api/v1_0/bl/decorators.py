@@ -32,12 +32,11 @@ def checking_validaty(cform):
     def arguments_wrapper(method):
         def wrapper(handler, obj_id):
             try:
-                form = Form.from_json(handler.request.arguments)
+                form = Form.from_json(handler.request.arguments,
+                                      skip_unknown_keys=True)
             except InvalidData as e:
                 message = e.message
-                handler.send_error(400, message=message,
-                                             skip_unknown_keys=False)
-
+                handler.send_error(400, message=message)
             if form.validate():
                 method(handler,obj_id)
             else:
