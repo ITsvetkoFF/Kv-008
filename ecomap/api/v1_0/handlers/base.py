@@ -22,9 +22,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def prepare(self):
         # Incorporate request JSON into arguments dictionary.
-        # This method has to be transformed into a simple function and put into
-        # bl package.
-        if self.request.body:
+        if self.request.body and not self.request.files:
             try:
                 json_data = tornado.escape.json_decode(self.request.body)
                 self.request.arguments.update(json_data)

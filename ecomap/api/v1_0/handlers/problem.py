@@ -1,10 +1,28 @@
-from datetime import datetime
+import os
+import random
+import string
+import imghdr
+
+import datetime
+from os.path import join
 from tornado import escape
 from wtforms_json import InvalidData
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.models import VotesActivity, DetailedProblem, Problem, \
-    ProblemsActivity
-from api.v1_0.forms.validation_json import  ProblemForm
+
+from api.v1_0.models import (
+    VotesActivity,
+    DetailedProblem,
+    Problem,
+    ProblemsActivity,
+    Photo
+)
+from api.v1_0.forms.validation_json import ProblemForm
+from api.v1_0.bl.decs import check_if_exists
+from api.v1_0.bl.get_datetime import get_datetime
+from api.v1_0.handlers.photos import PHOTOS_ROOT
+
+# you can add more image types if necessary
+PHOTO_TYPES = ('png', 'gif', 'jpeg', 'jpg')
 
 
 class ProblemsHandler(BaseHandler):
@@ -18,7 +36,7 @@ class ProblemsHandler(BaseHandler):
             if problem != None:
                 problem_data = dict()
                 for c in problem.__table__.columns:
-                    if isinstance(getattr(problem, c.name), datetime):
+                    if isinstance(getattr(problem, c.name), datetime.datetime):
                         problem_data[c.name] = str(getattr(problem, c.name))
                     else:
                         problem_data[c.name] = getattr(problem, c.name)
@@ -40,23 +58,26 @@ class ProblemsHandler(BaseHandler):
                 self.send_error(400, message=message)
             if form.validate():
 
-                problem = Problem(title=self.request.arguments['title'],
-                                  content=self.request.arguments['content'],
-                                  proposal=self.request.arguments['proposal'],
-                                  severity=self.request.arguments['severity'],
-                                  status=self.request.arguments['status'],
-                                  location=self.create_location(),
-                                  problem_type_id=self.request.arguments[
-                                      'problem_type_id'],
-                                  region_id=self.request.arguments['region_id'])
+                problem = Problem(
+                    title=self.request.arguments['title'],
+                    # you can't use brackets because these fields are nullable
+                    content=self.request.arguments.get('content'),
+                    proposal=self.request.arguments.get('proposal'),
+                    severity=self.request.arguments.get('severity'),
+                    status=self.request.arguments.get('status'),
+                    location=self.create_location(),
+                    problem_type_id=self.request.arguments.get(
+                        'problem_type_id'),
+                    region_id=self.request.arguments.get('region_id')
+                )
                 self.sess.add(problem)
                 self.sess.commit()
-                activity = ProblemsActivity(problem_id=problem.id,
-                                            data=escape.json_decode(
-                                                self.request.body),
-                                            user_id=self.get_current_user(),
-                                            datetime=datetime.utcnow(),
-                                            activity_type="ADDED")
+                activity = ProblemsActivity(
+                    problem_id=problem.id,
+                    data=escape.json_decode(self.request.body),
+                    user_id=self.get_current_user(),
+                    datetime=get_datetime(),
+                    activity_type="ADDED")
                 self.sess.add(activity)
                 self.sess.commit()
             else:
@@ -93,10 +114,9 @@ class ProblemsHandler(BaseHandler):
 
                 activity = ProblemsActivity(
                     problem_id=int(problem_id),
-                    data=escape.json_decode(
-                        self.request.body),
+                    data=escape.json_decode(self.request.body),
                     user_id=self.get_current_user(),
-                    datetime=datetime.utcnow(),
+                    datetime=get_datetime(),
                     activity_type="UPDATED"
                 )
                 self.sess.add(activity)
@@ -121,7 +141,7 @@ class ProblemsHandler(BaseHandler):
             activity = ProblemsActivity(problem_id=int(problem_id),
                                         data=None,
                                         user_id=self.get_current_user(),
-                                        datetime=datetime.utcnow(),
+                                        datetime=get_datetime(),
                                         activity_type='REMOVED')
             self.sess.add(activity)
             self.sess.commit()
@@ -134,12 +154,63 @@ class ProblemsHandler(BaseHandler):
 
 
 class ProblemVoteHandler(BaseHandler):
+    @check_if_exists(Problem)
     def post(self, problem_id):
         new_vote = VotesActivity(
             problem_id=int(problem_id),
             user_id=self.current_user,
-            datetime=datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+            datetime=get_datetime()
         )
 
         self.sess.add(new_vote)
+        self.sess.commit()
+
+
+class ProblemPhotosHandler(BaseHandler):
+    @check_if_exists(Problem)
+    def get(self, problem_id):
+        photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
+        # build a dict from photo data
+        self.write(
+            {photo.id: {'name': photo.name, 'comment': photo.comment} for
+             photo in photos}
+        )
+
+    @check_if_exists(Problem)
+    def post(self, problem_id):
+        while self.request.files['photo_files']:
+            photo_file = self.request.files['photo_files'].pop()
+            # rename files and append extensions
+            original_filename = photo_file.filename
+
+            # checking for extensions
+            extension = os.path.splitext(original_filename)[1]
+            if extension not in map(lambda type: '.' + type, PHOTO_TYPES):
+                return self.send_error(400, message='Bad photo '
+                                                    'file extension.')
+
+            # validating uploaded file type
+            file_type = imghdr.what(original_filename, photo_file.body)
+            if not file_type.endswith(PHOTO_TYPES):
+                self.send_error(400, message='Invalid photo file type.')
+                return
+
+            name = ''.join(
+                random.choice(string.ascii_lowercase + string.digits) for
+                x in range(6))
+            final_filename = name + extension
+
+            with open(join(PHOTOS_ROOT, final_filename), 'w') as output_file:
+                output_file.write(photo_file.body)
+
+            photo = Photo(
+                problem_id=problem_id,
+                name=final_filename,
+                datetime=get_datetime(),
+                user_id=self.current_user,
+                comment=self.request.body_arguments['comment'][0].decode(
+                    'utf-8')
+            )
+            self.sess.add(photo)
+
         self.sess.commit()
