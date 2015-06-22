@@ -40,16 +40,16 @@ class ProblemsHandler(BaseHandler):
         #     message = 'You have not permission to adde problem_id.'
         #     self.send_error(400, message=message)
         #     return
-        try:
-            form = ProblemForm.from_json(self.request.arguments,
-                                         skip_unknown_keys=False)
-        except InvalidData as e:
-            message = e.args
-            self.send_error(400, message=message)
-        if not form.validate():
-            message = form.errors
-            self.send_error(400, message=message)
-            return
+        # try:
+        #     form = ProblemForm.from_json(self.request.arguments,
+        #                                  skip_unknown_keys=False)
+        # except InvalidData as e:
+        #     message = e.args
+        #     self.send_error(400, message=message)
+        # if not form.validate():
+        #     message = form.errors
+        #     self.send_error(400, message=message)
+        #     return
 
         x = self.request.arguments.pop('Latitude')
         y = self.request.arguments.pop('Longtitude')

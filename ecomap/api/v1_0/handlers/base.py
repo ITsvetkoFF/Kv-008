@@ -54,25 +54,3 @@ class BaseHandler(tornado.web.RequestHandler):
             "Content-Type, Depth, User-Agent, X-File-Size, X-Requested-With, "
             "X-Requested-By, If-Modified-Since, X-File-Name, Cache-Control"
         )
-
-    def permission_control(self, method):
-        def wrapper():
-            modifier = self.get_action_modifier()
-            if modifier == 'NONE':
-                message = 'You have not permission to adde problem_id.'
-                self.send_error(400, message=message)
-            elif modifier == 'ANY':
-                method()
-            elif modifier == 'OWN':
-                user_id = None
-                definition_query = {'ProblemsHandler' : self.sess.query(ProblemsActivity.user_id).filter_by(problem_id=int(self.path_args[0]), activity_type='ADDED').first()}
-                for handler in definition_query.keys():
-                    if self.__class__.__name__ == handler:
-                        user_id = definition_query[handler]
-                if user_id == self.get_current_user():
-                    method()
-                else:
-                    message = 'You have not permission to adde problem_id.'
-                    self.send_error(400, message=message)
-        return wrapper()
-

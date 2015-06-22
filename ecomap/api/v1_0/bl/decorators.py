@@ -27,19 +27,19 @@ def permission_control(method):
                 handler.send_error(400, message=message)
     return wrapper
 
-def checking_validaty(form):
-    Form = form
+def checking_validaty(cform):
+    Form = cform
     def arguments_wrapper(method):
         def wrapper(handler, obj_id):
             try:
-                form = Form.from_json(handler.request.arguments,
-                                             skip_unknown_keys=False)
+                form = Form.from_json(handler.request.arguments)
             except InvalidData as e:
                 message = e.message
-                handler.send_error(400, message=message)
+                handler.send_error(400, message=message,
+                                             skip_unknown_keys=False)
 
             if form.validate():
-                method()
+                method(handler,obj_id)
             else:
                 message = form.errors
                 handler.send_error(400, message=message)
