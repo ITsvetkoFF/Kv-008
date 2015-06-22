@@ -3,8 +3,7 @@ from sqlalchemy.orm import relationship
 from geoalchemy2 import Geography
 from wtforms import FloatField
 from wtforms.validators import NumberRange
-from wtforms_components import ModelForm
-
+from wtforms_alchemy import ModelForm
 from api.v1_0.models import Base, enum_severity_type, enum_status
 
 
