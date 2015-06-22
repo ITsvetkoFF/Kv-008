@@ -4,7 +4,6 @@ from api.v1_0.models import Base
 
 
 class Page(Base):
-
     __tablename__ = 'pages'
 
     id = Column(Integer, primary_key=True, autoincrement=True)

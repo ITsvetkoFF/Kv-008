@@ -1,18 +1,28 @@
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship
-
 from api.v1_0.models import Base
+import sqlalchemy as sa
+
 
 class Solution(Base):
     __tablename__ = 'solutions'
 
-    id = Column(Integer, primary_key=True)
-    problem_id = Column(Integer,
-                        ForeignKey(u'problems.id', ondelete=u'CASCADE'),
-                        nullable=False)
-    administrator_id = Column(Integer, ForeignKey(u'users.id'), nullable=False)
-    responsible_id = Column(Integer, ForeignKey(u'users.id'), nullable=False)
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
 
-    problem = relationship('Problem')
-    administrator = relationship('User', foreign_keys=[administrator_id])
-    responsible = relationship('User', foreign_keys=[responsible_id])
+    problem_id = sa.Column(sa.Integer,
+                           sa.ForeignKey('problems.id', ondelete='CASCADE'),
+                           nullable=False)
+
+    administrator_id = sa.Column(sa.Integer,
+                                 sa.ForeignKey('users.id'),
+                                 nullable=False)
+
+    responsible_id = sa.Column(sa.Integer,
+                               sa.ForeignKey('users.id'),
+                               nullable=False)
+
+    problem = sa.orm.relationship('Problem')
+
+    administrator = sa.orm.relationship('User',
+                                        foreign_keys=[administrator_id])
+
+    responsible = sa.orm.relationship('User',
+                                      foreign_keys=[responsible_id])
