@@ -1,6 +1,9 @@
 from sqlalchemy import Integer, String, Text, Column, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geography
+from wtforms import FloatField
+from wtforms.validators import NumberRange
+from wtforms_components import ModelForm
 
 from api.v1_0.models import Base, enum_severity_type, enum_status
 
@@ -20,3 +23,12 @@ class Problem(Base):
 
     problem_type = relationship('ProblemType')
     region = relationship('Region')
+
+
+class ProblemForm(ModelForm):
+        class Meta:
+            model = Problem
+            exclude = ['location']
+            include = ['problem_type_id','region_id']
+        Latitude = FloatField(validators=[NumberRange()])
+        Longtitude = FloatField(validators=[NumberRange()])

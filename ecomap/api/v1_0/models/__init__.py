@@ -4,7 +4,7 @@ from .problem_type import ProblemType
 from .role import Role
 from .region import Region
 from .user import User
-from .problem import Problem
+from .problem import Problem, ProblemForm
 from .photo import Photo
 from .photos_activity import PhotosActivity
 from .problems_activity import ProblemsActivity

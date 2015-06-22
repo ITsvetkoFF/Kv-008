@@ -2,18 +2,18 @@ from datetime import datetime
 from tornado import escape
 from wtforms_json import InvalidData
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.forms.validation_json import  ProblemForm
 from api.v1_0.bl.response_helpers import create_location
 from api.v1_0.models import VotesActivity, DetailedProblem, Problem, \
-    ProblemsActivity
+    ProblemsActivity,ProblemForm
+from api.v1_0.bl.decorators import permission_control, checking_validaty
 
 
 class ProblemsHandler(BaseHandler):
+    @permission_control
     def get(self, problem_id=None):
         """Get a list of problems from the database. If problem_id is
         not None, get the problem identified by problem_id and write it to
         the client."""
-
         if problem_id == None:
              self.send_error(404,message='Problem not found for the given id.')
              return
@@ -31,14 +31,15 @@ class ProblemsHandler(BaseHandler):
                 problem_data[c.name] = getattr(problem, c.name)
         self.write(problem_data)
 
-
-
+    @checking_validaty(ProblemForm)
+    @permission_control
     def post(self, problem_id):
         """Store a new problem to the database."""
-        if self.get_action_modifier() == 'NONE':
-            message = 'You have not permission to adde problem_id.'
-            self.send_error(400, message=message)
-            return
+
+        # if self.get_action_modifier() == 'NONE':
+        #     message = 'You have not permission to adde problem_id.'
+        #     self.send_error(400, message=message)
+        #     return
         try:
             form = ProblemForm.from_json(self.request.arguments,
                                          skip_unknown_keys=False)
@@ -74,28 +75,28 @@ class ProblemsHandler(BaseHandler):
         self.sess.commit()
 
 
-
+    @permission_control
     def put(self, problem_id):
-        modifier = self.get_action_modifier()
-        user_id = self.sess.query(ProblemsActivity.user_id). \
-            filter_by(problem_id=problem_id, activity_type='ADDED').first()
+        # modifier = self.get_action_modifier()
+        # user_id = self.sess.query(ProblemsActivity.user_id). \
+        #     filter_by(problem_id=problem_id, activity_type='ADDED').first()
+        #
+        # if not (modifier == 'ANY' or (modifier == 'OWN' and user_id[0] == self.get_current_user())):
+        #     message = 'You have not permission to update.'
+        #     self.send_error(400, message=message)
+        #     return
 
-        if not (modifier == 'ANY' or (modifier == 'OWN' and user_id[0] == self.get_current_user())):
-            message = 'You have not permission to update.'
-            self.send_error(400, message=message)
-            return
-
-        try:
-            form = ProblemForm.from_json(self.request.arguments,
-                                         skip_unknown_keys=False)
-        except InvalidData as e:
-            message = e.message
-            self.send_error(400, message=message)
-
-        if not form.validate():
-            message = form.errors
-            self.send_error(400, message=message)
-            return
+        # try:
+        #     form = ProblemForm.from_json(self.request.arguments,
+        #                                  skip_unknown_keys=False)
+        # except InvalidData as e:
+        #     message = e.message
+        #     self.send_error(400, message=message)
+        #
+        # if not form.validate():
+        #     message = form.errors
+        #     self.send_error(400, message=message)
+        #     return
 
         x = self.request.arguments.pop('Latitude')
         y = self.request.arguments.pop('Longtitude')
@@ -118,17 +119,17 @@ class ProblemsHandler(BaseHandler):
         self.sess.commit()
 
 
-
+    @permission_control
     def delete(self, problem_id):
         """Delete a problem from the database by given problem id."""
-        modifier = self.get_action_modifier()
-        user_id = self.sess.query(ProblemsActivity.user_id). \
-            filter_by(problem_id=problem_id, activity_type='ADDED').first()
-
-        if not (modifier == 'ANY' or (modifier == 'OWN' and user_id[0] == self.get_current_user())):
-            message = 'You have not permission to remove.'
-            self.send_error(400, message=message)
-            return
+        # modifier = self.get_action_modifier()
+        # user_id = self.sess.query(ProblemsActivity.user_id). \
+        #     filter_by(problem_id=problem_id, activity_type='ADDED').first()
+        #
+        # if not (modifier == 'ANY' or (modifier == 'OWN' and user_id[0] == self.get_current_user())):
+        #     message = 'You have not permission to remove.'
+        #     self.send_error(400, message=message)
+        #     return
 
         activity = ProblemsActivity(
             problem_id=int(problem_id),
