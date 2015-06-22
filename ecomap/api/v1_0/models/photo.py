@@ -1,11 +1,22 @@
-from sqlalchemy import Column, Integer, String, Text
-
+from sqlalchemy import Column, String, Integer, Text, ForeignKey, DateTime
 from api.v1_0.models import Base
 
 
 class Photo(Base):
     __tablename__ = 'photos'
 
-    id = Column(Integer, primary_key=True)
-    link = Column(String(200), nullable=False)
+    id = Column(Integer,
+                primary_key=True,
+                autoincrement=True)
+
+    name = Column(String(200), nullable=False)
+    datetime = Column(DateTime, nullable=False)
     comment = Column(Text)
+
+    problem_id = Column(Integer,
+                        ForeignKey('problems.id'),
+                        nullable=False)
+
+    user_id = Column(Integer,
+                     ForeignKey('users.id'),
+                     nullable=False)

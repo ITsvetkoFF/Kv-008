@@ -21,6 +21,7 @@ query = select(
         problems_t.region_id,
         problems_activity_t.datetime,
         func.count(votes_activity_t.id).label('votes_numbers'),
+        # there is no space between name and last name
         (user_t.first_name + user_t.last_name).label('name')
     ]
 )

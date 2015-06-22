@@ -8,23 +8,15 @@ from api.v1_0.bl.auth_logic import *
 
 class RegisterHandler(BaseHandler):
     def post(self):
-        user_data = decode_json(self)
-        if user_data is None:
-            # there was an exception while decoding
-            # response message was sent
-            return
-        form = create_user_register_form(user_data, self)
-        if form is None:
-            # there was an exception while checking fields
-            # response message was sent
-            return
-
+        form = UserRegisterForm.from_json(self.request.arguments)
         if form.validate():
-            new_user_id = store_registered_new_user(self, user_data)
-            set_cookie_with_login_informer(self, new_user_id)
+            new_user_id = store_registered_new_user(self, form.data)
+            # if new_user_id is None then email is not unique and error
+            # has already been sent to the user
+            if new_user_id:
+                self.set_cookie('user_id', str(new_user_id))
         else:
-            self.send_error(400, message='Invalid data sent.',
-                            errors=form.errors)
+            self.send_error(400, message=form.errors)
 
 
 class FacebookAuthHandler(BaseHandler, tornado.auth.FacebookGraphMixin):
@@ -40,14 +32,14 @@ class FacebookAuthHandler(BaseHandler, tornado.auth.FacebookGraphMixin):
                 code=self.get_argument('code')
             )
             if not user_data:
-                handle_client_failure('Facebook', 'Authentication failure.')
+                self.send_error(500, message='Facebook authentication failed.')
                 return
 
-            user = get_stored_user_by_3rd_party_id(
-                self, 'facebook', user_data['id']
-            )
+            user = self.sess.query(User).filter(
+                User.facebook_id == user_data['id']).first()
+            # check if this user exists in the database
             if user:
-                set_cookie_with_login_informer(self, user.id)
+                self.set_cookie('user_id', str(user.id))
                 return
 
             user_profile = yield self.facebook_request(
@@ -55,11 +47,11 @@ class FacebookAuthHandler(BaseHandler, tornado.auth.FacebookGraphMixin):
                 access_token=user_data['access_token']
             )
             if not user_profile:
-                handle_client_failure('Facebook', 'Profile access failure.')
-                return
-
-            new_user_id = store_fb_new_user(self, user_profile)
-            set_cookie_with_login_informer(self, str(new_user_id))
+                self.send_error(500, message='Facebook profile access failed.')
+            else:
+                new_user_id = store_fb_new_user(self, user_profile)
+                if new_user_id:
+                    self.set_cookie('user_id', str(new_user_id))
             return
 
         yield self.authorize_redirect(
@@ -80,7 +72,7 @@ class GoogleAuthHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
                 code=self.get_argument('code')
             )
             if not user_data:
-                handle_client_failure('Google', 'Authentication failure.')
+                self.send_error(500, message='Google authentication failed.')
                 return
 
             # google request for user profile
@@ -89,20 +81,23 @@ class GoogleAuthHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
                 '=' + str(user_data['access_token']))
 
             if not response:
-                handle_client_failure('google', 'profile access failure')
+                self.send_error(500, message='Google profile access failed.')
                 return
 
             user_profile = tornado.escape.json_decode(response.body)
+            # load user with this google id, if she exists
+            # Need to check whether this email is stored in the database.
+            # In this case the user has already registered using register
+            # facebook routes.
+            user = self.sess.query(User).filter(
+                User.google_id == user_profile['id']).first()
 
-            user = get_stored_user_by_3rd_party_id(
-                self, 'google', user_profile['id']
-            )
             if user:
-                set_cookie_with_login_informer(self, user.id)
-                return
-
-            new_user_id = store_google_new_user(self, user_profile)
-            set_cookie_with_login_informer(self, str(new_user_id))
+                self.set_cookie('user_id', str(user.id))
+            else:
+                new_user_id = store_google_new_user(self, user_profile)
+                if new_user_id:
+                    self.set_cookie('user_id', str(new_user_id))
             return
 
         yield self.authorize_redirect(
@@ -116,20 +111,17 @@ class GoogleAuthHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
 class LoginHandler(BaseHandler):
     def post(self):
-        login_data = decode_json(self)
-        if login_data is None:
-            # there was an exception while decoding
+        form = UserLoginForm.from_json(self.request.arguments)
+        if not form.validate():
+            self.send_error(400, message=form.errors)
             return
 
-        form = create_user_login_form(login_data, self)
-        if not form:
-            return
-
-        user = get_user_by_email(self, form.email.data)
+        user = load_user_by_email(self, form.email.data)
+        # check if user exists and her passwords matches
         if user and user.password == form.password.data:
-            set_cookie_with_login_informer(self, user.id)
+            self.set_cookie('user_id', str(user.id))
         else:
-            self.send_error(400, message='Invalid email and/or password.')
+            self.send_error(400, message='Invalid email/password.')
 
 
 class LogoutHandler(BaseHandler):

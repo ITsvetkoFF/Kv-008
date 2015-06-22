@@ -21,7 +21,6 @@ from api.v1_0.models import Base
 from api.utils.db import get_db_engine
 from api import settings
 
-
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -67,16 +66,8 @@ def upgrade():
 
 
 def init_db():
-    """
-    Creates tables by SQLAlchemy models
-    """
-    fab_run('sudo -u postgres psql -c "DROP DATABASE IF EXISTS ecomap_db;"')
-    fab_run('sudo -u postgres psql -c "DROP ROLE IF EXISTS ecouser;"')
-    fab_run('sudo -u postgres psql -c "CREATE DATABASE ecomap_db;"')
-    fab_run('sudo -u postgres psql -c "CREATE USER ecouser WITH PASSWORD \'ecouser\';"')
-    fab_run('sudo -u postgres psql -c "ALTER USER ecouser SUPERUSER;"')
-    fab_run('sudo -u postgres psql ecomap_db -c "CREATE EXTENSION postgis;"')
-    fab_run('sudo -u postgres psql ecomap_db -c "CREATE EXTENSION postgis_topology;"')
+    fab_run('sudo -u postgres psql -f init_ecomap_db.sql;'
+            'export PYTHONPATH=":/ecomap"')
     Base.metadata.create_all(get_db_engine(settings))
 
 
@@ -86,18 +77,11 @@ def populate_db(problems_count):
     fab_run('python factories.py %s' % problems_count)
 
 
-def create_database():
+def create_database(db_name):
     """
     Create empty database
     """
-    try:
-        db_name = str(raw_input('Choose database name: '))
-        if db_name is False:
-            raise BaseException
-    except BaseException:
-        print "---> Database name not selected"
-    finally:
-        fab_run('sudo -u postgres psql -c "CREATE DATABASE %s"' % db_name)
+    fab_run('sudo -u postgres psql -c "CREATE DATABASE %s"' % db_name)
 
 
 def import_dump():
@@ -118,16 +102,8 @@ def import_dump():
                 break
 
 
-def drop_database():
+def drop_database(db_name):
     """
     Drop selected database
     """
-    try:
-        db_name = str(raw_input('Choose database: '))
-        if db_name is False:
-            raise ValueError
-        fab_run('sudo -u postgres psql -c "DROP DATABASE IF EXISTS %s"' % db_name)
-    except ValueError:
-        print "---> Database does not selected."
-    except:
-        print "---> Database %s does not exists." % db_name
+    fab_run('sudo -u postgres psql -c "DROP DATABASE IF EXISTS %s"' % db_name)
