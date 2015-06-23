@@ -2,7 +2,7 @@ import datetime
 
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
-from api.v1_0.bl.get_datetime import get_datetime
+from api.v1_0.bl.utils import get_datetime
 from api.v1_0.models import *
 from factories import session
 

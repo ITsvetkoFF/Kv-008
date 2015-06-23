@@ -7,6 +7,8 @@ from api.v1_0.models.detailed_problem import DetailedProblem
 
 class AllProblemsHandler(BaseHandler):
     def get(self):
+        """Returns the data for all the problems so you can mark them on the
+        map."""
         all_problems = []
 
         for problem, point_json in self.sess.query(

@@ -21,5 +21,5 @@ class ProblemsActivity(Base):
     activity_type = Column(Enum(*ACTIVITY_TYPES, name='activitytype'),
                            nullable=False)
 
-    problem = relationship('Problem')
+    problem = relationship('Problem', backref='problem_activities')
     user = relationship('User', backref='problem_activities')

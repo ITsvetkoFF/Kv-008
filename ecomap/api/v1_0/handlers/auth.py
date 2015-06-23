@@ -3,11 +3,19 @@ import tornado.auth
 import tornado.escape
 
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.bl.auth_logic import *
+from api.v1_0.bl.auth import *
 
 
 class RegisterHandler(BaseHandler):
     def post(self):
+        """Registers a new user.
+
+        If received data is valid, creates a new ``User``, stores it into
+        the database and sets a cookie named ``user_id``.
+
+        ``first_name``, ``last_name``, ``email`` and ``password`` key-value
+        pairs are required.
+        """
         form = UserRegisterForm.from_json(self.request.arguments)
         if form.validate():
             new_user_id = store_registered_new_user(self, form.data)
@@ -22,6 +30,10 @@ class RegisterHandler(BaseHandler):
 class FacebookAuthHandler(BaseHandler, tornado.auth.FacebookGraphMixin):
     @tornado.gen.coroutine
     def get(self):
+        """Authenticates a user using Facebook OAuth2 service.
+
+        In case of success sets a cookie named ``user_id``.
+        """
         uri = get_absolute_redirect_uri(self, 'fb_auth')
 
         if self.get_argument('code', None):
@@ -64,6 +76,10 @@ class FacebookAuthHandler(BaseHandler, tornado.auth.FacebookGraphMixin):
 class GoogleAuthHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
     @tornado.gen.coroutine
     def get(self):
+        """Authenticates a user using Google OAuth2 service.
+
+        In case of success sets a cookie named ``user_id``.
+        """
         uri = get_absolute_redirect_uri(self, 'google_auth')
 
         if self.get_argument('code', None):
@@ -111,6 +127,11 @@ class GoogleAuthHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
 class LoginHandler(BaseHandler):
     def post(self):
+        """Logs in a user.
+        Sets a cookie named ``user_id`` in case of success.
+
+        ``email`` and ``password`` key-value pairs are required.
+        """
         form = UserLoginForm.from_json(self.request.arguments)
         if not form.validate():
             self.send_error(400, message=form.errors)
@@ -126,5 +147,6 @@ class LoginHandler(BaseHandler):
 
 class LogoutHandler(BaseHandler):
     def get(self):
+        """Logs out a user."""
         self.clear_all_cookies()
         self.send_error(200, message='Logged out.')

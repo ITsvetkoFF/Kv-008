@@ -3,7 +3,7 @@ import tornado.escape
 
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models import Page
-from api.v1_0.bl.models_dict_logic import get_dict_from_orm, update_model_from_dict, get_object_from_dict
+from api.v1_0.bl.modeldict import get_dict_from_orm, update_model_from_dict, get_object_from_dict
 
 
 class PagesHandler(BaseHandler):
