@@ -6,7 +6,6 @@ import json
 import datetime
 from os.path import join
 from tornado import escape
-from wtforms_json import InvalidData
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.bl.response_helpers import create_location
 from api.v1_0.bl.decorators import permission_control, validation_json
@@ -19,7 +18,9 @@ from api.v1_0.models import (
     ProblemsActivity,
     Photo
 )
-from api.v1_0.forms.validation_json import ProblemForm
+from api.v1_0.models.problem import (
+    ProblemForm
+)
 from api.v1_0.bl.decs import check_if_exists
 from api.v1_0.bl.get_datetime import get_datetime
 from api.v1_0.handlers.photos import PHOTOS_ROOT
@@ -62,7 +63,7 @@ class ProblemsHandler(BaseHandler):
             data=escape.json_decode(
                 self.request.body),
             user_id=self.get_current_user(),
-            datetime=datetime.utcnow(),
+            datetime=get_datetime(),
             activity_type="ADDED")
         self.sess.add(activity)
         self.sess.commit()
@@ -86,7 +87,7 @@ class ProblemsHandler(BaseHandler):
             data=escape.json_decode(
                 self.request.body),
             user_id=self.get_current_user(),
-            datetime=datetime.utcnow(),
+            datetime=get_datetime(),
             activity_type="UPDATED"
         )
         self.sess.add(activity)
@@ -101,7 +102,7 @@ class ProblemsHandler(BaseHandler):
             problem_id=int(problem_id),
             data=None,
             user_id=self.get_current_user(),
-            datetime=datetime.utcnow(),
+            datetime=get_datetime(),
             activity_type='REMOVED')
         self.sess.add(activity)
         self.sess.commit()

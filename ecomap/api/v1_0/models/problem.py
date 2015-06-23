@@ -1,11 +1,15 @@
 from sqlalchemy import Integer, String, Text, Column, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geography
+from api.v1_0.models import Base, SEVERITY_TYPES, STATUSES
+
+import wtforms_json
+from wtforms_alchemy import ModelForm
 from wtforms import FloatField
 from wtforms.validators import NumberRange
-from wtforms_alchemy import ModelForm
-from api.v1_0.models import Base, enum_severity_type, enum_status
-from api.v1_0.models import Base, SEVERITY_TYPES, STATUSES
+
+
+wtforms_json.init()
 
 
 class Problem(Base):
