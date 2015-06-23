@@ -25,10 +25,11 @@ query = select(
     ]
 )
 
-j = ProblemsActivity.__table__  # Initial table to join.
-table_list = [Problem.__table__, VotesActivity.__table__, User.__table__]
+j = Problem.__table__  # Initial table to join.
+table_list = [VotesActivity.__table__,ProblemsActivity.__table__, User.__table__]
 for table in table_list:
     j = j.outerjoin(table)
+
 query = query.select_from(j)
 query = query.group_by(
     problems_t.id,
@@ -37,11 +38,7 @@ query = query.group_by(
     user_t.first_name,
     user_t.last_name,
 )
-
-
 detailed_problem_view = view("detailed_problem", metadata, query)
-
-
 
 # the ORM would appreciate this
 assert detailed_problem_view.primary_key == [detailed_problem_view.c.id]
