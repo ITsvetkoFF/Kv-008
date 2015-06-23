@@ -2,7 +2,7 @@ import tornado.escape
 import wtforms_json
 
 from api.v1_0.models.user import User
-from api.v1_0.forms.user_valid import UserLoginForm, UserRegisterForm
+from api.v1_0.forms.user import UserLoginForm, UserRegisterForm
 
 
 def _store_new_user(handler, new_user):
@@ -10,7 +10,7 @@ def _store_new_user(handler, new_user):
         handler.sess.add(new_user)
         handler.sess.commit()
         return new_user.id
-        
+
 
 def store_fb_new_user(handler, user_profile):
     new_user = User(

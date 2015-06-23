@@ -17,9 +17,9 @@ from api.v1_0.models import (
     ProblemsActivity,
     Photo
 )
-from api.v1_0.forms.validation_json import ProblemForm
+from api.v1_0.forms.problem import ProblemForm
 from api.v1_0.bl.decs import check_if_exists
-from api.v1_0.bl.get_datetime import get_datetime
+from api.v1_0.bl.utils import get_datetime
 from api.v1_0.handlers.photos import PHOTOS_ROOT
 
 # you can add more image types if necessary
@@ -28,10 +28,11 @@ PHOTO_TYPES = ('png', 'gif', 'jpeg', 'jpg')
 
 class ProblemsHandler(BaseHandler):
     def get(self, problem_id=None):
-        """Get a list of problems from the database. If problem_id is
-        not None, get the problem identified by problem_id and write it to
-        the client."""
+        """Returns the data for all the problems in the database.
 
+        If problem id is specified **/api/v1/problems/3**, returns the
+        data for the specified problem.
+        """
         if problem_id != None:
             problem = self.sess.query(DetailedProblem).get(int(problem_id))
             if problem != None:
@@ -49,7 +50,7 @@ class ProblemsHandler(BaseHandler):
             self.send_error(404, message='Problem not found for the given id.')
 
     def post(self, problem_id):
-        """Store a new problem to the database."""
+        """Creates a new problem and stores it into the database."""
         if self.get_action_modifier() != 'NONE':
             try:
                 form = ProblemForm.from_json(self.request.arguments,
@@ -130,7 +131,7 @@ class ProblemsHandler(BaseHandler):
             self.send_error(400, message=message)
 
     def delete(self, problem_id):
-        """Delete a problem from the database by given problem id."""
+        """Deletes the specified problem."""
         modifier = self.get_action_modifier()
         user_id = self.sess.query(ProblemsActivity.user_id). \
             filter_by(problem_id=problem_id, activity_type='ADDED').first()
@@ -157,6 +158,7 @@ class ProblemsHandler(BaseHandler):
 class ProblemVoteHandler(BaseHandler):
     @check_if_exists(Problem)
     def post(self, problem_id):
+        """Creates a vote record for the specified problem."""
         new_vote = VotesActivity(
             problem_id=int(problem_id),
             user_id=self.current_user,
@@ -170,20 +172,26 @@ class ProblemVoteHandler(BaseHandler):
 class ProblemPhotosHandler(BaseHandler):
     @check_if_exists(Problem)
     def get(self, problem_id):
+        """Returns all the photos data for the specified problem."""
         photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
         response_data = [dict(
-                photo_id=photo.id,
-                name=photo.name,
-                datetime=str(photo.datetime),
-                comment=photo.comment,
-                problem_id=photo.problem_id,
-                user_id=photo.user_id
-            ) for photo in photos]
+            photo_id=photo.id,
+            name=photo.name,
+            datetime=str(photo.datetime),
+            comment=photo.comment,
+            problem_id=photo.problem_id,
+            user_id=photo.user_id
+        ) for photo in photos]
 
         self.write(json.dumps(response_data))
 
     @check_if_exists(Problem)
     def post(self, problem_id):
+        """Creates a new photo for the specified problem and stores it.
+
+        You have to name your file input as ``photo_files`` and comment
+        input as ``comment``.
+        """
         while self.request.files['photo_files']:
             photo_file = self.request.files['photo_files'].pop()
             # rename files and append extensions
