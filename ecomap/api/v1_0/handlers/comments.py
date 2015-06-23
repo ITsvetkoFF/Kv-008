@@ -1,6 +1,4 @@
 from datetime import datetime
-import json
-
 from api.v1_0.models.user import User
 from api.v1_0.models.comment import Comment
 from api.v1_0.handlers.base import BaseHandler

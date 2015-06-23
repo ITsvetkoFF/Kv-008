@@ -1,6 +1,5 @@
 import json
 from sqlalchemy import func
-
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models.detailed_problem import DetailedProblem
 

@@ -2,9 +2,10 @@
 import os
 from tornado.web import URLSpec, StaticFileHandler
 
-from api.v1_0.handlers.pages import PagesHandler
 from api.v1_0.handlers.photos import PhotoHandler
 from api.v1_0.handlers.users import UserAPIHandler
+import api.v1_0.handlers.administration as admin
+from api.v1_0.handlers.pages import PagesHandler, PagesListHandler
 from api.v1_0.handlers.allproblems import AllProblemsHandler
 from api.v1_0.handlers.administration import ResourcesHandler, RolesHandler
 from api.v1_0.handlers.auth import (

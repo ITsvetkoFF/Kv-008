@@ -1,4 +1,5 @@
 from inspect import isclass
+from datetime import datetime
 
 
 def get_dict_from_orm(object_model):
@@ -24,3 +25,12 @@ def update_model_from_dict(model, model_dict):
         setattr(model, attr, model_dict[attr])
 
     return model
+
+def get_dict_problem_data(problem):
+    problem_data = dict()
+    for c in problem.__table__.columns:
+        if isinstance(getattr(problem, c.name), datetime):
+            problem_data[c.name] = str(getattr(problem, c.name))
+        else:
+            problem_data[c.name] = getattr(problem, c.name)
+    return problem_data

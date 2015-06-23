@@ -20,14 +20,13 @@ query = select(
         problems_t.problem_type_id,
         problems_t.region_id,
         problems_activity_t.datetime,
-        func.count(votes_activity_t.id).label('votes_numbers'),
-        # there is no space between name and last name
+        func.count(votes_activity_t.id).label('number_of_votes'),
         (user_t.first_name + user_t.last_name).label('name')
     ]
 )
 
-j = ProblemsActivity.__table__  # Initial table to join.
-table_list = [Problem.__table__, VotesActivity.__table__, User.__table__]
+j = Problem.__table__  # Initial table to join.
+table_list = [VotesActivity.__table__,ProblemsActivity.__table__, User.__table__]
 for table in table_list:
     j = j.outerjoin(table)
 query = query.select_from(j)
@@ -38,11 +37,7 @@ query = query.group_by(
     user_t.first_name,
     user_t.last_name,
 )
-
-
 detailed_problem_view = view("detailed_problem", metadata, query)
-
-
 
 # the ORM would appreciate this
 assert detailed_problem_view.primary_key == [detailed_problem_view.c.id]
