@@ -7,9 +7,9 @@ import json
 from os.path import join
 from tornado import escape
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.bl.response_helpers import create_location
+from api.v1_0.bl.utils import create_location
 from api.v1_0.bl.decorators import permission_control, validation_json
-from api.v1_0.bl.utils import get_dict_problem_data
+from api.v1_0.bl.modeldict import get_dict_problem_data
 
 from api.v1_0.models import (
     VotesActivity,

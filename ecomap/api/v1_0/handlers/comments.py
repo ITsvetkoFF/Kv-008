@@ -2,7 +2,7 @@ from datetime import datetime
 from api.v1_0.models.user import User
 from api.v1_0.models.comment import Comment
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.bl.response_helpers import iso8601_conv_with_empty_check, conv_array_to_dict
+from api.v1_0.bl.utils import iso_datetime, conv_array_to_dict
 
 
 class CommentsHandler(BaseHandler):
@@ -15,8 +15,8 @@ class CommentsHandler(BaseHandler):
             'content': comment_query.content,
             'problem_id': comment_query.problem_id,
             'user_id': comment_query.user_id,
-            'created_date': iso8601_conv_with_empty_check(comment_query.created_date),
-            'modified_date': iso8601_conv_with_empty_check(comment_query.modified_date),
+            'created_date': iso_datetime(comment_query.created_date),
+            'modified_date': iso_datetime(comment_query.modified_date),
             'modified_user_id': comment_query.modified_user_id
         }
         self.write(response)
@@ -63,8 +63,8 @@ class ProblemCommentsHandler(BaseHandler):
                 'id': comment_query.id,
                 'content': comment_query.content,
                 'created_by': user_query.first_name,
-                'created_date': iso8601_conv_with_empty_check(comment_query.created_date),
-                'modified_date': iso8601_conv_with_empty_check(comment_query.modified_date),
+                'created_date': iso_datetime(comment_query.created_date),
+                'modified_date': iso_datetime(comment_query.modified_date),
                 'modified_by': first_name,
             }
             json_response.append(response)
