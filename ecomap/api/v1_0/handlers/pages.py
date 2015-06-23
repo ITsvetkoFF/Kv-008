@@ -16,8 +16,9 @@ class PagesHandler(BaseHandler):
     @tornado.web.authenticated
     def put(self, page_id=None, *args, **kwargs):
         model = self.sess.query(Page).filter_by(id=page_id).first()
-        model = update_model_from_dict(model=model,
-                                       model_dict=self.request.arguments)
+        model = update_model_from_dict(
+            model=model,
+            model_dict=self.request.arguments)
         self.sess.update(model)
         self.sess.commit()
 
@@ -48,8 +49,9 @@ class PagesListHandler(BaseHandler):
 
     @tornado.web.authenticated
     def post(self, page_id=None, *args, **kwargs):
-        self.sess.add(get_object_from_dict(model=Page,
-                                           income_dict=self.request.arguments))
+        self.sess.add(get_object_from_dict(
+            model=Page,
+            income_dict=self.request.arguments))
         self.sess.commit()
         return self.get(page_id=page_id, *args, **kwargs)
 
