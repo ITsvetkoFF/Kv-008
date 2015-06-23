@@ -50,7 +50,7 @@ def build_docs():
     Builds Sphinx Docs html version, docs/build/html
     """
     fab_run(
-        'sphinx-build -a %s/docs/source %s/docs/build/html' % (
+        'sphinx-build -E -b html -a %s/docs/source %s/docs/build/html' % (
             PROJECT_ROOT,
             PROJECT_ROOT
         )

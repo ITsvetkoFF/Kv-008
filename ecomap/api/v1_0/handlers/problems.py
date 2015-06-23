@@ -3,12 +3,13 @@ import random
 import string
 import imghdr
 import json
+
 from os.path import join
 from tornado import escape
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.bl.response_helpers import create_location
 from api.v1_0.bl.decorators import permission_control, validation_json
-from api.v1_0.bl.models_dict_logic import get_dict_problem_data
+from api.v1_0.bl.utils import get_dict_problem_data
 
 from api.v1_0.models import (
     VotesActivity,
@@ -21,7 +22,7 @@ from api.v1_0.forms.problem import (
     ProblemForm
 )
 from api.v1_0.bl.decs import check_if_exists
-from api.v1_0.bl.get_datetime import get_datetime
+from api.v1_0.bl.utils import get_datetime
 from api.v1_0.handlers.photos import PHOTOS_ROOT
 
 # you can add more image types if necessary
@@ -31,10 +32,11 @@ PHOTO_TYPES = ('png', 'gif', 'jpeg', 'jpg')
 class ProblemsHandler(BaseHandler):
     @permission_control
     def get(self, problem_id=None):
-        """Get a list of problems from the database. If problem_id is
-        not None, get the problem identified by problem_id and write it to
-        the client."""
-
+        """Returns the data for all the problems in the database.
+        
+        If problem id is specified **/api/v1/problems/3**, returns the
+        data for the specified problem.
+        """
         problem = self.sess.query(DetailedProblem).get(int(problem_id))
         self.write(get_dict_problem_data(problem))
 
@@ -114,6 +116,7 @@ class ProblemsHandler(BaseHandler):
 class ProblemVoteHandler(BaseHandler):
     @check_if_exists(Problem)
     def post(self, problem_id):
+        """Creates a vote record for the specified problem."""
         new_vote = VotesActivity(
             problem_id=int(problem_id),
             user_id=self.current_user,
@@ -127,20 +130,26 @@ class ProblemVoteHandler(BaseHandler):
 class ProblemPhotosHandler(BaseHandler):
     @check_if_exists(Problem)
     def get(self, problem_id):
+        """Returns all the photos data for the specified problem."""
         photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
         response_data = [dict(
-                photo_id=photo.id,
-                name=photo.name,
-                datetime=str(photo.datetime),
-                comment=photo.comment,
-                problem_id=photo.problem_id,
-                user_id=photo.user_id
-            ) for photo in photos]
+            photo_id=photo.id,
+            name=photo.name,
+            datetime=str(photo.datetime),
+            comment=photo.comment,
+            problem_id=photo.problem_id,
+            user_id=photo.user_id
+        ) for photo in photos]
 
         self.write(json.dumps(response_data))
 
     @check_if_exists(Problem)
     def post(self, problem_id):
+        """Creates a new photo for the specified problem and stores it.
+
+        You have to name your file input as ``photo_files`` and comment
+        input as ``comment``.
+        """
         while self.request.files['photo_files']:
             photo_file = self.request.files['photo_files'].pop()
             # rename files and append extensions

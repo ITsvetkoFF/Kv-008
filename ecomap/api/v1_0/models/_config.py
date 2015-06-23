@@ -2,13 +2,13 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 
 
-Base = declarative_base()
-
 STATUSES = ('SOLVED', 'UNSOLVED')
 ACTIVITY_TYPES = ('ADDED', 'REMOVED', 'UPDATED')
 SEVERITY_TYPES = ('1', '2', '3', '4', '5')
 MODIFIERS = ('ANY', 'OWN', 'NONE')
 ACTIONS = ('GET', 'PUT', 'POST', 'DELETE')
+
+Base = declarative_base()
 
 role_permissions = Table(
     'role_permissions', Base.metadata,
