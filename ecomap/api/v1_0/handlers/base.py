@@ -51,7 +51,3 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "Content-type")
         self.set_status(200)
 
-    def create_location(self):
-        x = self.request.arguments["Latitude"]
-        y = self.request.arguments["Longtitude"]
-        return "POINT({0} {1})".format(x, y)

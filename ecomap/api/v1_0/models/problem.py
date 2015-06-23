@@ -3,15 +3,6 @@ from sqlalchemy.orm import relationship
 from geoalchemy2 import Geography
 from api.v1_0.models import Base, SEVERITY_TYPES, STATUSES
 
-import wtforms_json
-from wtforms_alchemy import ModelForm
-from wtforms import FloatField
-from wtforms.validators import NumberRange
-
-
-wtforms_json.init()
-
-
 class Problem(Base):
     __tablename__ = 'problems'
 
@@ -28,12 +19,3 @@ class Problem(Base):
     problem_type = relationship('ProblemType')
     region = relationship('Region')
     region = relationship('Region')
-
-
-class ProblemForm(ModelForm):
-        class Meta:
-            model = Problem
-            exclude = ['location']
-            include = ['problem_type_id','region_id']
-        Latitude = FloatField(validators=[NumberRange()])
-        Longtitude = FloatField(validators=[NumberRange()])

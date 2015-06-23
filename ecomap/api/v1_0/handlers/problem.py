@@ -3,7 +3,6 @@ import random
 import string
 import imghdr
 import json
-import datetime
 from os.path import join
 from tornado import escape
 from api.v1_0.handlers.base import BaseHandler
@@ -18,7 +17,7 @@ from api.v1_0.models import (
     ProblemsActivity,
     Photo
 )
-from api.v1_0.models.problem import (
+from api.v1_0.forms.problem import (
     ProblemForm
 )
 from api.v1_0.bl.decs import check_if_exists
@@ -60,8 +59,7 @@ class ProblemsHandler(BaseHandler):
         self.sess.commit()
         activity = ProblemsActivity(
             problem_id=problem.id,
-            data=escape.json_decode(
-                self.request.body),
+            data=escape.json_decode(self.request.body),
             user_id=self.get_current_user(),
             datetime=get_datetime(),
             activity_type="ADDED")
