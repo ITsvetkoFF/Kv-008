@@ -21,7 +21,8 @@ query = select(
         problems_t.region_id,
         problems_activity_t.datetime,
         func.count(votes_activity_t.id).label('number_of_votes'),
-        (user_t.first_name + user_t.last_name).label('name')
+        user_t.first_name,
+        user_t.last_name
     ]
 )
 

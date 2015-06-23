@@ -6,7 +6,7 @@ from api.v1_0.models import Page
 from api.v1_0.bl.models_dict_logic import get_dict_from_orm, update_model_from_dict, get_object_from_dict
 
 
-class PagesHandler(BaseHandler):
+class PageHandler(BaseHandler):
 
     @tornado.web.authenticated
     def get(self, page_id=None, *args, **kwargs):
@@ -33,7 +33,7 @@ class PagesHandler(BaseHandler):
         self.sess.commit()
 
 
-class PagesListHandler(BaseHandler):
+class PagesHandler(BaseHandler):
 
     @tornado.web.authenticated
     def get(self, page_id=None, *args, **kwargs):
