@@ -21,3 +21,4 @@ class VotesActivity(Base):
 
     problem = relationship('Problem')
     user = relationship('User')
+

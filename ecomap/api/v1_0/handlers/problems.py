@@ -4,11 +4,12 @@ import string
 import imghdr
 import json
 
-import datetime
 from os.path import join
 from tornado import escape
-from wtforms_json import InvalidData
 from api.v1_0.handlers.base import BaseHandler
+from api.v1_0.bl.utils import create_location
+from api.v1_0.bl.decorators import permission_control, validation_json
+from api.v1_0.bl.modeldict import get_dict_problem_data
 
 from api.v1_0.models import (
     VotesActivity,
@@ -17,7 +18,9 @@ from api.v1_0.models import (
     ProblemsActivity,
     Photo
 )
-from api.v1_0.forms.problem import ProblemForm
+from api.v1_0.forms.problem import (
+    ProblemForm
+)
 from api.v1_0.bl.decs import check_if_exists
 from api.v1_0.bl.utils import get_datetime
 from api.v1_0.handlers.photos import PHOTOS_ROOT
@@ -27,132 +30,87 @@ PHOTO_TYPES = ('png', 'gif', 'jpeg', 'jpg')
 
 
 class ProblemsHandler(BaseHandler):
+    @permission_control
     def get(self, problem_id=None):
         """Returns the data for all the problems in the database.
-
+        
         If problem id is specified **/api/v1/problems/3**, returns the
         data for the specified problem.
         """
-        if problem_id != None:
-            problem = self.sess.query(DetailedProblem).get(int(problem_id))
-            if problem != None:
-                problem_data = dict()
-                for c in problem.__table__.columns:
-                    if isinstance(getattr(problem, c.name), datetime.datetime):
-                        problem_data[c.name] = str(getattr(problem, c.name))
-                    else:
-                        problem_data[c.name] = getattr(problem, c.name)
-                self.write(problem_data)
-            else:
-                self.send_error(404,
-                                message='Problem not found for the given id.')
-        else:
-            self.send_error(404, message='Problem not found for the given id.')
+        problem = self.sess.query(DetailedProblem).get(int(problem_id))
+        self.write(get_dict_problem_data(problem))
 
+
+    @permission_control
+    @validation_json(ProblemForm)
     def post(self, problem_id):
-        """Creates a new problem and stores it into the database."""
-        if self.get_action_modifier() != 'NONE':
-            try:
-                form = ProblemForm.from_json(self.request.arguments,
-                                             skip_unknown_keys=False)
-            except InvalidData as e:
-                message = e.args
-                self.send_error(400, message=message)
-            if form.validate():
+        """Store a new problem to the database."""
 
-                problem = Problem(
-                    title=self.request.arguments['title'],
-                    # you can't use brackets because these fields are nullable
-                    content=self.request.arguments.get('content'),
-                    proposal=self.request.arguments.get('proposal'),
-                    severity=self.request.arguments.get('severity'),
-                    status=self.request.arguments.get('status'),
-                    location=self.create_location(),
-                    problem_type_id=self.request.arguments.get(
-                        'problem_type_id'),
-                    region_id=self.request.arguments.get('region_id')
-                )
-                self.sess.add(problem)
-                self.sess.commit()
-                activity = ProblemsActivity(
-                    problem_id=problem.id,
-                    data=escape.json_decode(self.request.body),
-                    user_id=self.get_current_user(),
-                    datetime=get_datetime(),
-                    activity_type="ADDED")
-                self.sess.add(activity)
-                self.sess.commit()
-            else:
-                message = form.errors
-                self.send_error(400, message=message)
-        else:
-            message = 'You have not permission to adde problem_id.'
-            self.send_error(400, message=message)
+        x = self.request.arguments.pop('Latitude')
+        y = self.request.arguments.pop('Longtitude')
+        problem = Problem(
+            title=self.request.arguments['title'],
+            content=self.request.arguments['content'],
+            proposal=self.request.arguments['proposal'],
+            severity=self.request.arguments['severity'],
+            status=self.request.arguments['status'],
+            location=create_location(x,y),
+            problem_type_id=self.request.arguments['problem_type_id'],
+            region_id=self.request.arguments['region_id'])
+        self.sess.add(problem)
+        self.sess.commit()
+        activity = ProblemsActivity(
+            problem_id=problem.id,
+            data=escape.json_decode(self.request.body),
+            user_id=self.get_current_user(),
+            datetime=get_datetime(),
+            activity_type="ADDED")
+        self.sess.add(activity)
+        self.sess.commit()
 
+
+    @permission_control
+    @validation_json(ProblemForm)
     def put(self, problem_id):
-        modifier = self.get_action_modifier()
-        user_id = self.sess.query(ProblemsActivity.user_id). \
-            filter_by(problem_id=problem_id, activity_type='ADDED').first()
 
-        if modifier == 'ANY' or (
-                        modifier == 'OWN' and user_id[
-                    0] == self.get_current_user()):
-            try:
-                form = ProblemForm.from_json(self.request.arguments,
-                                             skip_unknown_keys=False)
-            except InvalidData as e:
-                message = e.message
-                self.send_error(400, message=message)
+        x = self.request.arguments.pop('Latitude')
+        y = self.request.arguments.pop('Longtitude')
+        self.request.arguments['location'] = create_location(x,y)
+        self.request.arguments['id'] = problem_id
+        self.sess.query(Problem).filter_by(id=int(problem_id)). \
+            update(self.request.arguments)
 
-            if form.validate():
-                self.request.arguments['location'] = self.create_location()
-                self.request.arguments.pop('Latitude')
-                self.request.arguments.pop('Longtitude')
-                self.request.arguments['id'] = problem_id
-                self.sess.query(Problem).filter_by(id=int(problem_id)). \
-                    update(self.request.arguments)
+        self.sess.commit()
 
-                self.sess.commit()
+        activity = ProblemsActivity(
+            problem_id=int(problem_id),
+            data=escape.json_decode(
+                self.request.body),
+            user_id=self.get_current_user(),
+            datetime=get_datetime(),
+            activity_type="UPDATED"
+        )
+        self.sess.add(activity)
+        self.sess.commit()
 
-                activity = ProblemsActivity(
-                    problem_id=int(problem_id),
-                    data=escape.json_decode(self.request.body),
-                    user_id=self.get_current_user(),
-                    datetime=get_datetime(),
-                    activity_type="UPDATED"
-                )
-                self.sess.add(activity)
-                self.sess.commit()
-            else:
-                message = form.errors
-                self.send_error(400, message=message)
-        else:
-            message = 'You have not permission to update.'
-            self.send_error(400, message=message)
 
+    @permission_control
     def delete(self, problem_id):
-        """Deletes the specified problem."""
-        modifier = self.get_action_modifier()
-        user_id = self.sess.query(ProblemsActivity.user_id). \
-            filter_by(problem_id=problem_id, activity_type='ADDED').first()
+        """Delete a problem from the database by given problem id."""
 
-        if modifier == 'ANY' or (
-                        modifier == 'OWN' and user_id[
-                    0] == self.get_current_user()):
+        activity = ProblemsActivity(
+            problem_id=int(problem_id),
+            data=None,
+            user_id=self.get_current_user(),
+            datetime=get_datetime(),
+            activity_type='REMOVED')
+        self.sess.add(activity)
+        self.sess.commit()
 
-            activity = ProblemsActivity(problem_id=int(problem_id),
-                                        data=None,
-                                        user_id=self.get_current_user(),
-                                        datetime=get_datetime(),
-                                        activity_type='REMOVED')
-            self.sess.add(activity)
-            self.sess.commit()
+        self.sess.query(Problem).filter_by(id=int(problem_id)).delete()
+        self.sess.commit()
 
-            self.sess.query(Problem).filter_by(id=int(problem_id)).delete()
-            self.sess.commit()
-        else:
-            message = 'You have not permission to remove.'
-            self.send_error(400, message=message)
+
 
 
 class ProblemVoteHandler(BaseHandler):

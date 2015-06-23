@@ -2,9 +2,9 @@
 import os
 from tornado.web import URLSpec, StaticFileHandler
 
-from api.v1_0.handlers.pages import PagesHandler
 from api.v1_0.handlers.photos import PhotoHandler
 from api.v1_0.handlers.users import UsersHandler
+from api.v1_0.handlers.pages import PageHandler, PagesHandler
 from api.v1_0.handlers.allproblems import AllProblemsHandler
 from api.v1_0.handlers.administration import ResourcesHandler, RolesHandler
 from api.v1_0.handlers.auth import (
@@ -46,7 +46,7 @@ APIUrls = [
     URLSpec(r'/api/v1/admin/roles/(\d+)/resources', ResourcesHandler),
 
     URLSpec(r'/api/v1/pages', PagesHandler),
-    URLSpec(r'/api/v1/pages/(\d+)', PagesHandler),
+    URLSpec(r'/api/v1/pages/(\d+)', PageHandler),
 
     URLSpec(r'/api/v1/comments/(\d+)', CommentsHandler),
 

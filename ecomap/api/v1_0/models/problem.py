@@ -1,9 +1,7 @@
 from sqlalchemy import Integer, String, Text, Column, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geography
-
 from api.v1_0.models import Base, SEVERITY_TYPES, STATUSES
-
 
 class Problem(Base):
     __tablename__ = 'problems'
@@ -19,4 +17,5 @@ class Problem(Base):
     region_id = Column(Integer, ForeignKey('regions.id'))
 
     problem_type = relationship('ProblemType')
+    region = relationship('Region')
     region = relationship('Region')
