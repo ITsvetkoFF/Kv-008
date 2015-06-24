@@ -3,6 +3,7 @@ import tornado.auth
 import tornado.escape
 
 from api.v1_0.handlers.base import BaseHandler
+from api.v1_0.forms.user import UserRegisterForm, UserLoginForm
 from api.v1_0.bl.auth import *
 
 

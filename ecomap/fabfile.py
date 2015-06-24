@@ -10,11 +10,11 @@ __all__ = [
     'create_database',
     'import_dump',
     'drop_database',
-    'populate_db'
+    'populate_db',
+    'runtests'
 ]
 
 import os
-
 from fabric.api import local as fab_run
 
 from api.v1_0.models import Base
@@ -32,10 +32,13 @@ def clean_pyc():
 
 
 def test():
-    """
-    Runs tests with nose
-    """
+    """ Runs tests with nose. """
     fab_run('nosetests -vs')
+
+
+def runtests():
+    """Runs runtests.py with buffer and failfast options."""
+    fab_run('python -m api.v1_0.tests.runtests --buffer --failfast')
 
 
 def run():

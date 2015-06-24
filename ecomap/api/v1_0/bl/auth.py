@@ -1,8 +1,4 @@
-import tornado.escape
-import wtforms_json
-
 from api.v1_0.models.user import User
-from api.v1_0.forms.user import UserLoginForm, UserRegisterForm
 
 
 def _store_new_user(handler, new_user):

@@ -24,33 +24,34 @@ from api.v1_0.handlers.comments import CommentsHandler, ProblemCommentsHandler
 from docs import DOCS_ROOT
 from api.v1_0.handlers.photos import PHOTOS_ROOT
 
+
 # a non-capturing group: (?:...)
 APIUrls = [
     URLSpec(r'/static/photos/(.*)', StaticFileHandler, {'path': PHOTOS_ROOT}),
 
-    URLSpec(r'/api/v1/register', RegisterHandler),
-    URLSpec(r'/api/v1/login', LoginHandler),
-    URLSpec(r'/api/v1/logout', LogoutHandler),
-    URLSpec(r'/api/v1/auth/facebook', FacebookAuthHandler, name='fb_auth'),
-    URLSpec(r'/api/v1/auth/google', GoogleAuthHandler, name='google_auth'),
+    URLSpec(r'/api/register', RegisterHandler),
+    URLSpec(r'/api/login', LoginHandler),
+    URLSpec(r'/api/logout', LogoutHandler),
+    URLSpec(r'/api/auth/facebook', FacebookAuthHandler, name='fb_auth'),
+    URLSpec(r'/api/auth/google', GoogleAuthHandler, name='google_auth'),
 
-    URLSpec(r'/api/v1/users(?:/(\d+))?', UsersHandler),
+    URLSpec(r'/api/users(?:/(\d+))?', UsersHandler),
 
-    URLSpec(r'/api/v1/allproblems', AllProblemsHandler),
-    URLSpec(r'/api/v1/problems(?:/(\d+))?', ProblemsHandler),
-    URLSpec(r'/api/v1/problems/(\d+)/vote', ProblemVoteHandler),
-    URLSpec(r'/api/v1/problems/(\d+)/photos', ProblemPhotosHandler),
-    URLSpec(r'/api/v1/problems/(\d+)/comments', ProblemCommentsHandler),
+    URLSpec(r'/api/allproblems', AllProblemsHandler),
+    URLSpec(r'/api/problems(?:/(\d+))?', ProblemsHandler),
+    URLSpec(r'/api/problems/(\d+)/vote', ProblemVoteHandler),
+    URLSpec(r'/api/problems/(\d+)/photos', ProblemPhotosHandler),
+    URLSpec(r'/api/problems/(\d+)/comments', ProblemCommentsHandler),
 
-    URLSpec(r'/api/v1/admin/roles', RolesHandler),
-    URLSpec(r'/api/v1/admin/roles/(\d+)/resources', ResourcesHandler),
+    URLSpec(r'/api/admin/roles', RolesHandler),
+    URLSpec(r'/api/admin/roles/(\d+)/resources', ResourcesHandler),
 
-    URLSpec(r'/api/v1/pages', PagesHandler),
-    URLSpec(r'/api/v1/pages/(\d+)', PagesHandler),
+    URLSpec(r'/api/pages', PagesHandler),
+    URLSpec(r'/api/pages/(\d+)', PagesHandler),
 
-    URLSpec(r'/api/v1/comments/(\d+)', CommentsHandler),
+    URLSpec(r'/api/comments/(\d+)', CommentsHandler),
 
-    URLSpec(r'/api/v1/photos/(\d+)', PhotoHandler),
+    URLSpec(r'/api/photos/(\d+)', PhotoHandler),
 
     URLSpec(r'/api/docs/(.*)', StaticFileHandler,
             {'path': os.path.join(DOCS_ROOT, 'build', 'html')})
