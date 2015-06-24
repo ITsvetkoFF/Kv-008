@@ -1,15 +1,17 @@
-import os
 import random
 import string
 import imghdr
 import json
-
 import datetime
-from os.path import join
-from tornado import escape
-from wtforms_json import InvalidData
-from api.v1_0.handlers.base import BaseHandler
 
+from tornado import escape
+
+import os
+from os.path import join
+
+from wtforms_json import InvalidData
+
+from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models import (
     VotesActivity,
     DetailedProblem,
@@ -21,6 +23,7 @@ from api.v1_0.forms.problem import ProblemForm
 from api.v1_0.bl.decs import check_if_exists
 from api.v1_0.bl.utils import get_datetime
 from api.v1_0.handlers.photos import PHOTOS_ROOT
+
 
 # you can add more image types if necessary
 PHOTO_TYPES = ('png', 'gif', 'jpeg', 'jpg')
@@ -192,8 +195,8 @@ class ProblemPhotosHandler(BaseHandler):
         You have to name your file input as ``photo_files`` and comment
         input as ``comment``.
         """
-        while self.request.files['photo_files']:
-            photo_file = self.request.files['photo_files'].pop()
+        while self.request.files['photos']:
+            photo_file = self.request.files['photos'].pop()
             # rename files and append extensions
             original_filename = photo_file.filename
 
@@ -222,7 +225,7 @@ class ProblemPhotosHandler(BaseHandler):
                 name=final_filename,
                 datetime=get_datetime(),
                 user_id=self.current_user,
-                comment=self.request.body_arguments['comment'][0].decode(
+                comment=self.request.body_arguments['comments'].pop().decode(
                     'utf-8')
             )
             self.sess.add(photo)

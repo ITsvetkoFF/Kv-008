@@ -1,4 +1,5 @@
 import tornado.testing
+
 import app
 
 
@@ -6,19 +7,33 @@ class BaseHTTPTest(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):
         return app.application
 
-# from tornado mailing list:
+# * AsyncHTTPTestCase
+#     - get_app -- returns tornado.web.Application or other HTTPServer callback
+#     - fetch -- synchronously fetch a url
+#     - get_http_port -- returns the port used by the server
+#     - get_url -- returns an absolute url for the given path on the test
+# server
 #
-# AsyncHTTPTestCase is a subclass of AsyncTestCase, so you have the same IOLoop
-# setup as AsyncTestCase. Use AsyncHTTPTestCase when you need HTTP (and can
-# supply an override of get_app()); use AsyncTestCase when all you need is a
-# basic IOLoop setup.
 #
-# So we definitely want to use AsyncHTTPTestCase as a superclass to test API.
+# Python unit testing framework PyUnit
+# important concepts:
+#   test fixture -- preparation and cleanup actions (working environment for
+#       the testing code.
+#   test case -- the smallest testable units (set of inputs --> response)
+#   test suite -- a collection of test cases, test suites or both
+#   test runner -- a component that executes tests and provides the outcome
+#       to the user
 #
-# You can also use @gen_test instead of AsyncHTTPTestCase.fetch to get test
-# code that looks like a coroutine (with yield statements), although this can
-# be a little awkward since there's not currently a helper function like
-# self.fetch() (the equivalent is something like
-# `yield self.http_client.fetch(self.get_url(path))`. It won't work to mix
-# the two styles, so if you use gen_test you cannot use anything else that
-# calls fetch, stop, or wait.
+# * TestCase
+#       This class implements the interface needed by the testrunner to allow
+#       it to drive the test, and methods that the test code can use to check
+#       for and report various kinds of failure.
+#   - setUp -- preparation
+#   - tearDown -- cleanup
+#   - runTest -- perform specific testing code
+#
+#   - assertEqual -- to check for an expected result
+#   - assertFalse -- to verify a condition
+#   - assertRaises -- to verify that a specific exception gets raised
+#
+# * TestSuite -- aggregator of tests and test suites
