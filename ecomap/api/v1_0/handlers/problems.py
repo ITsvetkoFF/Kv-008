@@ -8,7 +8,11 @@ from os.path import join
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.bl.utils import create_location
 from api.v1_0.bl.decorators import permission_control, validation_json
-from api.v1_0.bl.modeldict import get_dict_problem_data
+from api.v1_0.bl.modeldict import (
+    get_dict_problem_data,
+    generate_data,
+    revision_problems
+)
 
 from sqlalchemy import func
 
@@ -82,41 +86,27 @@ class ProblemHandler(BaseHandler):
 class ProblemsHandler(BaseHandler):
 
     def get(self):
-
-        if self.get_query_argument('rev', default=None):
-            pass
-        else:
-            all_problems = []
-            max = self.sess.query(func.max(DetailedProblem.id).label('id')). \
-                first()
-
-            for problem, point_json in self.sess.query(
-                    DetailedProblem, func.ST_AsGeoJSON(DetailedProblem.location)
-            ):
-                Latitude, Longtitude = json.loads(point_json)['coordinates']
-                all_problems.append(dict(
-                    id=problem.id,
-                    title=problem.title,
-                    status=problem.status,
-                    datetime=str(problem.datetime),
-                    problem_type_id=problem.problem_type_id,
-                    Latitude=Latitude,
-                    Longtitude=Longtitude,
-                    content=problem.content,
-                    severity=problem.severity,
-                    proposal=problem.proposal,
-                    region_id=problem.region_id,
-                    number_of_votes=problem.number_of_votes,
-                    first_name=problem.first_name,
-                    last_name=problem.last_name
-
-                ))
+        current_revision = (self.sess.query(func.max(DetailedProblem.id)). \
+                            first())[0]
+        previous_revision = int(self.get_query_argument('rev', default=0))
+        if previous_revision == 0:
             problems=dict(
-                current_activity_revision=max.id,
-                data=all_problems
+                current_activity_revision=current_revision,
+                data=generate_data(self)
             )
             json_string = json.dumps(problems, ensure_ascii=False)
+            self.write(json_string)
+        elif previous_revision == current_revision:
+            self.write(dict(current_activity_revision=current_revision))
+        elif previous_revision < current_revision:
+            revised_id = revision_problems(self,previous_revision)
 
+            problems=dict(
+                current_activity_revision=current_revision,
+                previous_activity_revision=previous_revision,
+                data=generate_data(self,revised_id)
+            )
+            json_string = json.dumps(problems, ensure_ascii=False)
             self.write(json_string)
 
 
