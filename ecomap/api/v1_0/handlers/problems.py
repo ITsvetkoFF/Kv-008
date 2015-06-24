@@ -5,14 +5,14 @@ import imghdr
 import json
 
 from os.path import join
-from tornado import escape
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.bl.utils import create_location
 from api.v1_0.bl.decorators import permission_control, validation_json
 from api.v1_0.bl.modeldict import get_dict_problem_data
 
+from sqlalchemy import func
+
 from api.v1_0.models import (
-    VotesActivity,
     DetailedProblem,
     Problem,
     ProblemsActivity,
@@ -29,7 +29,7 @@ from api.v1_0.handlers.photos import PHOTOS_ROOT
 PHOTO_TYPES = ('png', 'gif', 'jpeg', 'jpg')
 
 
-class ProblemsHandler(BaseHandler):
+class ProblemHandler(BaseHandler):
     @permission_control
     def get(self, problem_id=None):
         """Returns the data for all the problems in the database.
@@ -40,10 +40,89 @@ class ProblemsHandler(BaseHandler):
         problem = self.sess.query(DetailedProblem).get(int(problem_id))
         self.write(get_dict_problem_data(problem))
 
+    @permission_control
+    @validation_json(ProblemForm)
+    def put(self, problem_id):
+
+        x = self.request.arguments.pop('Latitude')
+        y = self.request.arguments.pop('Longtitude')
+        self.request.arguments['location'] = create_location(x,y)
+        self.request.arguments['id'] = problem_id
+        self.sess.query(Problem).filter_by(id=int(problem_id)). \
+            update(self.request.arguments)
+
+        self.sess.commit()
+
+        activity = ProblemsActivity(
+            problem_id=int(problem_id),
+            user_id=self.get_current_user(),
+            datetime=get_datetime(),
+            activity_type="UPDATED"
+        )
+        self.sess.add(activity)
+        self.sess.commit()
+
+
+    @permission_control
+    def delete(self, problem_id):
+        """Delete a problem from the database by given problem id."""
+
+        activity = ProblemsActivity(
+            problem_id=int(problem_id),
+            user_id=self.get_current_user(),
+            datetime=get_datetime(),
+            activity_type='REMOVED')
+        self.sess.add(activity)
+        self.sess.commit()
+
+        self.sess.query(Problem).filter_by(id=int(problem_id)).delete()
+        self.sess.commit()
+
+
+class ProblemsHandler(BaseHandler):
+
+    def get(self):
+
+        if self.get_query_argument('rev', default=None):
+            pass
+        else:
+            all_problems = []
+            max = self.sess.query(func.max(DetailedProblem.id).label('id')). \
+                first()
+
+            for problem, point_json in self.sess.query(
+                    DetailedProblem, func.ST_AsGeoJSON(DetailedProblem.location)
+            ):
+                Latitude, Longtitude = json.loads(point_json)['coordinates']
+                all_problems.append(dict(
+                    id=problem.id,
+                    title=problem.title,
+                    status=problem.status,
+                    datetime=str(problem.datetime),
+                    problem_type_id=problem.problem_type_id,
+                    Latitude=Latitude,
+                    Longtitude=Longtitude,
+                    content=problem.content,
+                    severity=problem.severity,
+                    proposal=problem.proposal,
+                    region_id=problem.region_id,
+                    number_of_votes=problem.number_of_votes,
+                    first_name=problem.first_name,
+                    last_name=problem.last_name
+
+                ))
+            problems=dict(
+                current_activity_revision=max.id,
+                data=all_problems
+            )
+            json_string = json.dumps(problems, ensure_ascii=False)
+
+            self.write(json_string)
+
 
     @permission_control
     @validation_json(ProblemForm)
-    def post(self, problem_id):
+    def post(self):
         """Store a new problem to the database."""
 
         x = self.request.arguments.pop('Latitude')
@@ -61,53 +140,10 @@ class ProblemsHandler(BaseHandler):
         self.sess.commit()
         activity = ProblemsActivity(
             problem_id=problem.id,
-            data=escape.json_decode(self.request.body),
             user_id=self.get_current_user(),
             datetime=get_datetime(),
             activity_type="ADDED")
         self.sess.add(activity)
-        self.sess.commit()
-
-
-    @permission_control
-    @validation_json(ProblemForm)
-    def put(self, problem_id):
-
-        x = self.request.arguments.pop('Latitude')
-        y = self.request.arguments.pop('Longtitude')
-        self.request.arguments['location'] = create_location(x,y)
-        self.request.arguments['id'] = problem_id
-        self.sess.query(Problem).filter_by(id=int(problem_id)). \
-            update(self.request.arguments)
-
-        self.sess.commit()
-
-        activity = ProblemsActivity(
-            problem_id=int(problem_id),
-            data=escape.json_decode(
-                self.request.body),
-            user_id=self.get_current_user(),
-            datetime=get_datetime(),
-            activity_type="UPDATED"
-        )
-        self.sess.add(activity)
-        self.sess.commit()
-
-
-    @permission_control
-    def delete(self, problem_id):
-        """Delete a problem from the database by given problem id."""
-
-        activity = ProblemsActivity(
-            problem_id=int(problem_id),
-            data=None,
-            user_id=self.get_current_user(),
-            datetime=get_datetime(),
-            activity_type='REMOVED')
-        self.sess.add(activity)
-        self.sess.commit()
-
-        self.sess.query(Problem).filter_by(id=int(problem_id)).delete()
         self.sess.commit()
 
 
@@ -117,10 +153,11 @@ class ProblemVoteHandler(BaseHandler):
     @check_if_exists(Problem)
     def post(self, problem_id):
         """Creates a vote record for the specified problem."""
-        new_vote = VotesActivity(
+        new_vote = ProblemsActivity(
             problem_id=int(problem_id),
             user_id=self.current_user,
-            datetime=get_datetime()
+            datetime=get_datetime(),
+            activity_type='VOTE'
         )
 
         self.sess.add(new_vote)

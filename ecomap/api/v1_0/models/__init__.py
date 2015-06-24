@@ -16,7 +16,6 @@ from .user import User
 from .problem import Problem
 from .photo import Photo
 from .problems_activity import ProblemsActivity
-from .votes_activity import VotesActivity
 from .comment import Comment
 from .resource import Resource
 from .permission import Permission

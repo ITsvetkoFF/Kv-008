@@ -4,7 +4,7 @@ from api.v1_0.models import *
 
 def permission_control(method):
     def wrapper(handler, obj_id):
-        definition_query = {'ProblemsHandler' : handler.sess.query(ProblemsActivity.user_id).filter_by(problem_id=obj_id, activity_type='ADDED').first()}
+        definition_query = {'ProblemHandler' : handler.sess.query(ProblemsActivity.user_id).filter_by(problem_id=obj_id, activity_type='ADDED').first()}
         modifier = handler.get_action_modifier()
         if modifier == 'NONE':
             message = 'You do not have sufficient right'
