@@ -7,7 +7,6 @@ ecomap/.idea
 ### Vagrant template
 .vagrant/
 
-ecomap/project/
 
 ### VirtualEnv template
 # Virtualenv

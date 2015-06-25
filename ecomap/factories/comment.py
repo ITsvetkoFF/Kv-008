@@ -1,5 +1,3 @@
-import datetime
-
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from api.v1_0.bl.utils import get_datetime

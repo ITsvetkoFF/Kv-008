@@ -14,7 +14,6 @@ class ProblemsActivity(Base):
                         ForeignKey('problems.id', ondelete='CASCADE'),
                         nullable=False)
 
-    data = Column(JSON)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     datetime = Column(DateTime, nullable=False)
 

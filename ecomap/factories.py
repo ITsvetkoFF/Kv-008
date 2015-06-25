@@ -5,7 +5,6 @@ from api.v1_0.urls import APIUrls
 from factories.problem import (
     ProblemActivityFactory,
     ProblemFactory,
-    VoteActivityFactory,
     ProblemTypeFactory
 )
 from factories.comment import CommentFactory
@@ -57,8 +56,10 @@ for i in xrange(int(sys.argv[1])):
     user.roles.append(role_user)
 
     kwargs = dict(user=user, problem=problem)
-    ProblemActivityFactory(**kwargs)
+    ProblemActivityFactory(
+        activity_type=random.choice(ACTIVITY_TYPES),
+        **kwargs
+    )
     CommentFactory(**kwargs)
-    VoteActivityFactory(**kwargs)
 
 session.commit()

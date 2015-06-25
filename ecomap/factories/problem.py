@@ -53,14 +53,7 @@ class ProblemActivityFactory(SQLAlchemyModelFactory):
     problem = None
     user = None
     datetime = get_datetime()
-    activity_type = "ADDED"
+    activity_type = "NONE"
 
 
-class VoteActivityFactory(SQLAlchemyModelFactory):
-    class Meta:
-        model = VotesActivity
-        sqlalchemy_session = session
 
-    problem = None
-    user = None
-    datetime = get_datetime()

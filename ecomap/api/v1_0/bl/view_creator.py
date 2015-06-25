@@ -26,7 +26,6 @@ def compile(element, compiler, **kw):
 def compile(element, compiler, **kw):
     return "DROP VIEW %s" % (element.name)
 
-
 def view(name, metadata, selectable):
     t = table(name)
 
