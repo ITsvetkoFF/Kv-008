@@ -11,7 +11,9 @@ from api.v1_0.bl.decorators import permission_control, validation_json
 from api.v1_0.bl.modeldict import (
     get_dict_problem_data,
     generate_data,
-    revision_problems
+    revision_problems,
+    revision_removed,
+    query_converter
 )
 
 from sqlalchemy import func
@@ -92,7 +94,7 @@ class ProblemsHandler(BaseHandler):
         if previous_revision == 0:
             problems=dict(
                 current_activity_revision=current_revision,
-                data=generate_data(self)
+                data=generate_data(self,(range(1,current_revision+1)))
             )
             json_string = json.dumps(problems, ensure_ascii=False)
             self.write(json_string)
@@ -104,7 +106,8 @@ class ProblemsHandler(BaseHandler):
             problems=dict(
                 current_activity_revision=current_revision,
                 previous_activity_revision=previous_revision,
-                data=generate_data(self,revised_id)
+                data=generate_data(self,revised_id) + revision_removed(
+                    self, previous_revision)[1]
             )
             json_string = json.dumps(problems, ensure_ascii=False)
             self.write(json_string)

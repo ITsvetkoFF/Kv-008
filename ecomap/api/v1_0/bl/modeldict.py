@@ -41,7 +41,7 @@ def get_dict_problem_data(problem):
             problem_data[c.name] = getattr(problem, c.name)
     return problem_data
 
-def generate_data(model, revised_id = (0,)):
+def generate_data(model, revised_id):
     all_problems = []
 
     for problem, point_json in (model.sess.query(
@@ -77,7 +77,7 @@ def query_converter(query):
 
 def revision_problems(model, previous_revision):
     Table = ProblemsActivity
-    problems_removed = revision_removed_problems(model, previous_revision)
+    problems_removed = revision_removed(model, previous_revision)[0]
 
     vote = model.sess.query(Table.problem_id).distinct(). \
         filter(
@@ -104,7 +104,7 @@ def revision_problems(model, previous_revision):
     revised_id = problems_added + problems_updated + problems_votes
     return revised_id
 
-def revision_removed_problems (model, previous_revision):
+def revision_removed (model, previous_revision):
     Table = ProblemsActivity
     removed = model.sess.query(Table.problem_id). \
         filter(
@@ -112,5 +112,12 @@ def revision_removed_problems (model, previous_revision):
         Table.activity_type=="REMOVED"
     ).all()
     problems_removed = query_converter(removed)
-    return problems_removed
+    removed_data = []
+    for item in problems_removed:
+        removed_data = removed_data +[{'id': item, 'action':'DELETED'}]
+
+    return [problems_removed, removed_data]
+
+def api_problems(model):
+    return query_converter(model.sess.query(DetailedProblem.id))
 
