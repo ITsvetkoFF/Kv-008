@@ -13,4 +13,4 @@ class ProblemForm(ModelForm):
             exclude = ['location']
             include = ['problem_type_id','region_id']
         Latitude = FloatField(validators=[NumberRange()])
-        Longtitude = FloatField(validators=[NumberRange()])
+        Longitude = FloatField(validators=[NumberRange()])
