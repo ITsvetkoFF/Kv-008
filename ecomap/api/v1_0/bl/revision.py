@@ -5,7 +5,7 @@ def generate_data(query):
     all_problems = []
 
     for problem, point_json in (query):
-        Latitude, Longtitude = json.loads(point_json)['coordinates']
+        Latitude, Longitude = json.loads(point_json)['coordinates']
         all_problems.append(dict(
             id=problem.id,
             title=problem.title,
@@ -13,7 +13,7 @@ def generate_data(query):
             datetime=str(problem.datetime),
             problem_type_id=problem.problem_type_id,
             Latitude=Latitude,
-            Longtitude=Longtitude,
+            Longitude=Longitude,
             content=problem.content,
             severity=problem.severity,
             proposal=problem.proposal,
