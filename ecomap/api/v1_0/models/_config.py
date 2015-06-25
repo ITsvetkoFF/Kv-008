@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 
 STATUSES = ('SOLVED', 'UNSOLVED')
-ACTIVITY_TYPES = ('ADDED', 'REMOVED', 'UPDATED')
+ACTIVITY_TYPES = ('ADDED', 'REMOVED', 'UPDATED','VOTE')
 SEVERITY_TYPES = ('1', '2', '3', '4', '5')
 MODIFIERS = ('ANY', 'OWN', 'NONE')
 ACTIONS = ('GET', 'PUT', 'POST', 'DELETE')
