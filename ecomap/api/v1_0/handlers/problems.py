@@ -51,7 +51,7 @@ class ProblemHandler(BaseHandler):
     def put(self, problem_id):
 
         x = self.request.arguments.pop('Latitude')
-        y = self.request.arguments.pop('Longtitude')
+        y = self.request.arguments.pop('Longitude')
         self.request.arguments['location'] = create_location(x,y)
         self.request.arguments['id'] = problem_id
         self.sess.query(Problem).filter_by(id=int(problem_id)). \
@@ -123,7 +123,7 @@ class ProblemsHandler(BaseHandler):
             json_string = json.dumps(problems, ensure_ascii=False)
             self.write(json_string)
         elif previous_revision > current_revision:
-            self.send_error(400, massege = 'k')
+            self.send_error(400, massege = 'Your revision is greater than current')
 
 
     @permission_control
@@ -132,7 +132,7 @@ class ProblemsHandler(BaseHandler):
         """Store a new problem to the database."""
 
         x = self.request.arguments.pop('Latitude')
-        y = self.request.arguments.pop('Longtitude')
+        y = self.request.arguments.pop('Longitude')
         problem = Problem(
             title=self.request.arguments['title'],
             content=self.request.arguments['content'],

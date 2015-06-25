@@ -18,4 +18,3 @@ class Problem(Base):
 
     problem_type = relationship('ProblemType')
     region = relationship('Region')
-    region = relationship('Region')

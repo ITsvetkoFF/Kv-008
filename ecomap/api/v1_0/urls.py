@@ -39,11 +39,11 @@ APIUrls = [
     URLSpec(r'/api/users(?:/(\d+))?', UsersHandler),
 
     URLSpec(r'/api/allproblems', AllProblemsHandler),
+    URLSpec(r'/api/problems', ProblemsHandler),
     URLSpec(r'/api/problems/(\d+)', ProblemHandler),
     URLSpec(r'/api/problems/(\d+)/vote', ProblemVoteHandler),
     URLSpec(r'/api/problems/(\d+)/photos', ProblemPhotosHandler),
     URLSpec(r'/api/problems/(\d+)/comments', ProblemCommentsHandler),
-    URLSpec(r'/api/problems', ProblemsHandler),
 
     URLSpec(r'/api/admin/roles', RolesHandler),
     URLSpec(r'/api/admin/roles/(\d+)/resources', ResourcesHandler),
