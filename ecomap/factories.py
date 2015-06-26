@@ -17,6 +17,7 @@ from factories.user import (
 from factories import session
 from api.v1_0.models import *
 
+
 for handler_name in [urlspec.handler_class.__name__ for urlspec in APIUrls]:
     resource = ResourceFactory(name=handler_name)
     for action in ACTIONS:
@@ -31,11 +32,17 @@ role_admin = RoleFactory(name='admin')
 role_admin.permissions.extend(session.query(Permission).filter_by(
     modifier='ANY').all())
 
+# ProblemHandler id
+ph_id = session.query(Resource).filter(
+    Resource.name == 'ProblemHandler').first().id
+
 role_user = RoleFactory(name='user')
+role_user.permissions.extend(session.query(Permission).filter(
+    Permission.resource_id == ph_id).filter(
+    Permission.modifier == 'ANY').filter(
+    Permission.action == 'GET').all())
 role_user.permissions.extend(session.query(Permission).filter_by(
-    modifier='NONE').all()[:5])
-role_user.permissions.extend(session.query(Permission).filter_by(
-    modifier='OWN').all()[5:])
+    modifier='OWN').filter(Permission.resource_id != ph_id).all())
 
 user_admin = UserFactory(first_name='user', last_name='admin')
 user_admin.roles.append(role_admin)
@@ -52,23 +59,23 @@ for i in xrange(int(sys.argv[1])):
         status=random.choice(STATUSES),
         severity=random.choice(SEVERITY_TYPES)
     )
-    user = UserFactory()
-    user.roles.append(role_user)
+user = UserFactory()
+user.roles.append(role_user)
 
-    kwargs = dict(user=user, problem=problem)
-    ProblemActivityFactory(
-        activity_type='ADDED',
-        **kwargs
-    )
-    ProblemActivityFactory(
-        activity_type='VOTE',
-        **kwargs
-    )
-    ProblemActivityFactory(
-        # Now you remove, update or vote for the problem
-        activity_type=random.choice(ACTIVITY_TYPES[1:]),
-        **kwargs
-    )
-    CommentFactory(**kwargs)
+kwargs = dict(user=user, problem=problem)
+ProblemActivityFactory(
+    activity_type='ADDED',
+    **kwargs
+)
+ProblemActivityFactory(
+    activity_type='VOTE',
+    **kwargs
+)
+ProblemActivityFactory(
+    # Now you remove, update or vote for the problem
+    activity_type=random.choice(ACTIVITY_TYPES[1:]),
+    **kwargs
+)
+CommentFactory(**kwargs)
 
 session.commit()
