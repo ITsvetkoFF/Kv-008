@@ -13,7 +13,7 @@ def generate_data(query):
             datetime=str(problem.datetime),
             problem_type_id=problem.problem_type_id,
             Latitude=Latitude,
-            Longtitude=Longtitude,
+            Longitude=Longtitude,
             content=problem.content,
             severity=problem.severity,
             proposal=problem.proposal,
