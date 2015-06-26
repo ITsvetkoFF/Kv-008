@@ -36,7 +36,6 @@ PHOTO_TYPES = ('png', 'gif', 'jpeg', 'jpg')
 
 
 class ProblemHandler(BaseHandler):
-    @permission_control
     def get(self, problem_id=None):
         """Returns the data for all the problems in the database.
         
