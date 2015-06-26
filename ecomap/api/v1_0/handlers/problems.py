@@ -3,7 +3,7 @@ import string
 import imghdr
 import json
 
-from os.path import join
+from os.path import join, splitext
 from api.v1_0.bl.utils import create_location
 from api.v1_0.bl.decorators import permission_control, validation_json
 from api.v1_0.bl.modeldict import get_dict_problem_data
@@ -38,7 +38,7 @@ PHOTO_TYPES = ('png', 'gif', 'jpeg', 'jpg')
 class ProblemHandler(BaseHandler):
     def get(self, problem_id=None):
         """Returns the data for all the problems in the database.
-        
+
         If problem id is specified **/api/v1/problems/3**, returns the
         data for the specified problem.
         """
@@ -48,10 +48,9 @@ class ProblemHandler(BaseHandler):
     @permission_control
     @validation_json(ProblemForm)
     def put(self, problem_id):
-
         x = self.request.arguments.pop('Latitude')
         y = self.request.arguments.pop('Longitude')
-        self.request.arguments['location'] = create_location(x,y)
+        self.request.arguments['location'] = create_location(x, y)
         self.request.arguments['id'] = problem_id
         self.sess.query(Problem).filter_by(id=int(problem_id)). \
             update(self.request.arguments)
@@ -66,7 +65,6 @@ class ProblemHandler(BaseHandler):
         )
         self.sess.add(activity)
         self.sess.commit()
-
 
     @permission_control
     def delete(self, problem_id):
@@ -85,7 +83,6 @@ class ProblemHandler(BaseHandler):
 
 
 class ProblemsHandler(BaseHandler):
-
     def get(self):
         current_revision = (self.sess.query(func.max(DetailedProblem.id)). \
                             first())[0]
@@ -94,7 +91,7 @@ class ProblemsHandler(BaseHandler):
             query = self.sess.query(
                 DetailedProblem,
                 func.ST_AsGeoJSON(DetailedProblem.location))
-            problems=dict(
+            problems = dict(
                 current_activity_revision=current_revision,
                 data=generate_data(query)
             )
@@ -103,27 +100,31 @@ class ProblemsHandler(BaseHandler):
         elif previous_revision == current_revision:
             self.write(dict(current_activity_revision=current_revision))
         elif previous_revision < current_revision:
-            removed = revision(self,previous_revision,"REMOVED")
-            update = revision(self,previous_revision,"UPDATED",removed)
-            added = revision(self,previous_revision, "ADDED", removed, update)
-            vote = revision(self,previous_revision,"VOTE",removed, update, added)
+            removed = revision(self, previous_revision, "REMOVED")
+            update = revision(self, previous_revision, "UPDATED", removed)
+            added = revision(self, previous_revision, "ADDED", removed, update)
+            vote = revision(self, previous_revision, "VOTE", removed, update,
+                            added)
 
             query = self.sess.query(
                 DetailedProblem,
                 func.ST_AsGeoJSON(DetailedProblem.location)). \
                 filter(DetailedProblem.id.in_(added + update))
-            small_query =self.sess.query(DetailedProblem.id, DetailedProblem.number_of_votes).filter(DetailedProblem.id.in_(vote))
+            small_query = self.sess.query(DetailedProblem.id,
+                                          DetailedProblem.number_of_votes).filter(
+                DetailedProblem.id.in_(vote))
 
-            problems=dict(
+            problems = dict(
                 current_activity_revision=current_revision,
                 previous_activity_revision=previous_revision,
-                data=generate_data(query) + removed_data(removed) + vote_data(small_query)
-                )
+                data=generate_data(query) + removed_data(removed) + vote_data(
+                    small_query)
+            )
             json_string = json.dumps(problems, ensure_ascii=False)
             self.write(json_string)
         elif previous_revision > current_revision:
-            self.send_error(400, massege = 'Your revision is greater than current')
-
+            self.send_error(400,
+                            message='Your revision is greater than current')
 
     @permission_control
     @validation_json(ProblemForm)
@@ -138,7 +139,7 @@ class ProblemsHandler(BaseHandler):
             proposal=self.request.arguments['proposal'],
             severity=self.request.arguments['severity'],
             status=self.request.arguments['status'],
-            location=create_location(x,y),
+            location=create_location(x, y),
             problem_type_id=self.request.arguments['problem_type_id'],
             region_id=self.request.arguments['region_id'])
         self.sess.add(problem)
@@ -150,8 +151,6 @@ class ProblemsHandler(BaseHandler):
             activity_type="ADDED")
         self.sess.add(activity)
         self.sess.commit()
-
-
 
 
 class ProblemVoteHandler(BaseHandler):
@@ -198,7 +197,7 @@ class ProblemPhotosHandler(BaseHandler):
             original_filename = photo_file.filename
 
             # checking for extensions
-            extension = os.path.splitext(original_filename)[1]
+            extension = splitext(original_filename)[1]
             if extension not in map(lambda type: '.' + type, PHOTO_TYPES):
                 return self.send_error(400, message='Bad photo '
                                                     'file extension.')
@@ -214,9 +213,6 @@ class ProblemPhotosHandler(BaseHandler):
                 x in range(6))
             final_filename = name + extension
 
-            with open(join(PHOTOS_ROOT, final_filename), 'w') as output_file:
-                output_file.write(photo_file.body)
-
             photo = Photo(
                 problem_id=problem_id,
                 name=final_filename,
@@ -226,5 +222,9 @@ class ProblemPhotosHandler(BaseHandler):
                     'utf-8')
             )
             self.sess.add(photo)
+            # Need to commit every photo to catch any errors before saving the
+            # file locally.
+            self.sess.commit()
 
-        self.sess.commit()
+            with open(join(PHOTOS_ROOT, final_filename), 'w') as output_file:
+                output_file.write(photo_file.body)
