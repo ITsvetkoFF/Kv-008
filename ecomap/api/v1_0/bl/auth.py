@@ -1,11 +1,17 @@
 from api.v1_0.models.user import User
 
 
+def respond_to_authed_user(handler, user):
+    handler.set_cookie('user_id', str(user.id))
+    handler.write({'first_name': user.first_name,
+                   'last_name': user.last_name})
+
+
 def _store_new_user(handler, new_user):
     if new_user.verify_new_email(handler):
         handler.sess.add(new_user)
         handler.sess.commit()
-        return new_user.id
+        return new_user
 
 
 def store_fb_new_user(handler, user_profile):

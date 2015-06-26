@@ -42,27 +42,6 @@ class UsersHandler(BaseHandler):
                 self.sess.query(User).filter_by(id=user_id).first()))
 
     @tornado.web.authenticated
-    def post(self):
-        """Creates a new ``User`` and stores it into the database.
-
-        You should send JSON data in the request body:
-
-        .. code-block:: json
-
-           {
-             "first_name": "user_2",
-             "last_name": "user_2_last_name",
-             "email": "user_2@example.com",
-             "password": "user_2_pass"
-           }
-
-        """
-        new_user = get_object_from_dict(User, self.request.arguments)
-        self.sess.add(new_user)
-        self.sess.commit()
-        return self.write({'id': new_user.id})
-
-    @tornado.web.authenticated
     def delete(self, user_id):
         """Deletes the specified user."""
         self.sess.delete(self.sess.query(User).filter_by(id=user_id).first())

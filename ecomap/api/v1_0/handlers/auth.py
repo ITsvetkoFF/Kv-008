@@ -19,11 +19,11 @@ class RegisterHandler(BaseHandler):
         """
         form = UserRegisterForm.from_json(self.request.arguments)
         if form.validate():
-            new_user_id = store_registered_new_user(self, form.data)
-            # if new_user_id is None then email is not unique and error
+            new_user = store_registered_new_user(self, form.data)
+            # if new_user is None then email is not unique and error
             # has already been sent to the user
-            if new_user_id:
-                self.set_cookie('user_id', str(new_user_id))
+            if new_user is not None:
+                respond_to_authed_user(self, new_user)
         else:
             self.send_error(400, message=form.errors)
 
@@ -62,9 +62,9 @@ class FacebookAuthHandler(BaseHandler, tornado.auth.FacebookGraphMixin):
             if not user_profile:
                 self.send_error(500, message='Facebook profile access failed.')
             else:
-                new_user_id = store_fb_new_user(self, user_profile)
-                if new_user_id:
-                    self.set_cookie('user_id', str(new_user_id))
+                new_user = store_fb_new_user(self, user_profile)
+                if new_user is not None:
+                    self.set_cookie('user_id', str(new_user.id))
             return
 
         yield self.authorize_redirect(
@@ -141,7 +141,8 @@ class LoginHandler(BaseHandler):
         user = load_user_by_email(self, form.email.data)
         # check if user exists and her passwords matches
         if user and user.password == form.password.data:
-            self.set_cookie('user_id', str(user.id))
+            # for production use set_secure_cookie method
+            respond_to_authed_user(self, user)
         else:
             self.send_error(400, message='Invalid email/password.')
 
@@ -150,4 +151,3 @@ class LogoutHandler(BaseHandler):
     def get(self):
         """Logs out a user."""
         self.clear_all_cookies()
-        self.send_error(200, message='Logged out.')

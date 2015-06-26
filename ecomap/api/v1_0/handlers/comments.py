@@ -7,7 +7,7 @@ from api.v1_0.bl.utils import iso_datetime, conv_array_to_dict
 
 class CommentsHandler(BaseHandler):
     def get(self, comment_id):
-        """Return comment by its id.
+        """Returns comment by its id.
 
         Answer format:
 

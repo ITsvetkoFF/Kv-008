@@ -53,7 +53,7 @@ class ProblemActivityFactory(SQLAlchemyModelFactory):
     problem = None
     user = None
     datetime = get_datetime()
-    activity_type = "NONE"
+    activity_type = None
 
 
 

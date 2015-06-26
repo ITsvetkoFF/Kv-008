@@ -59,23 +59,24 @@ for i in xrange(int(sys.argv[1])):
         status=random.choice(STATUSES),
         severity=random.choice(SEVERITY_TYPES)
     )
-user = UserFactory()
-user.roles.append(role_user)
 
-kwargs = dict(user=user, problem=problem)
-ProblemActivityFactory(
-    activity_type='ADDED',
-    **kwargs
-)
-ProblemActivityFactory(
-    activity_type='VOTE',
-    **kwargs
-)
-ProblemActivityFactory(
-    # Now you remove, update or vote for the problem
-    activity_type=random.choice(ACTIVITY_TYPES[1:]),
-    **kwargs
-)
-CommentFactory(**kwargs)
+    user = UserFactory()
+    user.roles.append(role_user)
+
+    kwargs = dict(user=user, problem=problem)
+    ProblemActivityFactory(
+        activity_type='ADDED',
+        **kwargs
+    )
+    ProblemActivityFactory(
+        activity_type='VOTE',
+        **kwargs
+    )
+    ProblemActivityFactory(
+        # Now you remove, update or vote for the problem
+        activity_type=random.choice(ACTIVITY_TYPES[1:]),
+        **kwargs
+    )
+    CommentFactory(**kwargs)
 
 session.commit()
