@@ -25,7 +25,7 @@ query1 = select(
         user_t.first_name,
         user_t.last_name
     ]
-).where(text("problems_activities.activity_type = 'VOTE'"))
+).where(text("problems_activities.activity_type = 'VOTE' AND problems_activities.problem_id NOT IN (SELECT problems_activities.problem_id FROM problems_activities WHERE problems_activities.activity_type = 'REMOVED') ")) #AND problems_activities.activity_type != 'UPDATED' AND problems_activities.activity_type != 'ADDED' AND problems_activities.activity_type != 'REMOVED'
 j = Problem.__table__  # Initial table to join.
 table_list = [Comment.__table__, ProblemsActivity.__table__, User.__table__]
 for table in table_list:
@@ -56,7 +56,7 @@ query2 = select(
         user_t.first_name,
         user_t.last_name
     ]
-).where(text("problems_activities.activity_type != 'VOTE'"))
+).where(text("problems_activities.activity_type = 'ADDED' AND problems_activities.problem_id NOT IN (SELECT problems_activities.problem_id FROM problems_activities WHERE problems_activities.activity_type = 'VOTE' OR problems_activities.activity_type = 'REMOVED') "))
 j = Problem.__table__  # Initial table to join.
 table_list = [Comment.__table__, ProblemsActivity.__table__, User.__table__]
 for table in table_list:

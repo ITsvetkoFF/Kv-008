@@ -73,7 +73,6 @@ def init_db():
             'export PYTHONPATH=":/ecomap"')
     Base.metadata.create_all(get_db_engine(settings))
 
-
 def populate_db(problems_count):
     """Populate database with fake data."""
     fab_run('export PYTHONPATH=":/ecomap"')

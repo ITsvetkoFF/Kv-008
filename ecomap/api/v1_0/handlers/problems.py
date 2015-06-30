@@ -5,7 +5,7 @@ import json
 
 from os.path import join
 from api.v1_0.bl.utils import create_location
-from api.v1_0.bl.decorators import permission_control, validation_json
+from api.v1_0.bl.decorators import permission_control, validation
 from api.v1_0.bl.modeldict import get_dict_problem_data
 from api.v1_0.bl.revision import (
     generate_data,
@@ -47,15 +47,13 @@ class ProblemHandler(BaseHandler):
         self.write(get_dict_problem_data(problem))
 
     @permission_control
-    @validation_json(ProblemForm)
+    @validation(ProblemForm)
     def put(self, problem_id):
-
         x = self.request.arguments.pop('Latitude')
         y = self.request.arguments.pop('Longitude')
-        self.request.arguments['location'] = create_location(x,y)
+        self.request.arguments['location'] = create_location(x, y)
         self.request.arguments['id'] = problem_id
-        self.sess.query(Problem).filter_by(id=int(problem_id)). \
-            update(self.request.arguments)
+        self.sess.query(Problem).filter_by(id=int(problem_id)).update(self.request.arguments)
 
         self.sess.commit()
 
@@ -67,7 +65,6 @@ class ProblemHandler(BaseHandler):
         )
         self.sess.add(activity)
         self.sess.commit()
-
 
     @permission_control
     def delete(self, problem_id):
@@ -86,16 +83,14 @@ class ProblemHandler(BaseHandler):
 
 
 class ProblemsHandler(BaseHandler):
-
     def get(self):
-        current_revision = (self.sess.query(func.max(DetailedProblem.id)). \
-                            first())[0]
+        current_revision = (self.sess.query(func.max(ProblemsActivity.id)).first())[0]
         previous_revision = int(self.get_query_argument('rev', default=0))
         if previous_revision == 0:
             query = self.sess.query(
                 DetailedProblem,
                 func.ST_AsGeoJSON(DetailedProblem.location))
-            problems=dict(
+            problems = dict(
                 current_activity_revision=current_revision,
                 data=generate_data(query)
             )
@@ -104,30 +99,34 @@ class ProblemsHandler(BaseHandler):
         elif previous_revision == current_revision:
             self.write(dict(current_activity_revision=current_revision))
         elif previous_revision < current_revision:
-            removed = revision(self,previous_revision,"REMOVED")
-            update = revision(self,previous_revision,"UPDATED",removed)
-            added = revision(self,previous_revision, "ADDED", removed, update)
-            vote = revision(self,previous_revision,"VOTE",removed, update, added)
+            removed = revision(self, previous_revision, "REMOVED")
+            update = revision(self, previous_revision, "UPDATED", removed)
+            added = revision(self, previous_revision, "ADDED", removed, update)
+            vote = revision(self, previous_revision, "VOTE", removed, update,
+                            added)
 
             query = self.sess.query(
                 DetailedProblem,
-                func.ST_AsGeoJSON(DetailedProblem.location)). \
-                filter(DetailedProblem.id.in_(added + update))
-            small_query =self.sess.query(DetailedProblem.id, DetailedProblem.number_of_votes).filter(DetailedProblem.id.in_(vote))
+                func.ST_AsGeoJSON(DetailedProblem.location)).filter(
+                DetailedProblem.id.in_(added + update))
+            small_query = self.sess.query(DetailedProblem.id,
+                                          DetailedProblem.number_of_votes).filter(
+                DetailedProblem.id.in_(vote))
 
-            problems=dict(
+            problems = dict(
                 current_activity_revision=current_revision,
                 previous_activity_revision=previous_revision,
-                data=generate_data(query) + removed_data(removed) + vote_data(small_query)
-                )
+                data=generate_data(query) + removed_data(removed) + vote_data(
+                    small_query)
+            )
             json_string = json.dumps(problems, ensure_ascii=False)
             self.write(json_string)
         elif previous_revision > current_revision:
-            self.send_error(400, massege = 'Your revision is greater than current')
-
+            self.send_error(400,
+                            message='Your revision is greater than current')
 
     @permission_control
-    @validation_json(ProblemForm)
+    @validation(ProblemForm)
     def post(self):
         """Store a new problem to the database."""
 
@@ -139,7 +138,7 @@ class ProblemsHandler(BaseHandler):
             proposal=self.request.arguments['proposal'],
             severity=self.request.arguments['severity'],
             status=self.request.arguments['status'],
-            location=create_location(x,y),
+            location=create_location(x, y),
             problem_type_id=self.request.arguments['problem_type_id'],
             region_id=self.request.arguments['region_id'])
         self.sess.add(problem)
@@ -151,8 +150,6 @@ class ProblemsHandler(BaseHandler):
             activity_type="ADDED")
         self.sess.add(activity)
         self.sess.commit()
-
-
 
 
 class ProblemVoteHandler(BaseHandler):

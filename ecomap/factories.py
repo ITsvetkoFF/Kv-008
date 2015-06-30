@@ -57,7 +57,15 @@ for i in xrange(int(sys.argv[1])):
 
     kwargs = dict(user=user, problem=problem)
     ProblemActivityFactory(
-        activity_type=random.choice(ACTIVITY_TYPES),
+    activity_type='ADDED',
+    **kwargs
+    )
+    ProblemActivityFactory(
+        activity_type='VOTE',
+        **kwargs
+    )
+    ProblemActivityFactory(
+        activity_type=random.choice(ACTIVITY_TYPES[1:]),
         **kwargs
     )
     CommentFactory(**kwargs)
