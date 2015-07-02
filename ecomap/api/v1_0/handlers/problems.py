@@ -109,7 +109,7 @@ class ProblemsHandler(BaseHandler):
                 DetailedProblem,
                 func.ST_AsGeoJSON(DetailedProblem.location)).filter(
                 DetailedProblem.id.in_(added + update))
-            small_query = self.sess.query(DetailedProblem.id,
+            vote_query = self.sess.query(DetailedProblem.id,
                                           DetailedProblem.number_of_votes).filter(
                 DetailedProblem.id.in_(vote))
 
@@ -117,7 +117,7 @@ class ProblemsHandler(BaseHandler):
                 current_activity_revision=current_revision,
                 previous_activity_revision=previous_revision,
                 data=generate_data(query) + removed_data(removed) + vote_data(
-                    small_query)
+                    vote_query)
             )
             json_string = json.dumps(problems, ensure_ascii=False)
             self.write(json_string)
@@ -125,7 +125,7 @@ class ProblemsHandler(BaseHandler):
             self.send_error(400,
                             message='Your revision is greater than current')
 
-    @permission_control
+    # @permission_control
     @validation(ProblemForm)
     def post(self):
         """Store a new problem to the database."""
