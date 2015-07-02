@@ -4,13 +4,15 @@ import tornado.escape
 
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models import User
-from api.v1_0.bl.modeldict import get_object_from_dict, \
-    get_dict_from_orm, update_model_from_dict
+from api.v1_0.bl.decs import check_if_exists
+from api.v1_0.bl.modeldict import (
+    loaded_obj_data_to_dict,
+    update_loaded_obj_with_data
+)
 
 
 class UsersHandler(BaseHandler):
-    @tornado.web.authenticated
-    def get(self, user_id=None):
+    def get(self, user_id):
         """Returns data for all users from the database or for the
         specified user.
 
@@ -24,30 +26,28 @@ class UsersHandler(BaseHandler):
              "first_name": "user_2",
              "last_name": "user_2_last_name",
              "email": "user_2@example.com",
-             "facebook_id": null,
+             "facebook_id": "",
              "password": "user_2_pass",
-             "id": 3
+             "id": 3,
+             "region_id": null
            }
 
         | Otherwise you'll get data for all users
         | **/api/v1/users**.
         """
         if user_id is None:
-            return self.write(
-                tornado.escape.json_encode([get_dict_from_orm(user)
-                                            for user in
-                                            self.sess.query(User).all()]))
+            self.write(tornado.escape.json_encode(
+                [loaded_obj_data_to_dict(user) for user in self.sess.query(User)]))
         else:
-            return self.write(get_dict_from_orm(
-                self.sess.query(User).filter_by(id=user_id).first()))
+            self.write(loaded_obj_data_to_dict(self.sess.query(User).get(user_id)))
 
-    @tornado.web.authenticated
+    @check_if_exists(User)
     def delete(self, user_id):
         """Deletes the specified user."""
-        self.sess.delete(self.sess.query(User).filter_by(id=user_id).first())
+        self.sess.delete(self.sess.query(User).get(user_id))
         self.sess.commit()
 
-    @tornado.web.authenticated
+    @check_if_exists(User)
     def put(self, user_id):
         """Updates data for the specified user.
 
@@ -56,8 +56,8 @@ class UsersHandler(BaseHandler):
         where key is a model column fields and values it's a values that you
         needs to change.
         """
-        model = update_model_from_dict(
-            model=self.sess.query(User).filter_by(id=user_id).first(),
-            model_dict=self.request.arguments)
-        self.sess.update(model)
+        user = update_loaded_obj_with_data(
+            self.sess.query(User).get(user_id),
+            self.request.arguments
+        )
         self.sess.commit()

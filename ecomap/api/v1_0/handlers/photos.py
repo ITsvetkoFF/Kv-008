@@ -1,11 +1,11 @@
 import os
 
+from api.v1_0.bl.modeldict import loaded_obj_data_to_dict
+
 from api.v1_0.bl.decs import check_if_exists
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models.photo import Photo
-from static import STATIC_ROOT
-
-PHOTOS_ROOT = os.path.join(STATIC_ROOT, 'photos')
+import static
 
 
 class PhotoHandler(BaseHandler):
@@ -13,13 +13,7 @@ class PhotoHandler(BaseHandler):
     def get(self, photo_id):
         """Returns data for the specified photo."""
         photo = self.sess.query(Photo).get(photo_id)
-        self.write(dict(
-            problem_id=photo.problem_id,
-            name=photo.name,
-            comment=photo.comment,
-            datetime=photo.datetime,
-            user_id=photo.user_id
-        ))
+        self.write(loaded_obj_data_to_dict(photo))
 
     @check_if_exists(Photo)
     def put(self, photo_id):
@@ -38,7 +32,7 @@ class PhotoHandler(BaseHandler):
         Photo is deleted from the database and removed from the hard drive
         as well."""
         photo = self.sess.query(Photo).get(photo_id)
-        os.remove(os.path.join(PHOTOS_ROOT, photo.name))
+        os.remove(os.path.join(static.PHOTOS_ROOT, photo.name))
 
         self.sess.delete(photo)
         self.sess.commit()

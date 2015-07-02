@@ -1,12 +1,12 @@
-import random
-import string
-import imghdr
 import json
 
-from os.path import join, splitext
 from api.v1_0.bl.utils import create_location
-from api.v1_0.bl.decorators import permission_control, validation_json
-from api.v1_0.bl.modeldict import get_dict_problem_data
+from api.v1_0.bl.decs import (
+    permission_control,
+    validation_json,
+    check_if_exists
+)
+from api.v1_0.bl.modeldict import *
 from api.v1_0.bl.revision import (
     generate_data,
     revision,
@@ -26,13 +26,8 @@ from api.v1_0.models import (
 from api.v1_0.forms.problem import (
     ProblemForm
 )
-from api.v1_0.bl.decs import check_if_exists
 from api.v1_0.bl.utils import get_datetime
-from api.v1_0.handlers.photos import PHOTOS_ROOT
-
-
-# you can add more image types if necessary
-PHOTO_TYPES = ('png', 'gif', 'jpeg', 'jpg')
+from api.v1_0.bl.photo import *
 
 
 class ProblemHandler(BaseHandler):
@@ -84,7 +79,7 @@ class ProblemHandler(BaseHandler):
 
 class ProblemsHandler(BaseHandler):
     def get(self):
-        current_revision = (self.sess.query(func.max(DetailedProblem.id)). \
+        current_revision = (self.sess.query(func.max(DetailedProblem.id)).
                             first())[0]
         previous_revision = int(self.get_query_argument('rev', default=0))
         if previous_revision == 0:
@@ -171,60 +166,34 @@ class ProblemVoteHandler(BaseHandler):
 class ProblemPhotosHandler(BaseHandler):
     @check_if_exists(Problem)
     def get(self, problem_id):
-        """Returns all the photos data for the specified problem."""
+        """Returns all photo data for the specified problem."""
         photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
-        response_data = [dict(
-            photo_id=photo.id,
-            name=photo.name,
-            datetime=str(photo.datetime),
-            comment=photo.comment,
-            problem_id=photo.problem_id,
-            user_id=photo.user_id
-        ) for photo in photos]
 
-        self.write(json.dumps(response_data))
+        self.write(json.dumps([loaded_obj_data_to_dict(photo) for photo in photos]))
 
     @check_if_exists(Problem)
     def post(self, problem_id):
-        """Creates a new photo for the specified problem and stores it.
+        """Stores uploaded photos to the hard drive, creates and stores
+        thumbnails, stores photo data to the database.
 
-        You have to name your file input as ``photo_files`` and comment
-        input as ``comment``.
+        You have to name your file inputs (all of them) as
+        ``photos`` and comment inputs (all of them) as ``comments``.
+        First file will be associated with first comment and so on.
         """
         while self.request.files['photos']:
             photo_file = self.request.files['photos'].pop()
-            # rename files and append extensions
-            original_filename = photo_file.filename
 
-            # checking for extensions
-            extension = splitext(original_filename)[1]
-            if extension not in map(lambda type: '.' + type, PHOTO_TYPES):
-                return self.send_error(400, message='Bad photo '
-                                                    'file extension.')
+            if not check_file_ext(photo_file.filename):
+                return self.send_error(400, message=(
+                    'Bad file extension. JPEG and JPG formats allowed.'
+                ))
 
-            # validating uploaded file type
-            file_type = imghdr.what(original_filename, photo_file.body)
-            if not file_type.endswith(PHOTO_TYPES):
-                self.send_error(400, message='Invalid photo file type.')
-                return
+            if not check_file_format(photo_file.body):
+                return self.send_error(400, message=(
+                    'Bad format. Only JPEG and JPG allowed.'))
 
-            name = ''.join(
-                random.choice(string.ascii_lowercase + string.digits) for
-                x in range(6))
-            final_filename = name + extension
+            new_filename = create_new_filename()
 
-            photo = Photo(
-                problem_id=problem_id,
-                name=final_filename,
-                datetime=get_datetime(),
-                user_id=self.current_user,
-                comment=self.request.body_arguments['comments'].pop().decode(
-                    'utf-8')
-            )
-            self.sess.add(photo)
-            # Need to commit every photo to catch any errors before saving the
-            # file locally.
-            self.sess.commit()
-
-            with open(join(PHOTOS_ROOT, final_filename), 'w') as output_file:
-                output_file.write(photo_file.body)
+            store_photo_data_to_db(problem_id, new_filename, self)
+            filepath = store_file_to_hd(new_filename, photo_file.body)
+            store_thumbnail_to_hd(filepath)

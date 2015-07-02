@@ -8,7 +8,7 @@ from tornado.httpclient import HTTPRequest, HTTPError
 from api import settings
 from api.utils.db import get_db_session
 from api.v1_0.models.comment import Comment
-from api.v1_0.bl.models_dict_logic import get_dict_from_orm
+from api.v1_0.bl.modeldict import get_dict_from_orm
 from api.v1_0.tests import BaseHTTPTest
 
 
@@ -30,7 +30,7 @@ class CommentsTest(CommentsAsyncHTTPTestCase):
     def setUp(self):
         super(CommentsTest, self).setUp()
         self.comments_id = int(9)
-        self.url = self.get_url(r'/api/v1/comments/%d' % self.comments_id)
+        self.url = self.get_url(r'/api/comments/%d' % self.comments_id)
 
     def return_comment_query(self):
         init_query = self.session.query(Comment).get(self.comments_id)
@@ -103,7 +103,7 @@ class ProblemCommentsTest(CommentsAsyncHTTPTestCase):
     def setUp(self):
         super(ProblemCommentsTest, self).setUp()
         self.problems_id = int(9)
-        self.url = self.get_url(r'/api/v1/problems/%d/comments' % self.problems_id)
+        self.url = self.get_url(r'/api/problems/%d/comments' % self.problems_id)
 
     @gen_test
     def test_problem_comments_get_ok_request(self, method='GET'):

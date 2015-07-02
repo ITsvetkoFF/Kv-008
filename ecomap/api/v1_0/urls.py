@@ -4,15 +4,22 @@ from tornado.web import URLSpec, StaticFileHandler
 
 from api.v1_0.handlers.photos import PhotoHandler
 from api.v1_0.handlers.users import UsersHandler
-from api.v1_0.handlers.pages import PageHandler, PagesHandler
+from api.v1_0.handlers.admin import (
+    RolesHandler,
+    ResourcesHandler
+)
+from api.v1_0.handlers.pages import (
+    PageHandler,
+    PagesHandler
+)
 from api.v1_0.handlers.allproblems import AllProblemsHandler
-from api.v1_0.handlers.administration import ResourcesHandler, RolesHandler
 from api.v1_0.handlers.auth import (
     FacebookAuthHandler,
     GoogleAuthHandler,
     RegisterHandler,
     LoginHandler,
-    LogoutHandler
+    LogoutHandler,
+    FacebookHandler
 )
 from api.v1_0.handlers.problems import (
     ProblemsHandler,
@@ -20,21 +27,26 @@ from api.v1_0.handlers.problems import (
     ProblemVoteHandler,
     ProblemPhotosHandler
 )
-from api.v1_0.handlers.comments import CommentsHandler, ProblemCommentsHandler
-
-from docs import DOCS_ROOT
-from api.v1_0.handlers.photos import PHOTOS_ROOT
-
+from api.v1_0.handlers.comments import (
+    CommentsHandler,
+    ProblemCommentsHandler
+)
+import docs
+import static
 
 # a non-capturing group: (?:...)
 APIUrls = [
-    URLSpec(r'/static/photos/(.*)', StaticFileHandler, {'path': PHOTOS_ROOT}),
+    URLSpec(r'/static/photos/(.*)', StaticFileHandler,
+            {'path': static.PHOTOS_ROOT}),
+    URLSpec(r'/static/thumbnails/(.*)', StaticFileHandler,
+            {'path': static.THUMBNAILS_ROOT}),
 
     URLSpec(r'/api/register', RegisterHandler),
     URLSpec(r'/api/login', LoginHandler),
     URLSpec(r'/api/logout', LogoutHandler),
     URLSpec(r'/api/auth/facebook', FacebookAuthHandler, name='fb_auth'),
     URLSpec(r'/api/auth/google', GoogleAuthHandler, name='google_auth'),
+    # URLSpec(r'/api/auth/facebook', FacebookAuthHandler, name='fb_auth'),
 
     URLSpec(r'/api/users(?:/(\d+))?', UsersHandler),
 
@@ -56,5 +68,5 @@ APIUrls = [
     URLSpec(r'/api/photos/(\d+)', PhotoHandler),
 
     URLSpec(r'/api/docs/(.*)', StaticFileHandler,
-            {'path': os.path.join(DOCS_ROOT, 'build', 'html')})
+            {'path': os.path.join(docs.DOCS_ROOT, 'build', 'html')})
 ]
