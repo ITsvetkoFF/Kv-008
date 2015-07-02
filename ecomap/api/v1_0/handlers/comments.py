@@ -52,7 +52,6 @@ class CommentsHandler(BaseHandler):
         .. code-block: json
 
         {
-            "modified_user_id": 1,
             "content": 1
         }
 
@@ -63,7 +62,7 @@ class CommentsHandler(BaseHandler):
 
         comment_query.content = self.request.arguments['content']
         comment_query.modified_date = datetime.utcnow()
-        comment_query.modified_user_id = self.request.arguments['modified_user_id']
+        comment_query.modified_user_id = self.current_user
         self.sess.commit()
 
     def delete(self, comment_id):
@@ -134,14 +133,13 @@ class ProblemCommentsHandler(BaseHandler):
         .. code-block: json
 
         {
-            "user_id": 1,
             "content": 1
         }
 
         """
         new_comment = Comment(content=str(self.request.arguments['content']),
                               problem_id=problem_id,
-                              user_id=int(self.request.arguments['user_id']),
+                              user_id=self.current_user,
                               created_date=datetime.utcnow())
         self.sess.add(new_comment)
         self.sess.commit()
