@@ -26,12 +26,7 @@ class User(Base):
     roles = relationship('Role', secondary=user_roles)
     region = relationship('Region')
 
-    def verify_new_email(self, handler):
+    def check_new_email(self, session):
         """Check email field unique constraint."""
-        email_unique = False
-        if handler.sess.query(User).filter(User.email == self.email).first():
-            handler.send_error(400, message='Email already in use.')
-        else:
-            email_unique = True
+        return session.query(User).filter(User.email == self.email).first()
 
-        return email_unique

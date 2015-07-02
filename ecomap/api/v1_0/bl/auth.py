@@ -1,42 +1,40 @@
 from api.v1_0.models.user import User
 
 
-def respond_to_authed_user(handler, user):
+def complete_authentication(handler, user):
     handler.set_cookie('user_id', str(user.id))
     handler.write({'first_name': user.first_name,
                    'last_name': user.last_name})
 
 
-def _store_new_user(handler, new_user):
-    if new_user.verify_new_email(handler):
-        handler.sess.add(new_user)
-        handler.sess.commit()
+def store_new_user(session, new_user):
+    # check_new_email returns a user, if her email matches
+    if not new_user.check_new_email(session):
+        session.add(new_user)
+        session.commit()
         return new_user
 
 
-def store_fb_new_user(handler, user_profile):
-    new_user = User(
+def create_fb_user(user_profile):
+    return User(
         first_name=user_profile['first_name'],
         last_name=user_profile['last_name'],
         email=user_profile['email'],
         facebook_id=user_profile['id']
     )
-    return _store_new_user(handler, new_user)
 
 
-def store_google_new_user(handler, user_profile):
-    new_user = User(
+def create_google_user(user_profile):
+    return User(
         first_name=user_profile['given_name'],
         last_name=user_profile['family_name'],
         email=user_profile['email'],
         google_id=user_profile['id']
     )
-    return _store_new_user(handler, new_user)
 
 
-def store_registered_new_user(handler, user_data):
-    new_user = User(**user_data)
-    return _store_new_user(handler, new_user)
+def create_new_user(user_data):
+    return User(**user_data)
 
 
 def get_absolute_redirect_uri(handler, url_name):

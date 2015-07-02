@@ -1,14 +1,14 @@
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
-from api.v1_0.models import *
-from factories import session
+import api.v1_0.models as models
+import api.v1_0.tests.common as common
 
 
 class RoleFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = Role
-        sqlalchemy_session = session
+        model = models.Role
+        sqlalchemy_session = common.Session
 
     name = None
 
@@ -18,8 +18,8 @@ class UserFactory(SQLAlchemyModelFactory):
     roles manually."""
 
     class Meta:
-        model = User
-        sqlalchemy_session = session
+        model = models.User
+        sqlalchemy_session = common.Session
 
     first_name = factory.sequence(lambda n: 'user_%s' % n)
     last_name = factory.lazy_attribute(
@@ -31,8 +31,8 @@ class UserFactory(SQLAlchemyModelFactory):
 
 class PermissionFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = Permission
-        sqlalchemy_session = session
+        model = models.Permission
+        sqlalchemy_session = common.Session
 
     resource = None
     action = None
@@ -41,7 +41,7 @@ class PermissionFactory(SQLAlchemyModelFactory):
 
 class ResourceFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = Resource
-        sqlalchemy_session = session
+        model = models.Resource
+        sqlalchemy_session = common.Session
 
     name = None

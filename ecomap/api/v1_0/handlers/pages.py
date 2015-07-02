@@ -3,58 +3,34 @@ import tornado.escape
 
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models import Page
-from api.v1_0.bl.modeldict import get_dict_from_orm, update_model_from_dict, get_object_from_dict
+from api.v1_0.bl.modeldict import (
+    loaded_obj_data_to_dict,
+    update_loaded_obj_with_data,
+    create_obj_with_data
+)
 
 
 class PageHandler(BaseHandler):
+    def get(self, page_id):
+        self.write(loaded_obj_data_to_dict(self.sess.query(Page).get(page_id)))
 
-    @tornado.web.authenticated
-    def get(self, page_id=None, *args, **kwargs):
-        if page_id:
-            self.send_error(status_code=400, message='Bad Request')
-
-    @tornado.web.authenticated
-    def put(self, page_id=None, *args, **kwargs):
-        model = self.sess.query(Page).filter_by(id=page_id).first()
-        model = update_model_from_dict(
-            model=model,
-            model_dict=self.request.arguments)
-        self.sess.update(model)
+    def put(self, page_id):
+        page = update_loaded_obj_with_data(
+            self.sess.query(Page).get(page_id),
+            self.request.arguments
+        )
         self.sess.commit()
 
-    @tornado.web.authenticated
-    def post(self, page_id=None, *args, **kwargs):
-        if page_id:
-            self.send_error(status_code=400, message='Bad Request')
-
-    @tornado.web.authenticated
-    def delete(self, page_id, *args, **kwargs):
-        self.sess.delete(self.sess.query(Page).filter_by(id=page_id).first())
+    def delete(self, page_id):
+        self.sess.delete(self.sess.query(Page).get(page_id))
         self.sess.commit()
 
 
 class PagesHandler(BaseHandler):
+    def get(self):
+        self.write(tornado.escape.json_encode(
+            [loaded_obj_data_to_dict(page) for page in self.sess.query(Page)]))
 
-    @tornado.web.authenticated
-    def get(self, page_id=None, *args, **kwargs):
-        if page_id is None:
-            return self.write(tornado.escape.json_encode([get_dict_from_orm(page)
-                                                          for page in self.sess.query(Page).all()]))
-        else:
-            return self.write(get_dict_from_orm(self.sess.query(Page).filter_by(id=page_id).first()))
-
-    @tornado.web.authenticated
-    def put(self):
-            self.send_error(status_code=400, message='Bad Request')
-
-    @tornado.web.authenticated
-    def post(self, page_id=None, *args, **kwargs):
-        self.sess.add(get_object_from_dict(
-            model=Page,
-            income_dict=self.request.arguments))
+    def post(self, page_id):
+        self.sess.add(create_obj_with_data(Page, self.request.arguments))
         self.sess.commit()
-        return self.get(page_id=page_id, *args, **kwargs)
-
-    @tornado.web.authenticated
-    def delete(self):
-        self.send_error(status_code=400, message='Bad Request')()

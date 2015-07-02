@@ -19,13 +19,63 @@ class RegisterHandler(BaseHandler):
         """
         form = UserRegisterForm.from_json(self.request.arguments)
         if form.validate():
-            new_user = store_registered_new_user(self, form.data)
-            # if new_user is None then email is not unique and error
-            # has already been sent to the user
-            if new_user is not None:
-                respond_to_authed_user(self, new_user)
+            new_user = store_new_user(self.sess, create_new_user(form.data))
+            # if new_user is None then email is not unique
+            if not new_user:
+                return self.send_error(400, message='Email already in use.')
+
+            complete_authentication(self, new_user)
         else:
             self.send_error(400, message=form.errors)
+
+
+class FacebookHandler(BaseHandler):
+    def post(self):
+        user = self.sess.query(User).filter(
+            User.facebook_id == self.request.arguments['id']).first()
+
+        if user:
+            complete_authentication(self, user)
+        else:
+            new_user = store_new_user(
+                self.sess, create_fb_user(self.request.arguments))
+            # If new_user is None, then her email is already in the database,
+            # and that means, that she has registered directly using our
+            # registration form.
+            if not new_user:
+                return self.send_error(400, message='Email already in use.')
+
+            complete_authentication(self, new_user)
+
+
+class LoginHandler(BaseHandler):
+    def post(self):
+        """Logs in a user.
+        Sets a cookie ``user_id`` and writes user's ``first_name`` and
+        ``last_name`` to the client (so it can display them in the navbar).
+
+        ``email`` and ``password`` key-value pairs are required in request
+        JSON payload.
+
+        If user authentication fails, a client gets 400 response status code
+        and a message *"Invalid email/password."*.
+        """
+        form = UserLoginForm.from_json(self.request.arguments)
+        if not form.validate():
+            return self.send_error(400, message=form.errors)
+
+        user = load_user_by_email(self, form.email.data)
+        # check if user exists and her password matches
+        if user and user.password == form.password.data:
+            complete_authentication(self, user)
+        else:
+            self.send_error(400, message='Invalid email/password.')
+
+
+class LogoutHandler(BaseHandler):
+    def get(self):
+        """Logs out a user."""
+        self.clear_all_cookies()
 
 
 class FacebookAuthHandler(BaseHandler, tornado.auth.FacebookGraphMixin):
@@ -62,9 +112,13 @@ class FacebookAuthHandler(BaseHandler, tornado.auth.FacebookGraphMixin):
             if not user_profile:
                 self.send_error(500, message='Facebook profile access failed.')
             else:
-                new_user = store_fb_new_user(self, user_profile)
-                if new_user is not None:
-                    self.set_cookie('user_id', str(new_user.id))
+                new_user = store_new_user(
+                    self.sess, create_fb_user(user_profile))
+                if not new_user:
+                    self.send_error(400, message='Email already in use.')
+                    return
+
+                self.set_cookie('user_id', str(new_user.id))
             return
 
         yield self.authorize_redirect(
@@ -112,9 +166,13 @@ class GoogleAuthHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
             if user:
                 self.set_cookie('user_id', str(user.id))
             else:
-                new_user_id = store_google_new_user(self, user_profile)
-                if new_user_id:
-                    self.set_cookie('user_id', str(new_user_id))
+                new_user = store_new_user(
+                    self.sess, create_google_user(user_profile))
+                if not new_user:
+                    self.send_error(400, message='Email already in use.')
+                    return
+
+                self.set_cookie('user_id', str(new_user.id))
             return
 
         yield self.authorize_redirect(
@@ -124,30 +182,3 @@ class GoogleAuthHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
             response_type='code',
             extra_params={'approval_prompt': 'auto'}
         )
-
-
-class LoginHandler(BaseHandler):
-    def post(self):
-        """Logs in a user.
-        Sets a cookie named ``user_id`` in case of success.
-
-        ``email`` and ``password`` key-value pairs are required.
-        """
-        form = UserLoginForm.from_json(self.request.arguments)
-        if not form.validate():
-            self.send_error(400, message=form.errors)
-            return
-
-        user = load_user_by_email(self, form.email.data)
-        # check if user exists and her passwords matches
-        if user and user.password == form.password.data:
-            # for production use set_secure_cookie method
-            respond_to_authed_user(self, user)
-        else:
-            self.send_error(400, message='Invalid email/password.')
-
-
-class LogoutHandler(BaseHandler):
-    def get(self):
-        """Logs out a user."""
-        self.clear_all_cookies()
