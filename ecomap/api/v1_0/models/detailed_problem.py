@@ -1,81 +1,25 @@
-from api.v1_0.models import *
-from sqlalchemy import *
-from api.v1_0.bl.view_creator import view
+from sqlalchemy import Integer, String, Text, Column, ForeignKey, Enum, DateTime
+from geoalchemy2 import Geography
+from api.v1_0.models import Base, SEVERITY_TYPES, STATUSES
 
-metadata = Base.metadata
-user_t = User.__table__.c
-problems_activity_t = ProblemsActivity.__table__.c
-problems_t = Problem.__table__.c
-comments_t = Comment.__table__.c
-
-query1 = select(
-    [
-        problems_t.id,
-        problems_t.title,
-        problems_t.content,
-        problems_t.proposal,
-        problems_t.severity,
-        problems_t.status,
-        func.ST_GeogFromWKB(problems_t.location).label('location'),
-        problems_t.problem_type_id,
-        problems_t.region_id,
-        problems_activity_t.datetime,
-        func.count(comments_t.id).label('number_of_comments'),
-        func.count(problems_activity_t.id ).label('number_of_votes'),
-        user_t.first_name,
-        user_t.last_name
-    ]
-).where(text("problems_activities.activity_type = 'VOTE'"))
-j = Problem.__table__  # Initial table to join.
-table_list = [Comment.__table__, ProblemsActivity.__table__, User.__table__]
-for table in table_list:
-    j = j.outerjoin(table)
-query1 = query1.select_from(j)
-query1 = query1.group_by(
-    problems_t.id,
-    problems_activity_t.problem_id,
-    problems_activity_t.datetime,
-    user_t.first_name,
-    user_t.last_name,
-)
-
-query2 = select(
-    [
-        problems_t.id,
-        problems_t.title,
-        problems_t.content,
-        problems_t.proposal,
-        problems_t.severity,
-        problems_t.status,
-        func.ST_GeogFromWKB(problems_t.location).label('location'),
-        problems_t.problem_type_id,
-        problems_t.region_id,
-        problems_activity_t.datetime,
-        func.count(comments_t.id).label('number_of_comments'),
-        func.count(text("NULL")).label('number_of_votes'),
-        user_t.first_name,
-        user_t.last_name
-    ]
-).where(text("problems_activities.activity_type != 'VOTE'"))
-j = Problem.__table__  # Initial table to join.
-table_list = [Comment.__table__, ProblemsActivity.__table__, User.__table__]
-for table in table_list:
-    j = j.outerjoin(table)
-query2 = query2.select_from(j)
-query2 = query2.group_by(
-    problems_t.id,
-    problems_activity_t.problem_id,
-    problems_activity_t.datetime,
-    user_t.first_name,
-    user_t.last_name,
-)
-query = union(query2,query1)
-
-detailed_problem_view = view("detailed_problem", metadata, query)
-
-# the ORM would appreciate this
-assert detailed_problem_view.primary_key == [detailed_problem_view.c.id]
 
 
 class DetailedProblem(Base):
-    __table__ = detailed_problem_view
+    __tablename__ = 'detailed_problem'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(200), nullable=False)
+    content = Column(Text)
+    proposal = Column(Text)
+    severity = Column(Enum(*SEVERITY_TYPES, name='severitytypes'))
+    location = Column(Geography, nullable=False)
+    status = Column(Enum(*STATUSES, name='status'))
+    problem_type_id = Column(Integer, ForeignKey('problem_types.id'))
+    region_id = Column(Integer, ForeignKey('regions.id'))
+    first_name = Column(String(100), nullable=False)
+    last_name = Column(String(100), nullable=False)
+    datetime = Column(DateTime, nullable=False)
+    number_of_votes = Column(Integer)
+    number_of_comments = Column(Integer)
+
+

@@ -72,6 +72,7 @@ def init_db():
     fab_run('sudo -u postgres psql -f init_ecomap_db.sql;'
             'export PYTHONPATH=":/ecomap"')
     Base.metadata.create_all(get_db_engine(settings))
+    fab_run('sudo -u postgres psql -f /ecomap/api/dal/view.sql;')
 
 
 def populate_db(problems_count):

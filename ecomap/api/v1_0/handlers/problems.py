@@ -3,7 +3,7 @@ import json
 from api.v1_0.bl.utils import create_location
 from api.v1_0.bl.decs import (
     permission_control,
-    validation_json,
+    validation,
     check_if_exists
 )
 from api.v1_0.bl.modeldict import *
@@ -37,11 +37,13 @@ class ProblemHandler(BaseHandler):
         If problem id is specified **/api/v1/problems/3**, returns the
         data for the specified problem.
         """
-        problem = self.sess.query(DetailedProblem).get(int(problem_id))
-        self.write(get_dict_problem_data(problem))
+        problem =   self.sess.query(
+                DetailedProblem,
+                func.ST_AsGeoJSON(DetailedProblem.location))
+        self.write(generate_data(problem)[0])
 
     @permission_control
-    @validation_json(ProblemForm)
+    @validation(ProblemForm)
     def put(self, problem_id):
         x = self.request.arguments.pop('Latitude')
         y = self.request.arguments.pop('Longitude')
@@ -78,8 +80,9 @@ class ProblemHandler(BaseHandler):
 
 
 class ProblemsHandler(BaseHandler):
+
     def get(self):
-        current_revision = (self.sess.query(func.max(DetailedProblem.id)).
+        current_revision = (self.sess.query(func.max(ProblemsActivity.id)). \
                             first())[0]
         previous_revision = int(self.get_query_argument('rev', default=0))
         if previous_revision == 0:
@@ -122,7 +125,7 @@ class ProblemsHandler(BaseHandler):
                             message='Your revision is greater than current')
 
     @permission_control
-    @validation_json(ProblemForm)
+    @validation(ProblemForm)
     def post(self):
         """Store a new problem to the database."""
 

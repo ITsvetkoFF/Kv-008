@@ -8,7 +8,8 @@ class Comment(Base):
 
     id = Column(Integer, primary_key=True)
     content = Column(Text, nullable=False)
-    problem_id = Column(Integer, ForeignKey('problems.id'),
+    problem_id = Column(Integer,
+                        ForeignKey('problems.id', ondelete='CASCADE'),
                         nullable=False)
     user_id = Column(Integer, ForeignKey(u'users.id'),
                      nullable=False)
