@@ -1,5 +1,4 @@
 from inspect import isclass
-from datetime import datetime
 
 from api.v1_0.bl.utils import iso_datetime
 
@@ -66,11 +65,6 @@ def update_model_from_dict(model, model_dict):
     return model
 
 
-def get_dict_problem_data(problem):
-    problem_data = dict()
-    for c in problem.__table__.columns:
-        if isinstance(getattr(problem, c.name), datetime):
-            problem_data[c.name] = iso_datetime(getattr(problem, c.name))
-        else:
-            problem_data[c.name] = getattr(problem, c.name)
-    return problem_data
+
+
+

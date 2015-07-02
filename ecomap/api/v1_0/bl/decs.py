@@ -54,7 +54,7 @@ def permission_control(method):
     return wrapper
 
 
-def validation_json(model_form):
+def validation(model_form):
     Form = model_form
 
     def arguments_wrapper(method):
