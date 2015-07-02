@@ -6,7 +6,6 @@ import json
 from os.path import join
 from api.v1_0.bl.utils import create_location
 from api.v1_0.bl.decorators import permission_control, validation
-from api.v1_0.bl.modeldict import get_dict_problem_data
 from api.v1_0.bl.revision import (
     generate_data,
     revision,
@@ -43,8 +42,10 @@ class ProblemHandler(BaseHandler):
         If problem id is specified **/api/v1/problems/3**, returns the
         data for the specified problem.
         """
-        problem = self.sess.query(DetailedProblem).get(int(problem_id))
-        self.write(get_dict_problem_data(problem))
+        problem =   self.sess.query(
+                DetailedProblem,
+                func.ST_AsGeoJSON(DetailedProblem.location))
+        self.write(generate_data(problem)[0])
 
     @permission_control
     @validation(ProblemForm)
