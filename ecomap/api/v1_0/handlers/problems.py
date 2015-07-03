@@ -31,22 +31,28 @@ from api.v1_0.bl.photo import *
 
 
 class ProblemHandler(BaseHandler):
+
     def get(self, problem_id=None):
         """Returns the data for all the problems in the database.
 
         If problem id is specified **/api/v1/problems/3**, returns the
         data for the specified problem.
         """
-        problem =   self.sess.query(
-                DetailedProblem,
-                func.ST_AsGeoJSON(DetailedProblem.location))
-        self.write(generate_data(problem)[0])
+        problem = self.sess.query(
+            DetailedProblem,
+            func.ST_AsGeoJSON(DetailedProblem.location)).filter(
+            DetailedProblem.id == problem_id)
+        try:
+            data = generate_data(problem)[0]
+        except IndexError:
+            self.send_error(400, message='Entry not found for the given id.')
+        self.write(data)
 
     @permission_control
     @validation(ProblemForm)
     def put(self, problem_id):
-        x = self.request.arguments.pop('Latitude')
-        y = self.request.arguments.pop('Longitude')
+        x = self.request.arguments.pop('latitude')
+        y = self.request.arguments.pop('longitude')
         self.request.arguments['location'] = create_location(x, y)
         self.request.arguments['id'] = problem_id
         self.sess.query(Problem).filter_by(id=int(problem_id)). \
@@ -75,12 +81,8 @@ class ProblemHandler(BaseHandler):
         self.sess.add(activity)
         self.sess.commit()
 
-        self.sess.query(Problem).filter_by(id=int(problem_id)).delete()
-        self.sess.commit()
-
 
 class ProblemsHandler(BaseHandler):
-
     def get(self):
         current_revision = (self.sess.query(func.max(ProblemsActivity.id)). \
                             first())[0]
@@ -124,13 +126,13 @@ class ProblemsHandler(BaseHandler):
             self.send_error(400,
                             message='Your revision is greater than current')
 
-    @permission_control
+    # @permission_control
     @validation(ProblemForm)
     def post(self):
         """Store a new problem to the database."""
 
-        x = self.request.arguments.pop('Latitude')
-        y = self.request.arguments.pop('Longitude')
+        x = self.request.arguments['latitude']
+        y = self.request.arguments['longitude']
         problem = Problem(
             title=self.request.arguments['title'],
             content=self.request.arguments['content'],
@@ -155,14 +157,14 @@ class ProblemVoteHandler(BaseHandler):
     @check_if_exists(Problem)
     def post(self, problem_id):
         """Creates a vote record for the specified problem."""
-        new_vote = ProblemsActivity(
+        vote = ProblemsActivity(
             problem_id=int(problem_id),
             user_id=self.current_user,
             datetime=get_datetime(),
             activity_type='VOTE'
         )
 
-        self.sess.add(new_vote)
+        self.sess.add(vote)
         self.sess.commit()
 
 
@@ -172,7 +174,8 @@ class ProblemPhotosHandler(BaseHandler):
         """Returns all photo data for the specified problem."""
         photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
 
-        self.write(json.dumps([loaded_obj_data_to_dict(photo) for photo in photos]))
+        self.write(
+            json.dumps([loaded_obj_data_to_dict(photo) for photo in photos]))
 
     @check_if_exists(Problem)
     def post(self, problem_id):
