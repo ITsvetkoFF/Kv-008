@@ -14,8 +14,8 @@ from factories.user import (
     PermissionFactory,
     RoleFactory
 )
-from factories import session
 from api.v1_0.models import *
+import api.v1_0.tests.common as common
 
 
 for handler_name in [urlspec.handler_class.__name__ for urlspec in APIUrls]:
@@ -29,19 +29,19 @@ for handler_name in [urlspec.handler_class.__name__ for urlspec in APIUrls]:
             )
 
 role_admin = RoleFactory(name='admin')
-role_admin.permissions.extend(session.query(Permission).filter_by(
+role_admin.permissions.extend(common.Session.query(Permission).filter_by(
     modifier='ANY').all())
 
 # ProblemHandler id
-ph_id = session.query(Resource).filter(
+ph_id = common.Session.query(Resource).filter(
     Resource.name == 'ProblemHandler').first().id
 
 role_user = RoleFactory(name='user')
-role_user.permissions.extend(session.query(Permission).filter(
+role_user.permissions.extend(common.Session.query(Permission).filter(
     Permission.resource_id == ph_id).filter(
     Permission.modifier == 'ANY').filter(
     Permission.action == 'GET').all())
-role_user.permissions.extend(session.query(Permission).filter_by(
+role_user.permissions.extend(common.Session.query(Permission).filter_by(
     modifier='OWN').filter(Permission.resource_id != ph_id).all())
 
 user_admin = UserFactory(first_name='user', last_name='admin')
@@ -51,7 +51,7 @@ user_admin.roles.append(role_admin)
 for i in xrange(5):
     ProblemTypeFactory()
 
-problem_types = session.query(ProblemType).all()
+problem_types = common.Session.query(ProblemType).all()
 
 for i in xrange(int(sys.argv[1])):
     problem = ProblemFactory(
@@ -79,4 +79,4 @@ for i in xrange(int(sys.argv[1])):
     )
     CommentFactory(**kwargs)
 
-session.commit()
+common.Session.commit()

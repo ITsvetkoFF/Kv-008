@@ -21,9 +21,9 @@ class UserFactory(SQLAlchemyModelFactory):
         model = models.User
         sqlalchemy_session = common.Session
 
-    first_name = factory.sequence(lambda n: 'user_%s' % n)
+    first_name = factory.sequence(lambda n: 'user%s' % n)
     last_name = factory.lazy_attribute(
-        lambda obj: '%s_last_name' % obj.first_name)
+        lambda obj: '%s_lastname' % obj.first_name)
     email = factory.lazy_attribute(
         lambda obj: '%s@example.com' % obj.first_name)
     password = factory.lazy_attribute(lambda obj: '%s_pass' % obj.first_name)

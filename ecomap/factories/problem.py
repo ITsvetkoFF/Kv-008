@@ -2,13 +2,13 @@ import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
 from api.v1_0.models import *
-from factories import session
+import api.v1_0.tests.common as common
 from api.v1_0.bl.utils import get_datetime
 
 class RegionFactory(SQLAlchemyModelFactory):
     class Meta:
         model = Region
-        sqlalchemy_session = session
+        sqlalchemy_session = common.Session
 
     name = factory.sequence(lambda n: 'region_%s' % n)
     location = factory.sequence(lambda n: 'POINT(1%s 1%s)' % (n, n))
@@ -19,7 +19,7 @@ class ProblemTypeFactory(SQLAlchemyModelFactory):
 
     class Meta:
         model = ProblemType
-        sqlalchemy_session = session
+        sqlalchemy_session = common.Session
 
     type = factory.sequence(lambda n: 'problem_type_%s' % n)
 
@@ -29,7 +29,7 @@ class ProblemFactory(SQLAlchemyModelFactory):
 
     class Meta:
         model = Problem
-        sqlalchemy_session = session
+        sqlalchemy_session = common.Session
 
     title = factory.sequence(lambda n: 'problem_%s' % n)
     content = factory.lazy_attribute(lambda obj: '%s_content' % obj.title)
@@ -48,7 +48,7 @@ class ProblemActivityFactory(SQLAlchemyModelFactory):
 
     class Meta:
         model = ProblemsActivity
-        sqlalchemy_session = session
+        sqlalchemy_session = common.Session
 
     problem = None
     user = None
