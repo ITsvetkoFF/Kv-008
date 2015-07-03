@@ -18,8 +18,7 @@ from api.v1_0.handlers.auth import (
     GoogleAuthHandler,
     RegisterHandler,
     LoginHandler,
-    LogoutHandler,
-    FacebookHandler
+    LogoutHandler
 )
 from api.v1_0.handlers.problems import (
     ProblemsHandler,
@@ -46,7 +45,6 @@ APIUrls = [
     URLSpec(r'/api/logout', LogoutHandler),
     URLSpec(r'/api/auth/facebook', FacebookAuthHandler, name='fb_auth'),
     URLSpec(r'/api/auth/google', GoogleAuthHandler, name='google_auth'),
-    # URLSpec(r'/api/auth/facebook', FacebookAuthHandler, name='fb_auth'),
 
     URLSpec(r'/api/users(?:/(\d+))?', UsersHandler),
 

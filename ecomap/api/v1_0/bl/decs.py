@@ -26,7 +26,7 @@ def check_if_exists(model):
 
 def permission_control(method):
     @wraps(method)
-    def wrapper(handler, obj_id):
+    def wrapper(handler, obj_id = None):
         definition_query = {'ProblemHandler': handler.sess.query(
             ProblemsActivity.user_id).filter_by(problem_id=obj_id,
                                                 activity_type='ADDED').first()}
@@ -55,19 +55,18 @@ def permission_control(method):
 
 
 def validation(model_form):
-    Form = model_form
 
     def arguments_wrapper(method):
         @wraps(method)
-        def wrapper(handler, obj_id):
+        def wrapper(handler):
             try:
-                form = Form.from_json(handler.request.arguments,
+                form = model_form.from_json(handler.request.arguments,
                                       skip_unknown_keys=False)
             except InvalidData as e:
                 message = e.message
                 handler.send_error(400, message=message)
             if form.validate():
-                method(handler, obj_id)
+                method(handler)
             else:
                 message = form.errors
                 handler.send_error(400, message=message)
