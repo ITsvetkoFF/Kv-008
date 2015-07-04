@@ -24,7 +24,7 @@ class RegisterHandler(BaseHandler):
             if not new_user:
                 return self.send_error(400, message='Email already in use.')
 
-            complete_authentication(self, new_user)
+            complete_auth(self, new_user)
         else:
             self.send_error(400, message=form.errors)
 
@@ -35,7 +35,7 @@ class FacebookHandler(BaseHandler):
             User.facebook_id == self.request.arguments['id']).first()
 
         if user:
-            complete_authentication(self, user)
+            complete_auth(self, user)
         else:
             new_user = store_new_user(
                 self.sess, create_fb_user(self.request.arguments))
@@ -45,7 +45,7 @@ class FacebookHandler(BaseHandler):
             if not new_user:
                 return self.send_error(400, message='Email already in use.')
 
-            complete_authentication(self, new_user)
+            complete_auth(self, new_user)
 
 
 class LoginHandler(BaseHandler):
@@ -67,7 +67,7 @@ class LoginHandler(BaseHandler):
         user = load_user_by_email(self, form.email.data)
         # check if user exists and her password matches
         if user and user.password == form.password.data:
-            complete_authentication(self, user)
+            complete_auth(self, user)
         else:
             self.send_error(400, message='Invalid email/password.')
 

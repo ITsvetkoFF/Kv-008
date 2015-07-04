@@ -3,7 +3,9 @@ from api.v1_0.models.user import User
 from api.v1_0.models.permission import Permission
 
 
-def complete_authentication(handler, user):
+def complete_auth(handler, user):
+    """Completes authentication process setting a cookie and writing some
+    user data to the client."""
     handler.set_cookie('user_id', str(user.id))
     handler.write({
         'first_name': user.first_name,
@@ -14,12 +16,14 @@ def complete_authentication(handler, user):
 
 
 def get_user_perms(session, user_id):
-    session.query(
+    """Returns a list of all permissions (distinct if a user has
+    multiple roles with common permissions)."""
+    return session.query(
         Permission.resource_name,
         Permission.action,
         Permission.modifier
-    ).join(RolePermission).filter(
-        RolePermission.role.in_(get_user_roles(session, user_id)))
+    ).join(RolePermission).filter(RolePermission.role.in_(
+            get_user_roles(session, user_id))).distinct().all()
 
 
 def get_user_roles(session, user_id):
