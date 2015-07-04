@@ -1,5 +1,6 @@
+from api.v1_0.models._config import UserRole, RolePermission
 from api.v1_0.models.user import User
-from api.v1_0.bl.modeldict import loaded_obj_data_to_dict as lodtod
+from api.v1_0.models.permission import Permission
 
 
 def complete_authentication(handler, user):
@@ -7,12 +8,23 @@ def complete_authentication(handler, user):
     handler.write({
         'first_name': user.first_name,
         'last_name': user.last_name,
-        'user_roles': [role.name for role in user.roles],
-        # I think that looking up a resource in an object is better
-        # that in an array.
-        'user_perms': {perm.resource.name: lodtod(perm) for
-                       role in user.roles for perm in role.permissions}
+        'user_roles': get_user_roles(handler.sess, user.id),
+        'user_perms': get_user_perms()
     })
+
+
+def get_user_perms(session, user_id):
+    session.query(
+        Permission.resource_name,
+        Permission.action,
+        Permission.modifier
+    ).join(RolePermission).filter(
+        RolePermission.role.in_(get_user_roles(session, user_id)))
+
+
+def get_user_roles(session, user_id):
+    return [row.role for row in
+            session.query(UserRole.role).filter(UserRole.user == user_id)]
 
 
 def store_new_user(session, new_user):
@@ -56,24 +68,3 @@ def get_absolute_redirect_uri(handler, url_name):
 
 def load_user_by_email(handler, email):
     return handler.sess.query(User).filter(User.email == email).first()
-
-
-def combine_permissions(user):
-    perms = dict()
-    for role in user.roles:
-        for perm in role.permissions:
-            if perm.resource.name not in perms:
-                perms[perm.resource.name] = lodtod(perm)
-            else:
-                if perms[perm.resource.name]['action'] == perm.action:
-                    perms[perm.resource.name]['modifier'] = compare_modifiers(
-                        perms[perm.resource.name]['modifier'], perm.modifier)
-                else:
-                    perms
-
-
-MOD_VALUES = {'NONE': 0, 'OWN': 1, 'ANY': 2}
-
-
-def compare_modifiers(mod1, mod2):
-    return mod1 if MOD_VALUES[mod1] > MOD_VALUES[mod2] else mod2

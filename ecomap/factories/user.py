@@ -29,19 +29,36 @@ class UserFactory(SQLAlchemyModelFactory):
     password = factory.lazy_attribute(lambda obj: '%s_pass' % obj.first_name)
 
 
-class PermissionFactory(SQLAlchemyModelFactory):
+class UserRoleFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = models.Permission
+        model = models.UserRole
         sqlalchemy_session = common.Session
 
-    resource = None
-    action = None
-    modifier = None
-
+    user = None
+    role = None
 
 class ResourceFactory(SQLAlchemyModelFactory):
     class Meta:
         model = models.Resource
         sqlalchemy_session = common.Session
 
-    name = None
+    name = factory.sequence(lambda n: 'resource%s' % n)
+
+
+class PermissionFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = models.Permission
+        sqlalchemy_session = common.Session
+
+    resource_name = None
+    action = None
+    modifier = None
+
+
+class RolePermissionFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = models.RolePermission
+        sqlalchemy_session = common.Session
+
+    role = None
+    permission = None

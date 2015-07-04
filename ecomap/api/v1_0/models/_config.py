@@ -11,30 +11,17 @@ ACTIONS = ('GET', 'PUT', 'POST', 'DELETE')
 
 Base = declarative_base()
 
-role_permissions = Table(
-    'role_permissions', Base.metadata,
-    Column('role', String(100), ForeignKey('roles.name'),
-           primary_key=True),
-    Column('permission', Integer, ForeignKey('permissions.id'),
-           primary_key=True)
-)
-
 # mapping classes to use joins
-class RolePermission(object):
-    pass
+class RolePermission(Base):
+    __tablename__ = 'role_permissions'
+
+    role = Column(String(100), ForeignKey('roles.name'), primary_key=True)
+    permission = Column(Integer, ForeignKey('permissions.id'),
+                        primary_key=True)
 
 
-orm.mapper(RolePermission, role_permissions)
+class UserRole(Base):
+    __tablename__ = 'user_roles'
 
-user_roles = Table(
-    'user_roles', Base.metadata,
-    Column('user', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('role', String(100), ForeignKey('roles.name'), primary_key=True),
-)
-
-
-class UserRole(object):
-    pass
-
-
-orm.mapper(UserRole, user_roles)
+    user = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    role = Column(String(100), ForeignKey('roles.name'), primary_key=True)

@@ -63,8 +63,3 @@ def update_model_from_dict(model, model_dict):
         setattr(model, attr, model_dict[attr])
 
     return model
-
-
-
-
-

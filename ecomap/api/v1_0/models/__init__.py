@@ -5,8 +5,8 @@ from ._config import (
     STATUSES,
     SEVERITY_TYPES,
     MODIFIERS,
-    role_permissions,
-    user_roles
+    RolePermission,
+    UserRole
 )
 
 from .problem_type import ProblemType
