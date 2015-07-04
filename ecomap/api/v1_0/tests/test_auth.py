@@ -12,7 +12,7 @@ class LoginHTTPTest(BaseHTTPTest):
         BaseHTTPTest.setUp(self)
 
         self.session = common.Session()
-        self.session.add(UserFactory(first_name='Mike', last_name='Ross'))
+        UserFactory(first_name='Mike', last_name='Ross')
         self.session.commit()
 
     def test_login_success(self):
