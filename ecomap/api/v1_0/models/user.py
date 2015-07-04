@@ -29,4 +29,3 @@ class User(Base):
     def check_new_email(self, session):
         """Check email field unique constraint."""
         return session.query(User).filter(User.email == self.email).first()
-
