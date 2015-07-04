@@ -44,8 +44,9 @@ class BaseHandler(tornado.web.RequestHandler):
                     return perm.modifier
 
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "http://127.0.0.1:8888 "
-                                                       "http://localhost:8888")
+        if self.request.headers.get("Origin"):
+            self.set_header("Access-Control-Allow-Origin",
+                            self.request.headers.get("Origin"))
         self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Cache-control", "no-store, no-cache, "
                                          "must-revalidate, max-age=0")

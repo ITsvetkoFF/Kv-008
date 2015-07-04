@@ -13,15 +13,15 @@ class AllProblemsHandler(BaseHandler):
         for problem, point_json in self.sess.query(
                 DetailedProblem, func.ST_AsGeoJSON(DetailedProblem.location)
         ):
-            latitude, longitude = json.loads(point_json)['coordinates']
+            Latitude, Longitude = json.loads(point_json)['coordinates']
             all_problems.append(dict(
                 id=problem.id,
                 title=problem.title,
                 status=problem.status,
                 datetime=str(problem.datetime),
                 problem_type_id=problem.problem_type_id,
-                latitude=latitude,
-                longitude=longitude
+                Latitude=Latitude,
+                Longitude=Longitude
             ))
 
         json_string = json.dumps(all_problems, ensure_ascii=False)

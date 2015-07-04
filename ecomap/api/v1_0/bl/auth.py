@@ -11,7 +11,7 @@ def complete_auth(handler, user):
         'first_name': user.first_name,
         'last_name': user.last_name,
         'user_roles': get_user_roles(handler.sess, user.id),
-        'user_perms': get_user_perms()
+        'user_perms': get_user_perms(handler.sess, user.id)
     })
 
 
