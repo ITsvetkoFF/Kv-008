@@ -4,21 +4,19 @@ import tornado.escape
 
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models import User
-from api.v1_0.bl.decs import check_if_exists
+from api.v1_0.bl.decs import check_if_exists, check_permission
 from api.v1_0.bl.modeldict import (
-    loaded_obj_data_to_dict,
+    get_row_data,
     update_loaded_obj_with_data
 )
 
 
 class UsersHandler(BaseHandler):
-    def get(self, user_id):
-        """Returns data for all users from the database or for the
-        specified user.
+    @tornado.web.authenticated
+    def get(self):
+        """Returns data for all users in the database.
 
-        | If you pass user id (specifying it in the url)
-        | **/api/v1/users/3**,
-        | you'll get something like this:
+        | User data is like this:
 
         .. code-block:: json
 
@@ -32,22 +30,30 @@ class UsersHandler(BaseHandler):
              "region_id": null
            }
 
-        | Otherwise you'll get data for all users
-        | **/api/v1/users**.
         """
-        if user_id is None:
-            self.write(tornado.escape.json_encode(
-                [loaded_obj_data_to_dict(user) for user in self.sess.query(User)]))
-        else:
-            self.write(loaded_obj_data_to_dict(self.sess.query(User).get(user_id)))
+        self.write(tornado.escape.json_encode(
+            [get_row_data(user) for user in self.sess.query(User)]))
 
-    @check_if_exists(User)
+
+class UserHandler(BaseHandler):
+    @tornado.web.authenticated
+    @check_if_exists('user')
+    @check_permission('user')
+    def get(self, user_id):
+        """Returns data for the specified user."""
+        self.write(get_row_data(self.sess.query(User).get(user_id)))
+
+    @tornado.web.authenticated
+    @check_if_exists('user')
+    @check_permission('user')
     def delete(self, user_id):
         """Deletes the specified user."""
         self.sess.delete(self.sess.query(User).get(user_id))
         self.sess.commit()
 
-    @check_if_exists(User)
+    @tornado.web.authenticated
+    @check_if_exists('user')
+    @check_permission('user')
     def put(self, user_id):
         """Updates data for the specified user.
 
@@ -56,8 +62,9 @@ class UsersHandler(BaseHandler):
         where key is a model column fields and values it's a values that you
         needs to change.
         """
-        user = update_loaded_obj_with_data(
-            self.sess.query(User).get(user_id),
+        user = self.sess.query(User).get(user_id)
+        update_loaded_obj_with_data(
+            user,
             self.request.arguments
         )
         self.sess.commit()

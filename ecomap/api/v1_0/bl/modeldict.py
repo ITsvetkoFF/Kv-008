@@ -3,7 +3,7 @@ from inspect import isclass
 from api.v1_0.bl.utils import iso_datetime
 
 
-def loaded_obj_data_to_dict(obj):
+def get_row_data(obj):
     """Put data from the object associated table row into a dict."""
     data = {col.name: getattr(obj, col.name) for col in obj.__table__.columns}
     if 'datetime' in data:

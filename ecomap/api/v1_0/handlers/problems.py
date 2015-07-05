@@ -2,7 +2,6 @@ import json
 
 from api.v1_0.bl.utils import create_location
 from api.v1_0.bl.decs import (
-    permission_control,
     validation,
     check_if_exists
 )
@@ -48,7 +47,6 @@ class ProblemHandler(BaseHandler):
             self.send_error(400, message='Entry not found for the given id.')
         self.write(data)
 
-    @permission_control
     @validation(ProblemForm)
     def put(self, problem_id):
         x = self.request.arguments.pop('latitude')
@@ -69,7 +67,6 @@ class ProblemHandler(BaseHandler):
         self.sess.add(activity)
         self.sess.commit()
 
-    @permission_control
     def delete(self, problem_id):
         """Delete a problem from the database by given problem id."""
 
@@ -126,7 +123,6 @@ class ProblemsHandler(BaseHandler):
             self.send_error(400,
                             message='Your revision is greater than current')
 
-    # @permission_control
     @validation(ProblemForm)
     def post(self):
         """Store a new problem to the database."""
@@ -154,7 +150,7 @@ class ProblemsHandler(BaseHandler):
 
 
 class ProblemVoteHandler(BaseHandler):
-    @check_if_exists(Problem)
+    @check_if_exists('problem')
     def post(self, problem_id):
         """Creates a vote record for the specified problem."""
         vote = ProblemsActivity(
@@ -169,15 +165,15 @@ class ProblemVoteHandler(BaseHandler):
 
 
 class ProblemPhotosHandler(BaseHandler):
-    @check_if_exists(Problem)
+    @check_if_exists('problem')
     def get(self, problem_id):
         """Returns all photo data for the specified problem."""
         photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
 
         self.write(
-            json.dumps([loaded_obj_data_to_dict(photo) for photo in photos]))
+            json.dumps([get_row_data(photo) for photo in photos]))
 
-    @check_if_exists(Problem)
+    @check_if_exists('problem')
     def post(self, problem_id):
         """Stores uploaded photos to the hard drive, creates and stores
         thumbnails, stores photo data to the database.

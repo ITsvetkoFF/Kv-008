@@ -3,7 +3,7 @@ import os
 from tornado.web import URLSpec, StaticFileHandler
 
 from api.v1_0.handlers.photos import PhotoHandler
-from api.v1_0.handlers.users import UsersHandler
+from api.v1_0.handlers.users import UsersHandler, UserHandler
 from api.v1_0.handlers.admin import (
     RolesHandler,
     ResourcesHandler
@@ -14,11 +14,10 @@ from api.v1_0.handlers.pages import (
 )
 from api.v1_0.handlers.allproblems import AllProblemsHandler
 from api.v1_0.handlers.auth import (
-    FacebookAuthHandler,
-    GoogleAuthHandler,
     RegisterHandler,
     LoginHandler,
-    LogoutHandler
+    LogoutHandler,
+    FacebookHandler
 )
 from api.v1_0.handlers.problems import (
     ProblemsHandler,
@@ -33,7 +32,6 @@ from api.v1_0.handlers.comments import (
 import docs
 import static
 
-# a non-capturing group: (?:...)
 APIUrls = [
     URLSpec(r'/static/photos/(.*)', StaticFileHandler,
             {'path': static.PHOTOS_ROOT}),
@@ -43,10 +41,10 @@ APIUrls = [
     URLSpec(r'/api/register', RegisterHandler),
     URLSpec(r'/api/login', LoginHandler),
     URLSpec(r'/api/logout', LogoutHandler),
-    URLSpec(r'/api/auth/facebook', FacebookAuthHandler, name='fb_auth'),
-    URLSpec(r'/api/auth/google', GoogleAuthHandler, name='google_auth'),
+    URLSpec(r'/api/auth/facebook', FacebookHandler),
 
-    URLSpec(r'/api/users(?:/(\d+))?', UsersHandler),
+    URLSpec(r'/api/users', UsersHandler),
+    URLSpec(r'/api/users/(\d+)', UserHandler),
 
     URLSpec(r'/api/allproblems', AllProblemsHandler),
     URLSpec(r'/api/problems', ProblemsHandler),

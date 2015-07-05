@@ -1,6 +1,6 @@
 import os
 
-from api.v1_0.bl.modeldict import loaded_obj_data_to_dict
+from api.v1_0.bl.modeldict import get_row_data
 
 from api.v1_0.bl.decs import check_if_exists
 from api.v1_0.handlers.base import BaseHandler
@@ -9,13 +9,13 @@ import static
 
 
 class PhotoHandler(BaseHandler):
-    @check_if_exists(Photo)
+    @check_if_exists('photo')
     def get(self, photo_id):
         """Returns data for the specified photo."""
         photo = self.sess.query(Photo).get(photo_id)
-        self.write(loaded_obj_data_to_dict(photo))
+        self.write(get_row_data(photo))
 
-    @check_if_exists(Photo)
+    @check_if_exists('photo')
     def put(self, photo_id):
         """Updates data for the specified photo.
 
@@ -25,7 +25,7 @@ class PhotoHandler(BaseHandler):
 
         self.sess.commit()
 
-    @check_if_exists(Photo)
+    @check_if_exists('photo')
     def delete(self, photo_id):
         """Deletes the specified photo.
 

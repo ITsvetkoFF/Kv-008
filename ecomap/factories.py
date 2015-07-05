@@ -23,33 +23,43 @@ import api.v1_0.tests.common as common
 if __name__ == '__main__':
     role_admin = RoleFactory(name='admin')
     role_user = RoleFactory(name='user')
+    # role without permissions
+    role = RoleFactory(name='role')
 
     # insert resources and permissions
-    for x in xrange(8):
-        res = ResourceFactory()
+    for name in ('user', 'photo', 'problem', 'comment', 'admin', 'all_users'):
+        res = ResourceFactory(name=name)
 
     common.Session.commit()
     for res in common.Session.query(Resource):
         for a in ACTIONS:
-            perm = PermissionFactory(action=a, resource_name=res.name)
-            # need to commit to get perm.id
+            perm_any = PermissionFactory(action=a,
+                                         resource_name=res.name,
+                                         modifier='ANY')
+            perm_own = PermissionFactory(action=a,
+                                         resource_name=res.name,
+                                         modifier='OWN')
+            # need to commit to get id
             common.Session.commit()
 
+            # populate role_admin with 'ANY' permissions
             RolePermissionFactory(
                 role=role_admin.name,
-                permission=perm.id
+                permission=perm_any.id
             )
-            # populate role_user with the same permissions
+            # populate role_user with the 'OWN' permissions
             RolePermissionFactory(
                 role=role_user.name,
-                permission=perm.id
+                permission=perm_own.id
             )
 
     user_admin = UserFactory(first_name='user', last_name='admin')
+    user = UserFactory(first_name='No', last_name='Permissions')
     common.Session.commit()
 
     UserRoleFactory(user=user_admin.id, role=role_admin.name)
     UserRoleFactory(user=user_admin.id, role=role_user.name)
+    UserRoleFactory(user=user.id, role=role.name)
     common.Session.commit()
 
     # insert problem types
