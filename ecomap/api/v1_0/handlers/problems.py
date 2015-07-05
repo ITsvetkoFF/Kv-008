@@ -1,10 +1,11 @@
 import json
+import tornado.web
 
 from api.v1_0.bl.utils import create_location
 from api.v1_0.bl.decs import (
     validate_payload,
-    check_if_exists
-)
+    check_if_exists,
+    check_permission)
 from api.v1_0.bl.modeldict import *
 from api.v1_0.bl.revision import (
     generate_data,
@@ -47,6 +48,9 @@ class ProblemHandler(BaseHandler):
             self.send_error(400, message='Entry not found for the given id.')
         self.write(data)
 
+    @tornado.web.authenticated
+    @check_if_exists('problem')
+    @check_permission('problem')
     @validate_payload(ProblemForm)
     def put(self, problem_id):
         x = self.request.arguments.pop('latitude')
@@ -67,8 +71,11 @@ class ProblemHandler(BaseHandler):
         self.sess.add(activity)
         self.sess.commit()
 
+    @tornado.web.authenticated
+    @check_if_exists('problem')
+    @check_permission('problem')
     def delete(self, problem_id):
-        """Delete a problem from the database by given problem id."""
+        """Deletes a problem from the database by given problem id."""
 
         activity = ProblemsActivity(
             problem_id=int(problem_id),
@@ -80,6 +87,7 @@ class ProblemHandler(BaseHandler):
 
 
 class ProblemsHandler(BaseHandler):
+    @tornado.web.authenticated
     def get(self):
         current_revision = (self.sess.query(func.max(ProblemsActivity.id)). \
                             first())[0]
@@ -123,6 +131,8 @@ class ProblemsHandler(BaseHandler):
             self.send_error(400,
                             message='Your revision is greater than current')
 
+    @tornado.web.authenticated
+    @check_permission('problem')
     @validate_payload(ProblemForm)
     def post(self):
         """Store a new problem to the database."""
@@ -150,7 +160,9 @@ class ProblemsHandler(BaseHandler):
 
 
 class ProblemVoteHandler(BaseHandler):
+    @tornado.web.authenticated
     @check_if_exists('problem')
+    @check_permission('vote')
     def post(self, problem_id):
         """Creates a vote record for the specified problem."""
         vote = ProblemsActivity(
@@ -165,6 +177,7 @@ class ProblemVoteHandler(BaseHandler):
 
 
 class ProblemPhotosHandler(BaseHandler):
+    @tornado.web.authenticated
     @check_if_exists('problem')
     def get(self, problem_id):
         """Returns all photo data for the specified problem."""
@@ -173,7 +186,9 @@ class ProblemPhotosHandler(BaseHandler):
         self.write(
             json.dumps([get_row_data(photo) for photo in photos]))
 
+    @tornado.web.authenticated
     @check_if_exists('problem')
+    @check_permission('problem_photo')
     def post(self, problem_id):
         """Stores uploaded photos to the hard drive, creates and stores
         thumbnails, stores photo data to the database.

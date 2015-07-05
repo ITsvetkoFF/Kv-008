@@ -18,7 +18,9 @@ from factories.user import (
 )
 from api.v1_0.models import *
 import api.v1_0.tests.common as common
+
 from factories import RESOURCES
+
 
 if __name__ == '__main__':
     role_admin = RoleFactory(name='admin')

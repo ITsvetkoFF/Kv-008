@@ -64,8 +64,5 @@ class UserHandler(BaseHandler):
         needs to change.
         """
         user = self.sess.query(User).get(user_id)
-        update_obj(
-            user,
-            self.request.arguments
-        )
+        update_obj(user, self.request.arguments)
         self.sess.commit()
