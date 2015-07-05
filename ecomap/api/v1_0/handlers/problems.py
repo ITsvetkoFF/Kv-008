@@ -2,7 +2,7 @@ import json
 
 from api.v1_0.bl.utils import create_location
 from api.v1_0.bl.decs import (
-    validation,
+    validate_payload,
     check_if_exists
 )
 from api.v1_0.bl.modeldict import *
@@ -47,7 +47,7 @@ class ProblemHandler(BaseHandler):
             self.send_error(400, message='Entry not found for the given id.')
         self.write(data)
 
-    @validation(ProblemForm)
+    @validate_payload(ProblemForm)
     def put(self, problem_id):
         x = self.request.arguments.pop('latitude')
         y = self.request.arguments.pop('longitude')
@@ -123,7 +123,7 @@ class ProblemsHandler(BaseHandler):
             self.send_error(400,
                             message='Your revision is greater than current')
 
-    @validation(ProblemForm)
+    @validate_payload(ProblemForm)
     def post(self):
         """Store a new problem to the database."""
 

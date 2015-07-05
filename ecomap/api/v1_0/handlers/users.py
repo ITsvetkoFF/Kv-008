@@ -7,12 +7,13 @@ from api.v1_0.models import User
 from api.v1_0.bl.decs import check_if_exists, check_permission
 from api.v1_0.bl.modeldict import (
     get_row_data,
-    update_loaded_obj_with_data
+    update_obj
 )
 
 
 class UsersHandler(BaseHandler):
     @tornado.web.authenticated
+    @check_permission('all_users')
     def get(self):
         """Returns data for all users in the database.
 
@@ -63,7 +64,7 @@ class UserHandler(BaseHandler):
         needs to change.
         """
         user = self.sess.query(User).get(user_id)
-        update_loaded_obj_with_data(
+        update_obj(
             user,
             self.request.arguments
         )

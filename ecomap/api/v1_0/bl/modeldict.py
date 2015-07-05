@@ -12,7 +12,7 @@ def get_row_data(obj):
     return data
 
 
-def create_obj_with_data(model, data):
+def create_obj(model, data):
     return model(**data)
 
     # doesn't make sense
@@ -28,7 +28,7 @@ def create_obj_with_data(model, data):
     #     )
 
 
-def update_loaded_obj_with_data(obj, data):
+def update_obj(obj, data):
     obj.__dict__.update(data)
     return obj
 

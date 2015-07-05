@@ -1,21 +1,30 @@
 import os
+import tornado.web
 
 from api.v1_0.bl.modeldict import get_row_data
 
-from api.v1_0.bl.decs import check_if_exists
+from api.v1_0.bl.decs import (
+    check_if_exists,
+    check_permission,
+    validate_payload
+)
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models.photo import Photo
 import static
 
 
 class PhotoHandler(BaseHandler):
+    @tornado.web.authenticated
     @check_if_exists('photo')
+    @check_permission('photo')
     def get(self, photo_id):
         """Returns data for the specified photo."""
         photo = self.sess.query(Photo).get(photo_id)
         self.write(get_row_data(photo))
 
+    @tornado.web.authenticated
     @check_if_exists('photo')
+    @check_permission('photo')
     def put(self, photo_id):
         """Updates data for the specified photo.
 
@@ -25,7 +34,9 @@ class PhotoHandler(BaseHandler):
 
         self.sess.commit()
 
+    @tornado.web.authenticated
     @check_if_exists('photo')
+    @check_permission('photo')
     def delete(self, photo_id):
         """Deletes the specified photo.
 

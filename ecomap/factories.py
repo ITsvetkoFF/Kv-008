@@ -18,7 +18,7 @@ from factories.user import (
 )
 from api.v1_0.models import *
 import api.v1_0.tests.common as common
-
+from factories import RESOURCES
 
 if __name__ == '__main__':
     role_admin = RoleFactory(name='admin')
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     role = RoleFactory(name='role')
 
     # insert resources and permissions
-    for name in ('user', 'photo', 'problem', 'comment', 'admin', 'all_users'):
+    for name in RESOURCES:
         res = ResourceFactory(name=name)
 
     common.Session.commit()
