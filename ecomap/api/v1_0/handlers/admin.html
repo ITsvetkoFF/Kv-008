@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="application/json; charset=UTF-8"/>
+  <title>Permissions</title>
+</head>
+<body>
+<div name="body">
+  <form action="/api/admin" method="post" enctype='application/json'>
+
+    <table border="2">
+
+      <thead>
+      <td>Role/Resource</td>
+      {% for role in roles %}
+      <td>
+        <p>{{role}}</p>
+      </td>
+      {% end %}
+      </thead>
+
+      {% for res_meth in res_methods %}
+      <tr name="{{ res_meth }}">
+        <td>{{ res_meth }}</td>
+        {% for role in roles %}
+        <td name="{{ role }}">
+          <select name="{{ role }}">
+            {% for mod in mods %}
+            <option value=''>{{ mod }}</option>
+            {% end %}
+          </select>
+          </p>
+          {% end %}
+        </td>
+        {% end %}
+      </tr>
+
+    </table>
+    <input type="submit" , value="Submit">
+
+  </form>
+</div>
+</body>
+</html>
