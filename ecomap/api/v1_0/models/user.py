@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 
 from wtforms.validators import Email
 
-from api.v1_0.models._config import user_roles
 from api.v1_0.models import Base
 
 
@@ -23,7 +22,6 @@ class User(Base):
     google_id = Column(String(100))
     facebook_id = Column(String(100))
 
-    roles = relationship('Role', secondary=user_roles)
     region = relationship('Region')
 
     def check_new_email(self, session):

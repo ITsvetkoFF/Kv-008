@@ -1,47 +1,59 @@
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
-import api.v1_0.models as models
-import api.v1_0.tests.common as common
+import api.v1_0.models as md
+import factories.common as cm
 
 
 class RoleFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = models.Role
-        sqlalchemy_session = common.Session
+        model = md.Role
+        sqlalchemy_session = cm.Session
 
     name = None
 
 
 class UserFactory(SQLAlchemyModelFactory):
-    """Creates a new user. You need to append role object to its attribute
-    roles manually."""
-
     class Meta:
-        model = models.User
-        sqlalchemy_session = common.Session
+        model = md.User
+        sqlalchemy_session = cm.Session
 
-    first_name = factory.sequence(lambda n: 'user%s' % n)
-    last_name = factory.lazy_attribute(
+    first_name = factory.Sequence(lambda n: 'user%d' % n)
+
+    last_name = factory.LazyAttribute(
         lambda obj: '%s_lastname' % obj.first_name)
-    email = factory.lazy_attribute(
+
+    email = factory.LazyAttribute(
         lambda obj: '%s@example.com' % obj.first_name)
-    password = factory.lazy_attribute(lambda obj: '%s_pass' % obj.first_name)
+
+    password = factory.LazyAttribute(
+        lambda obj: '%s_pass' % obj.first_name)
+
+
+
+class UserRoleFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = md.UserRole
+        sqlalchemy_session = cm.Session
+
+    user = factory.SubFactory(UserFactory)
+    role = None
 
 
 class PermissionFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = models.Permission
-        sqlalchemy_session = common.Session
+        model = md.Permission
+        sqlalchemy_session = cm.Session
 
-    resource = None
+    res = None
     action = None
     modifier = None
 
 
-class ResourceFactory(SQLAlchemyModelFactory):
+class RolePermissionFactory(SQLAlchemyModelFactory):
     class Meta:
-        model = models.Resource
-        sqlalchemy_session = common.Session
+        model = md.RolePermission
+        sqlalchemy_session = cm.Session
 
-    name = None
+    role = None
+    perm = factory.SubFactory(PermissionFactory)

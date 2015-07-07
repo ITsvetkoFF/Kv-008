@@ -1,10 +1,13 @@
 import json
 
+import tornado.web
+
 from api.v1_0.bl.utils import create_location
 from api.v1_0.bl.decs import (
     permission_control,
     validation,
-    check_if_exists
+    check_if_exists,
+    check_permission
 )
 from api.v1_0.bl.modeldict import *
 from api.v1_0.bl.revision import (
@@ -153,8 +156,10 @@ class ProblemsHandler(BaseHandler):
         self.sess.commit()
 
 
-class ProblemVoteHandler(BaseHandler):
+class VoteHandler(BaseHandler):
+    @tornado.web.authenticated
     @check_if_exists(Problem)
+    @check_permission
     def post(self, problem_id):
         """Creates a vote record for the specified problem."""
         vote = ProblemsActivity(
@@ -169,15 +174,18 @@ class ProblemVoteHandler(BaseHandler):
 
 
 class ProblemPhotosHandler(BaseHandler):
+    @tornado.web.authenticated
     @check_if_exists(Problem)
     def get(self, problem_id):
         """Returns all photo data for the specified problem."""
         photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
 
         self.write(
-            json.dumps([loaded_obj_data_to_dict(photo) for photo in photos]))
+            json.dumps([get_row_data(photo) for photo in photos]))
 
+    @tornado.web.authenticated
     @check_if_exists(Problem)
+    @check_permission
     def post(self, problem_id):
         """Stores uploaded photos to the hard drive, creates and stores
         thumbnails, stores photo data to the database.

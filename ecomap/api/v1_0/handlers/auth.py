@@ -24,7 +24,7 @@ class RegisterHandler(BaseHandler):
             if not new_user:
                 return self.send_error(400, message='Email already in use.')
 
-            complete_authentication(self, new_user)
+            complete_auth(self, new_user)
         else:
             self.send_error(400, message=form.errors)
 
@@ -35,7 +35,7 @@ class FacebookHandler(BaseHandler):
             User.facebook_id == self.request.arguments['id']).first()
 
         if user:
-            complete_authentication(self, user)
+            complete_auth(self, user)
         else:
             new_user = store_new_user(
                 self.sess, create_fb_user(self.request.arguments))
@@ -45,7 +45,7 @@ class FacebookHandler(BaseHandler):
             if not new_user:
                 return self.send_error(400, message='Email already in use.')
 
-            complete_authentication(self, new_user)
+            complete_auth(self, new_user)
 
 
 class LoginHandler(BaseHandler):
@@ -67,7 +67,7 @@ class LoginHandler(BaseHandler):
         user = load_user_by_email(self, form.email.data)
         # check if user exists and her password matches
         if user and user.password == form.password.data:
-            complete_authentication(self, user)
+            complete_auth(self, user)
         else:
             self.send_error(400, message='Invalid email/password.')
 
@@ -76,109 +76,3 @@ class LogoutHandler(BaseHandler):
     def get(self):
         """Logs out a user."""
         self.clear_all_cookies()
-
-
-class FacebookAuthHandler(BaseHandler, tornado.auth.FacebookGraphMixin):
-    @tornado.gen.coroutine
-    def get(self):
-        """Authenticates a user using Facebook OAuth2 service.
-
-        In case of success sets a cookie named ``user_id``.
-        """
-        uri = get_absolute_redirect_uri(self, 'fb_auth')
-
-        if self.get_argument('code', None):
-            user_data = yield self.get_authenticated_user(
-                redirect_uri=uri,
-                client_id=self.settings['fb_oauth']['key'],
-                client_secret=self.settings['fb_oauth']['secret'],
-                code=self.get_argument('code')
-            )
-            if not user_data:
-                self.send_error(500, message='Facebook authentication failed.')
-                return
-
-            user = self.sess.query(User).filter(
-                User.facebook_id == user_data['id']).first()
-            # check if this user exists in the database
-            if user:
-                self.set_cookie('user_id', str(user.id))
-                return
-
-            user_profile = yield self.facebook_request(
-                path='/me',
-                access_token=user_data['access_token']
-            )
-            if not user_profile:
-                self.send_error(500, message='Facebook profile access failed.')
-            else:
-                new_user = store_new_user(
-                    self.sess, create_fb_user(user_profile))
-                if not new_user:
-                    self.send_error(400, message='Email already in use.')
-                    return
-
-                self.set_cookie('user_id', str(new_user.id))
-            return
-
-        yield self.authorize_redirect(
-            redirect_uri=uri,
-            client_id=self.settings['fb_oauth']['key'],
-            extra_params={'scope': 'email'}
-        )
-
-
-class GoogleAuthHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
-    @tornado.gen.coroutine
-    def get(self):
-        """Authenticates a user using Google OAuth2 service.
-
-        In case of success sets a cookie named ``user_id``.
-        """
-        uri = get_absolute_redirect_uri(self, 'google_auth')
-
-        if self.get_argument('code', None):
-            user_data = yield self.get_authenticated_user(
-                redirect_uri=uri,
-                code=self.get_argument('code')
-            )
-            if not user_data:
-                self.send_error(500, message='Google authentication failed.')
-                return
-
-            # google request for user profile
-            response = yield self.get_auth_http_client().fetch(
-                'https://www.googleapis.com/oauth2/v1/userinfo?access_token'
-                '=' + str(user_data['access_token']))
-
-            if not response:
-                self.send_error(500, message='Google profile access failed.')
-                return
-
-            user_profile = tornado.escape.json_decode(response.body)
-            # load user with this google id, if she exists
-            # Need to check whether this email is stored in the database.
-            # In this case the user has already registered using register
-            # facebook routes.
-            user = self.sess.query(User).filter(
-                User.google_id == user_profile['id']).first()
-
-            if user:
-                self.set_cookie('user_id', str(user.id))
-            else:
-                new_user = store_new_user(
-                    self.sess, create_google_user(user_profile))
-                if not new_user:
-                    self.send_error(400, message='Email already in use.')
-                    return
-
-                self.set_cookie('user_id', str(new_user.id))
-            return
-
-        yield self.authorize_redirect(
-            redirect_uri=uri,
-            client_id=self.settings['google_oauth']['key'],
-            scope=['profile', 'email'],
-            response_type='code',
-            extra_params={'approval_prompt': 'auto'}
-        )

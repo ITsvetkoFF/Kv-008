@@ -1,10 +1,34 @@
+from api.v1_0.models import UserRole, RolePermission
 from api.v1_0.models.user import User
+from api.v1_0.models.permission import Permission
 
 
-def complete_authentication(handler, user):
+def complete_auth(handler, user):
+    """Completes authentication process setting a cookie and writing some
+    user data to the client."""
     handler.set_cookie('user_id', str(user.id))
-    handler.write({'first_name': user.first_name,
-                   'last_name': user.last_name})
+    handler.write({
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'user_roles': get_user_roles(handler.sess, user.id),
+        'user_perms': get_user_perms(handler.sess, user.id)
+    })
+
+
+def get_user_perms(session, user_id):
+    """Returns a list of all permissions (distinct if a user has
+    multiple roles with common permissions)."""
+    return session.query(
+        Permission.res_name,
+        Permission.action,
+        Permission.modifier
+    ).join(RolePermission).filter(RolePermission.role_name.in_(
+        get_user_roles(session, user_id))).distinct().all()
+
+
+def get_user_roles(session, user_id):
+    return [row.role_name for row in session.query(UserRole.role_name).filter(
+        UserRole.user_id == user_id)]
 
 
 def store_new_user(session, new_user):

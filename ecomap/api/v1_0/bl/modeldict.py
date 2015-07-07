@@ -3,7 +3,7 @@ from inspect import isclass
 from api.v1_0.bl.utils import iso_datetime
 
 
-def loaded_obj_data_to_dict(obj):
+def get_row_data(obj):
     """Put data from the object associated table row into a dict."""
     data = {col.name: getattr(obj, col.name) for col in obj.__table__.columns}
     if 'datetime' in data:
@@ -12,24 +12,10 @@ def loaded_obj_data_to_dict(obj):
     return data
 
 
-def create_obj_with_data(model, data):
-    return model(**data)
+def update_row_data(obj, data):
+    while data:
+        setattr(obj, *data.popitem())
 
-    # doesn't make sense
-    #
-    # try:
-    #     result = model()
-    #     for key in income_dict:
-    #         setattr(result, key, income_dict[key])
-    # except KeyError as e:
-    #     raise 'No such field {filed} in model {model}'.format(
-    #         field=key,
-    #         model=model.__class__.__name__
-    #     )
-
-
-def update_loaded_obj_with_data(obj, data):
-    obj.__dict__.update(data)
     return obj
 
 
@@ -63,8 +49,3 @@ def update_model_from_dict(model, model_dict):
         setattr(model, attr, model_dict[attr])
 
     return model
-
-
-
-
-

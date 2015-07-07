@@ -4,50 +4,37 @@ import tornado.escape
 
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models import User
-from api.v1_0.bl.decs import check_if_exists
-from api.v1_0.bl.modeldict import (
-    loaded_obj_data_to_dict,
-    update_loaded_obj_with_data
-)
+from api.v1_0.bl.decs import check_if_exists, check_permission
+from api.v1_0.bl.modeldict import get_row_data, update_row_data
 
 
 class UsersHandler(BaseHandler):
-    def get(self, user_id):
-        """Returns data for all users from the database or for the
-        specified user.
+    @tornado.web.authenticated
+    @check_permission
+    def get(self):
+        """Returns data for all users in the database."""
+        self.write(tornado.escape.json_encode(
+            [get_row_data(user) for user in self.sess.query(User)]))
 
-        | If you pass user id (specifying it in the url)
-        | **/api/v1/users/3**,
-        | you'll get something like this:
 
-        .. code-block:: json
-
-           {
-             "first_name": "user_2",
-             "last_name": "user_2_last_name",
-             "email": "user_2@example.com",
-             "facebook_id": "",
-             "password": "user_2_pass",
-             "id": 3,
-             "region_id": null
-           }
-
-        | Otherwise you'll get data for all users
-        | **/api/v1/users**.
-        """
-        if user_id is None:
-            self.write(tornado.escape.json_encode(
-                [loaded_obj_data_to_dict(user) for user in self.sess.query(User)]))
-        else:
-            self.write(loaded_obj_data_to_dict(self.sess.query(User).get(user_id)))
-
+class UserHandler(BaseHandler):
+    @tornado.web.authenticated
     @check_if_exists(User)
+    @check_permission
+    def get(self, user_id):
+        self.write(get_row_data(self.sess.query(User).get(user_id)))
+
+    @tornado.web.authenticated
+    @check_if_exists(User)
+    @check_permission
     def delete(self, user_id):
         """Deletes the specified user."""
         self.sess.delete(self.sess.query(User).get(user_id))
         self.sess.commit()
 
+    @tornado.web.authenticated
     @check_if_exists(User)
+    @check_permission
     def put(self, user_id):
         """Updates data for the specified user.
 
@@ -56,7 +43,9 @@ class UsersHandler(BaseHandler):
         where key is a model column fields and values it's a values that you
         needs to change.
         """
-        user = update_loaded_obj_with_data(
+        # email unique contraint
+        # no user passwords
+        user = update_row_data(
             self.sess.query(User).get(user_id),
             self.request.arguments
         )
