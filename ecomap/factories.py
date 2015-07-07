@@ -93,6 +93,11 @@ admin_perms['ProblemHandler'] = \
     ('DELETE', 'ANY')
 ]
 
+# This permissions is already in user_perms, so I need to delete it
+# to avoid duplicate entries.
+del admin_perms['ProblemsHandler']
+del admin_perms['VoteHandler']
+
 
 def get_args(item, handler):
     return dict(zip(
