@@ -20,8 +20,8 @@ class AllProblemsHandler(BaseHandler):
                 status=problem.status,
                 datetime=str(problem.datetime),
                 problem_type_id=problem.problem_type_id,
-                latitude=latitude,
-                longitude=longitude
+                Latitude=latitude,
+                Longitude=longitude
             ))
 
         json_string = json.dumps(all_problems, ensure_ascii=False)

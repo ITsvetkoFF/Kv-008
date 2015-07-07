@@ -71,7 +71,7 @@ user_perms['ProblemCommentsHandler'] = \
 # * PageHandler PUT, DELETE
 # * CommentsHandler PUT, DELETE ANY
 # * PhotoHandler PUT, DELETE ANY
-admin_perms = dict(user_perms)
+admin_perms = dict()
 admin_perms['UsersHandler'] = [
     ('GET', 'ANY'),
 ]
