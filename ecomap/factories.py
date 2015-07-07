@@ -8,6 +8,7 @@ from factories.problem import (
 )
 from factories.comment import CommentFactory
 from factories.user import (
+    PermissionFactory,
     UserFactory,
     UserRoleFactory,
     RolePermissionFactory
@@ -54,7 +55,8 @@ user_perms['ProblemsHandler'] = \
     ('POST', 'ANY')
 ]
 user_perms['ProblemHandler'] = \
-    user_perms['PhotoHandler'] = [
+    user_perms['PhotoHandler'] = \
+    user_perms['CommentHandler'] = [
     ('PUT', 'OWN'),
     ('DELETE', 'OWN')
 ]
@@ -119,6 +121,21 @@ def main():
 
         for item in admin_perms.get(name, []):
             RolePermissionFactory(role=role_admin, **get_args(item, hdl))
+
+    # I have to create all these  manually so I don't create duplicates.
+    perms = [
+        ('UsersHandler', 'GET', 'NONE'),
+        ('PagesHandler', 'POST', 'NONE'),
+        ('ProblemPhotosHandler', 'POST', 'NONE'),
+        ('ProblemCommentsHandler', 'POST', 'NONE'),
+        ('ProblemsHandler', 'POST', 'NONE'),
+        ('VoteHandler', 'POST', 'NONE'),
+        ('PageHandler', 'PUT', 'NONE'),
+        ('PageHandler', 'DELETE', 'NONE')
+    ]
+    arg_name = ('res_name', 'action', 'modifier')
+    for row in perms:
+        cm.Session.add(md.Permission(**dict(zip(arg_name, row))))
 
     # create problem types
     types = [ProblemTypeFactory() for i in xrange(8)]
