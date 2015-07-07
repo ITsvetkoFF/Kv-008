@@ -24,7 +24,11 @@ class User(Base):
 
     region = relationship('Region')
 
-    def check_new_email(self, session):
+    def check_unique_email(self, session, email, user_id=None):
         """Check email field unique constraint."""
-        return session.query(User).filter(User.email == self.email).first()
+        u = session.query(User).filter(User.email == email).first()
+        # if a user sends his own email in payload
+        if not u or (user_id and u.id == user_id):
+            return True
 
+        return False

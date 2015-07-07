@@ -22,7 +22,7 @@ class UserHandler(BaseHandler):
     @check_if_exists(User)
     @check_permission
     def get(self, user_id):
-        self.write(get_row_data(self.sess.query(User).get(user_id)))
+        self.write(get_row_data(self.sess.query(User).get(user_id), True))
 
     @tornado.web.authenticated
     @check_if_exists(User)
@@ -43,10 +43,13 @@ class UserHandler(BaseHandler):
         where key is a model column fields and values it's a values that you
         needs to change.
         """
-        # email unique contraint
-        # no user passwords
-        user = update_row_data(
-            self.sess.query(User).get(user_id),
-            self.request.arguments
-        )
+
+        user = self.sess.query(User).get(user_id)
+
+        if 'email' in self.request.arguments:
+            if not user.check_unique_email(
+                    self.sess, self.request.arguments['email'], user.id):
+                return self.send_error(400, message='Email already in use.')
+
+        update_row_data(user, self.request.arguments)
         self.sess.commit()

@@ -3,11 +3,14 @@ from inspect import isclass
 from api.v1_0.bl.utils import iso_datetime
 
 
-def get_row_data(obj):
+def get_row_data(obj, password=False):
     """Put data from the object associated table row into a dict."""
     data = {col.name: getattr(obj, col.name) for col in obj.__table__.columns}
     if 'datetime' in data:
         data['datetime'] = iso_datetime(data['datetime'])
+
+    if not password and 'password' in data:
+        del data['password']
 
     return data
 

@@ -19,7 +19,7 @@ class RegisterHandler(BaseHandler):
         """
         form = UserRegisterForm.from_json(self.request.arguments)
         if form.validate():
-            new_user = store_new_user(self.sess, create_new_user(form.data))
+            new_user = store_new_user(self.sess, User(**form.data))
             # if new_user is None then email is not unique
             if not new_user:
                 return self.send_error(400, message='Email already in use.')
@@ -64,7 +64,7 @@ class LoginHandler(BaseHandler):
         if not form.validate():
             return self.send_error(400, message=form.errors)
 
-        user = load_user_by_email(self, form.email.data)
+        user = get_user_with_email(self, form.email.data)
         # check if user exists and her password matches
         if user and user.password == form.password.data:
             complete_auth(self, user)
