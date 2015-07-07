@@ -10,20 +10,27 @@ def complete_auth(handler, user):
     handler.write({
         'first_name': user.first_name,
         'last_name': user.last_name,
-        'user_roles': get_user_roles(handler.sess, user.id),
-        'user_perms': get_user_perms(handler.sess, user.id)
+        'user_roles': ':'.join(get_user_roles(handler.sess, user.id)),
+        'user_perms': [':'.join(row) for row in get_user_perms(
+            handler.sess, user.id)]
     })
 
 
 def get_user_perms(session, user_id):
-    """Returns a list of all permissions (distinct if a user has
-    multiple roles with common permissions)."""
+    """Returns a query obj of all permissions (distinct if a user has
+    multiple roles with common permissions).
+    """
     return session.query(
         Permission.res_name,
         Permission.action,
         Permission.modifier
     ).join(RolePermission).filter(RolePermission.role_name.in_(
-        get_user_roles(session, user_id))).distinct().all()
+        get_user_roles(session, user_id))).distinct()
+
+
+def get_role_perms(session, role_name):
+    return session.query(Permission).join(RolePermission).filter(
+        RolePermission.role_name == role_name).all()
 
 
 def get_user_roles(session, user_id):
