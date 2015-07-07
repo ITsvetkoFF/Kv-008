@@ -1,6 +1,6 @@
 import json
 
-from api.v1_0.bl.utils import create_location
+from api.v1_0.bl.utils import create_location, get_datetime, define_values
 from api.v1_0.bl.decs import (
     permission_control,
     validation,
@@ -26,7 +26,6 @@ from api.v1_0.models import (
 from api.v1_0.forms.problem import (
     ProblemForm
 )
-from api.v1_0.bl.utils import get_datetime
 from api.v1_0.bl.photo import *
 
 
@@ -130,18 +129,18 @@ class ProblemsHandler(BaseHandler):
     @validation(ProblemForm)
     def post(self):
         """Store a new problem to the database."""
-
-        x = self.request.arguments['latitude']
-        y = self.request.arguments['longitude']
+        arguments = self.request.arguments
+        x = arguments['latitude']
+        y = arguments['longitude']
         problem = Problem(
-            title=self.request.arguments['title'],
-            content=self.request.arguments['content'],
-            proposal=self.request.arguments['proposal'],
-            severity=self.request.arguments['severity'],
-            status=self.request.arguments['status'],
+            title=arguments['title'],
+            content=define_values(arguments,'content'),
+            proposal=define_values(arguments,'proposal'),
+            severity=define_values(arguments,'severity', '1'),
+            status=define_values(arguments,'status','UNSOLVED'),
             location=create_location(x, y),
-            problem_type_id=self.request.arguments['problem_type_id'],
-            region_id=self.request.arguments['region_id'])
+            problem_type_id=define_values(arguments,'problem_type_id'),
+            region_id=define_values(arguments,'region_id'))
         self.sess.add(problem)
         self.sess.commit()
         activity = ProblemsActivity(

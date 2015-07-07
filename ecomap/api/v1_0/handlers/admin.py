@@ -1,123 +1,68 @@
-import tornado.escape
-import tornado.web
-
 from api.v1_0.handlers.base import BaseHandler
-from api.v1_0.models import Permission, Resource, Role
-from api.v1_0.bl.modeldict import get_dict_from_orm, \
-    get_object_from_dict
+from api.v1_0.models import *
+from api.v1_0.bl.revision import query_converter
+import math
+from factories.user import RoleFactory
 
 
-class RolesHandler(BaseHandler):
-    """
-    This handler provides you to manipulates role profiles.
-    """
+class PermissionHandler(BaseHandler):
+    def get(self):
+        methods_list = ['GET', 'POST', 'PUT', 'DELETE']
+        modifier = ['ANY','OWN','NONE']
+        data = dict()
+        for role in self.sess.query(Role):
+            hendlers=dict()
+            for perm in role.permissions:
+                methods = dict()
+                hendler = perm.resource.name
+                for perm in role.permissions:
+                    if perm.resource.name == hendler:
+                        methods[perm.action] = perm.modifier
+                hendlers[hendler]=methods
+            data[role.name]= hendlers
 
-    @tornado.web.authenticated
-    def get(self, *args, **kwargs):
-        """Returns the specified role or all the roles otherwise.
+        permissions_data = dict()
+        for r in self.sess.query(Role):
+            resource = dict()
+            for res in self.sess.query(Resource):
+                action = dict()
+                for f in self.sess.query(Permission):
+                    if res.id == f.resource_id:
+                        # action[(f.action,f.modifier)]=f.id
+                        # permissions_data[res.name]=action
+                        permissions_data[(res.name,f.action,f.modifier)]=f.id
+        print permissions_data
 
-        Answer format:
+        def permissions_id(res, met, mod):
+            return permissions_data[(res,met,mod)]
 
-        .. code-block: json
+        def get_modifier (role, res, method):
+            return data[role][res][method]
 
-           {
-             "id": 1,
-             "name": "admin"
-           }
+        self.render(
+            "/ecomap/api/templates/admin.html",
+            data = data,
+            modifier=modifier,
+            get_modifier=get_modifier,
+            methods=methods_list,
+            perm_id=permissions_id
+        )
 
-        """
-        temp = tornado.escape.json_encode(
-            [get_dict_from_orm(role) for role in self.sess.query(Role).all()])
-        self.write(temp)
+    def post(self):
+        for role in self.request.arguments.keys():
+            role_id = self.sess.query(Role.id).filter(Role.name==role).first()[0]
+            for perm_id in self.request.arguments[role]:
+                role_perm = Role(name=role)
+                print role_perm.permissions, '000000000000000000000000000'
+                # role_perm.permissions.extend(self.sess.query(Permission).filter_by(
+                #     id=perm_id).all())
+                role_admin = RoleFactory(id=role_id)
+                role_admin.permissions.extend(self.sess.query(Permission).filter_by(
+                    id=perm_id).all())
 
-    @tornado.web.authenticated
-    def put(self):
-        query = get_object_from_dict(Role, self.request.arguments)
-        self.sess.add(query)
-        self.sess.commit()
-        self.write(tornado.escape.json_encode({'id': query.id}))
 
 
-class ResourcesHandler(BaseHandler):
-    """Manipulates resources using administrative account.
-
-    get - returns all roles list if role_id isn't specified otherwise it
-    returns specified role.
-    put - changes role profile
-    """
-
-    @tornado.web.authenticated
-    class PermissionsOutput:
-        """Returns answers of ResourceHandler."""
-
-        def __init__(self, db, role_id, resource_id):
-            self.ID = resource_id
-            self.NAME = db.query(Resource).filter_by(
-                id=resource_id).first().name
-            self.GET = None
-            self.PUT = None
-            self.POST = None
-            self.DELETE = None
-
-            for permission in db.query(Role).filter_by(
-                    id=role_id).first().permissions:
-                if permission.action.upper() == 'GET':
-                    self.GET = permission.modifier
-                elif permission.action.upper() == 'PUT':
-                    self.PUT = permission.modifier
-                elif permission.action.upper() == 'POST':
-                    self.POST = permission.modifier
-                elif permission.action.upper() == 'DELETE':
-                    self.DELETE = permission.modifier
-
-    @tornado.web.authenticated
-    def get(self, role_id, *args, **kwargs):
-        """Returns all the resources for the specified user.
-
-        Resources are in format:
-
-        .. code-block:: json
-
-           {
-             "ID": 1,
-             "NAME": "LoginHandler",
-             "GET": "ANY",
-             "PUT": "ANY",
-             "POST": "ANY",
-             "DELETE": "ANY"
-           }
-
-        If the specified user is not found, returns an error:
-
-        .. code-block:: json
-
-           {
-             "status_code": 404,
-             "message": "Role not found"
-           }
-
-        """
-        role = self.sess.query(Role).filter_by(id=role_id).first()
-
-        if role is None:
-            self.send_error(404, message='Role not found')
-
-        permissions = [permissions.id
-                       for permissions in role.permissions]
-        resources = set([self.sess.query(Permission.resource_id).filter_by(
-            id=idx).first()[0]
-                         for idx in permissions])
-        answer = [self.PermissionsOutput(db=self.sess,
-                                         role_id=role_id,
-                                         resource_id=idx).__dict__
-                  for idx in resources]
-        self.write(tornado.escape.json_encode(answer))
-
-    @tornado.web.authenticated
-    def put(self):
-        """Changes resources."""
-        query = Permission(resource_id=self.request.arguments['resource_id'],
-                           action=self.request.arguments['action'],
-                           modifier=self.request.arguments['modifier'])
-        self.sess.update(query)
-        self.sess.commit()
+                # role_perm = role_permissions(role=role_id, permission=perm_id)
+                # self.sess.add(role_perm)
+                # print self.sess.query(Role.permissions).add({role_id:perm_id}), '0000000000000'
+        self.write(self.request.arguments)

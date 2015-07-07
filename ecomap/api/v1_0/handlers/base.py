@@ -21,15 +21,15 @@ class BaseHandler(tornado.web.RequestHandler):
 
         return int(user_id)
 
-    def prepare(self):
-        # Incorporate request JSON into arguments dictionary.
-        if self.request.body and not self.request.files:
-            try:
-                json_data = tornado.escape.json_decode(self.request.body)
-                self.request.arguments.update(json_data)
-            except ValueError:
-                message = 'Unable to parse JSON.'
-                self.send_error(400, message=message)
+    # def prepare(self):
+    #     # Incorporate request JSON into arguments dictionary.
+    #     if self.request.body and not self.request.files:
+    #         try:
+    #             json_data = tornado.escape.json_decode(self.request.body)
+    #             self.request.arguments.update(json_data)
+    #         except ValueError:
+    #             message = 'Unable to parse JSON.'
+    #             self.send_error(400, message=message)
 
     def write_error(self, status_code, **kwargs):
         self.write(kwargs)

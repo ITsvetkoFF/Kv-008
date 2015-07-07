@@ -16,3 +16,11 @@ def conv_array_to_dict(array):
 
 def create_location( x, y):
     return "POINT({0} {1})".format(x, y)
+
+def define_values(arguments, key, default = None):
+    try:
+        arguments[key]
+    except KeyError:
+        return default
+    else:
+        return arguments[key]

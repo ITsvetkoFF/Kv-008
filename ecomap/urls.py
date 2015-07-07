@@ -4,10 +4,7 @@ from tornado.web import URLSpec, StaticFileHandler
 
 from api.v1_0.handlers.photos import PhotoHandler
 from api.v1_0.handlers.users import UsersHandler
-from api.v1_0.handlers.admin import (
-    RolesHandler,
-    ResourcesHandler
-)
+from api.v1_0.handlers.admin import PermissionHandler
 from api.v1_0.handlers.pages import (
     PageHandler,
     PagesHandler
@@ -37,6 +34,8 @@ import static
 APIUrls = [
     URLSpec(r'/static/photos/(.*)', StaticFileHandler,
             {'path': static.PHOTOS_ROOT}),
+    URLSpec(r'/api/docs/(.*)', StaticFileHandler,
+            {'path': os.path.join(docs.DOCS_ROOT, 'build', 'html')}),
     URLSpec(r'/static/thumbnails/(.*)', StaticFileHandler,
             {'path': static.THUMBNAILS_ROOT}),
 
@@ -55,9 +54,6 @@ APIUrls = [
     URLSpec(r'/api/problems/(\d+)/photos', ProblemPhotosHandler),
     URLSpec(r'/api/problems/(\d+)/comments', ProblemCommentsHandler),
 
-    URLSpec(r'/api/admin/roles', RolesHandler),
-    URLSpec(r'/api/admin/roles/(\d+)/resources', ResourcesHandler),
-
     URLSpec(r'/api/pages', PagesHandler),
     URLSpec(r'/api/pages/(\d+)', PageHandler),
 
@@ -65,6 +61,5 @@ APIUrls = [
 
     URLSpec(r'/api/photos/(\d+)', PhotoHandler),
 
-    URLSpec(r'/api/docs/(.*)', StaticFileHandler,
-            {'path': os.path.join(docs.DOCS_ROOT, 'build', 'html')})
+    URLSpec(r'/api/admin', PermissionHandler)
 ]

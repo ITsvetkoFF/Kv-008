@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="application/json; charset=UTF-8"/>
+    <title>Permission</title>
+  </head>
+  <body>
+    <div name="body">
+      <form action="/api/admin" method="post" enctype='application/json'>
+          <input type="submit", value="Відправити">
+          <table border="2">
+              <thead>
+                <td>Role/Resource</td>
+                {% for role in data.keys() %}
+                <td>
+                    <p>{{role}}</p>
+                </td>
+                  {% end %}
+              </thead>
+              {% for res in data.values()[0].keys() %}
+              <tr name="{{res}}">
+                    <td>{{res}}</td>
+                    {% for role in data.keys() %}
+                    <td name="{{role}}">
+                        {% for method in methods %}
+                        <p>{{method}}:
+                        <select name="{{role}}">
+                            {% for mod in modifier%}
+                            {% if mod == get_modifier(role,res,method)%}
+                            <option value='{{perm_id(res,method,mod)}}' selected >{{mod}}</option>
+                            {% else %}
+                            <option value='{{perm_id(res,method,mod)}}'>{{mod}}</option>
+                            {% end %}
+                            {% end %}
+                        </select>
+                        </p>
+                        {% end %}
+                    </td>
+                    {% end %}
+              </tr>
+              {% end %}
+
+          </table>
+      </form>
+    </div>
+  </body>
+</html>

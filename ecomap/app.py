@@ -7,7 +7,7 @@ from tornado.ioloop import IOLoop
 
 from api import settings
 from api.utils.db import get_db_session
-from api.v1_0.urls import APIUrls
+from urls import APIUrls
 
 application = Application(handlers=APIUrls, **settings)
 application.db_sess = get_db_session(settings)
