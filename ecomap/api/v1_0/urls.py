@@ -7,6 +7,7 @@ from api.v1_0.handlers.users import (
     UsersHandler,
     UserHandler
 )
+from api.v1_0.handlers.admin import PermissionHandler
 from api.v1_0.handlers.pages import (
     PageHandler,
     PagesHandler
@@ -72,5 +73,6 @@ APIUrls = [
     URLSpec(r'/api/photos/(\d+)', PhotoHandler),
 
     URLSpec(r'/api/docs/(.*)', StaticFileHandler,
-            {'path': os.path.join(docs.DOCS_ROOT, 'build', 'html')})
+            {'path': os.path.join(docs.DOCS_ROOT, 'build', 'html')}),
+    URLSpec(r'/api/admin', PermissionHandler)
 ]
