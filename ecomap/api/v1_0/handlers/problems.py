@@ -127,7 +127,6 @@ class ProblemsHandler(BaseHandler):
                             message='Your revision is greater than current')
 
     # @permission_control
-    @validation(ProblemForm)
     def post(self):
         """Store a new problem to the database."""
 
@@ -151,6 +150,8 @@ class ProblemsHandler(BaseHandler):
             activity_type="ADDED")
         self.sess.add(activity)
         self.sess.commit()
+        if self.get_status() is 200:
+            self.write({'id': problem.id})
 
 
 class ProblemVoteHandler(BaseHandler):
