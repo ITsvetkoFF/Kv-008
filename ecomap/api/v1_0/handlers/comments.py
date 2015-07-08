@@ -5,7 +5,7 @@ from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.bl.utils import iso_datetime, conv_array_to_dict
 
 
-class CommentsHandler(BaseHandler):
+class CommentHandler(BaseHandler):
     def get(self, comment_id):
         """Returns comment by its id.
 
@@ -37,12 +37,6 @@ class CommentsHandler(BaseHandler):
             'modified_user_id': comment_query.modified_user_id
         }
         self.write(response)
-
-    def post(self, comment_id):
-        """Method not allowed
-        """
-        if comment_id:
-            self.send_error(status_code=400, message='Bad Request')
 
     def put(self, comment_id):
         """For modifying comment by its id.
@@ -101,7 +95,8 @@ class ProblemCommentsHandler(BaseHandler):
 
         """
         json_response = []
-        comments_query = self.sess.query(Comment).filter_by(problem_id=problem_id).all()
+        comments_query = self.sess.query(Comment).filter_by(
+            problem_id=problem_id).all()
         if not comments_query:
             self.send_error(status_code=404, message='Not Found')
 
@@ -109,7 +104,8 @@ class ProblemCommentsHandler(BaseHandler):
             user_query = self.sess.query(User).get(comment_query.user_id)
 
             if comment_query.modified_user_id is not None:
-                modified_query = self.sess.query(User).get(comment_query.modified_user_id)
+                modified_query = self.sess.query(User).get(
+                    comment_query.modified_user_id)
                 first_name = modified_query.first_name
             else:
                 first_name = None
@@ -143,15 +139,3 @@ class ProblemCommentsHandler(BaseHandler):
                               created_date=datetime.utcnow())
         self.sess.add(new_comment)
         self.sess.commit()
-
-    def put(self, problem_id):
-        """Method not allowed
-        """
-        if problem_id:
-            self.send_error(status_code=400, message='Bad Request')
-
-    def delete(self, problem_id):
-        """Method not allowed
-        """
-        if problem_id:
-            self.send_error(status_code=400, message='Bad Request')

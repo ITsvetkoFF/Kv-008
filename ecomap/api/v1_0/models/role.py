@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 # this import has to be here to run permission.py before Role definition.
 import api.v1_0.models.permission
 from api.v1_0.models import Base
-from api.v1_0.models import role_permissions
 
 
 class Role(Base):
@@ -12,5 +11,3 @@ class Role(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False, unique=True)
-
-    permissions = relationship('Permission', secondary=role_permissions)

@@ -23,7 +23,13 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def prepare(self):
         # Incorporate request JSON into arguments dictionary.
-        if self.request.body and not self.request.files:
+        if self.request.body:
+            if self.request.files:
+                return
+            if self.request.headers['content-type'] == (
+                    'application/x-www-form-urlencoded'):
+                return
+
             try:
                 json_data = tornado.escape.json_decode(self.request.body)
                 self.request.arguments.update(json_data)
@@ -46,7 +52,7 @@ class BaseHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
         if self.request.headers.get("Origin"):
             self.set_header("Access-Control-Allow-Origin",
-                        self.request.headers.get("Origin"))
+                            self.request.headers.get("Origin"))
         self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Cache-control",
                         "no-store, no-cache, must-revalidate, max-age=0")

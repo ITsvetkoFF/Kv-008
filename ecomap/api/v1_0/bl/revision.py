@@ -28,8 +28,8 @@ def generate_data(query):
 
 def query_converter(query):
     problems=tuple()
-    for id in query:
-        problems = problems + id
+    for elem in query:
+        problems = problems + elem
     return problems
 
 def removed_data(removed):

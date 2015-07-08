@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 
 from wtforms.validators import Email
 
-from api.v1_0.models._config import user_roles
 from api.v1_0.models import Base
 
 
@@ -23,10 +22,13 @@ class User(Base):
     google_id = Column(String(100))
     facebook_id = Column(String(100))
 
-    roles = relationship('Role', secondary=user_roles)
     region = relationship('Region')
 
-    def check_new_email(self, session):
+    def check_unique_email(self, session, email, user_id=None):
         """Check email field unique constraint."""
-        return session.query(User).filter(User.email == self.email).first()
+        u = session.query(User).filter(User.email == email).first()
+        # if a user sends his own email in payload
+        if not u or (user_id and u.id == user_id):
+            return True
 
+        return False

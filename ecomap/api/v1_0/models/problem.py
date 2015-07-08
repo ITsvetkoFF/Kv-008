@@ -13,7 +13,8 @@ class Problem(Base):
     severity = Column(Enum(*SEVERITY_TYPES, name='severitytypes'))
     location = Column(Geography, nullable=False)
     status = Column(Enum(*STATUSES, name='status'))
-    problem_type_id = Column(Integer, ForeignKey('problem_types.id'))
+    problem_type_id = Column(Integer, ForeignKey('problem_types.id'),
+                             nullable=False)
     region_id = Column(Integer, ForeignKey('regions.id'))
 
     problem_type = relationship('ProblemType')
