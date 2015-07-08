@@ -2,22 +2,22 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="application/json; charset=UTF-8"/>
-  <title>Permissions</title>
+  <title>Permissions Manager</title>
 </head>
 <body>
 <div name="body">
+  <h1>Permissions Manager</h1>
+  {% if request.query_arguments.get('message') %}<h4>{{ request.arguments.get('message')[0] }}</h4>{% end %}
   <form action="/api/admin" method="post" enctype='application/x-www-form-urlencoded'>
 
     <table border="2">
 
-      <thead>
-      <td>Role/Resource</td>
+      <td></td>
       {% for role_name in role_names %}
-      <td>
-        <p>{{role_name}}</p>
+      <td align="center">
+        {{role_name}}
       </td>
       {% end %}
-      </thead>
 
       {% for res_meth in res_methods %}
       <tr>
@@ -25,8 +25,8 @@
         {% for role_name in role_names %}
         <td>
           <select name="{{ role_name + ' ' + res_meth }}">
-            {% for mod in get_mods(res_meth, handler.sess) %}
-            <option value='{{ mod }}' {% if mod == get_modif(role_name, res_meth, handler.sess) %}selected{% end %}>{{ mod }}</option>
+            {% for mod in get_act_mods(res_meth, handler.sess) %}
+            <option value='{{ mod }}' {% if mod == get_mod(role_name, res_meth, handler.sess) %}selected{% end %}>{{ mod }}</option>
             {% end %}
           </select>
           </p>
@@ -36,7 +36,7 @@
       </tr>
 
     </table>
-    <input type="submit" , value="Submit">
+    <input type="submit"  value="Submit">
 
   </form>
 </div>
