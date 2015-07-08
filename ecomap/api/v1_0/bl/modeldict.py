@@ -4,7 +4,7 @@ from api.v1_0.bl.utils import iso_datetime
 
 
 def get_row_data(obj, password=False):
-    """Put data from the object associated table row into a dict."""
+    """Return object row data in a dict."""
     data = {col.name: getattr(obj, col.name) for col in obj.__table__.columns}
     if 'datetime' in data:
         data['datetime'] = iso_datetime(data['datetime'])
@@ -16,13 +16,13 @@ def get_row_data(obj, password=False):
 
 
 def update_row_data(obj, data):
+    """Update obj attributes with data from a dict."""
     while data:
         setattr(obj, *data.popitem())
 
     return obj
 
 
-# Misha's magic
 def get_dict_from_orm(object_model):
     """"""
     return dict((key.name,

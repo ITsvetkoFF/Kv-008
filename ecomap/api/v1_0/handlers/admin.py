@@ -7,7 +7,7 @@ from api.v1_0.bl.admin import *
 class PermissionHandler(BaseHandler):
     def get(self):
         # I need res_methods (handler name + method strings).
-        # Checkout html source.
+        # Checkout rendered html source.
         res_methods = [' '.join(row) for row in self.sess.query(
             Permission.res_name, Permission.action).distinct().order_by(
             Permission.res_name, Permission.action)]

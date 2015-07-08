@@ -7,7 +7,7 @@ from api.v1_0.bl.auth import get_user_roles
 
 
 def check_if_exists(model):
-    """Checks if there is a row for the specified id in the url."""
+    """Check if there is a row for the specified id in the url."""
     assert model in (
         User, Photo, Problem, Comment, Page), 'Bad model argument.'
 
@@ -56,7 +56,7 @@ def permission_control(method):
 
 
 def validation(form):
-    """Validates request payload.
+    """Validate request payload.
 
     You cannot send unknown keys in payload.
     """
@@ -68,7 +68,7 @@ def validation(form):
                 f = form.from_json(args[0].request.arguments,
                                    skip_unknown_keys=False)
                 if f.validate():
-                    method(args[0])
+                    method(*args)
                 else:
                     args[0].send_error(400, message=f.errors)
 
@@ -84,7 +84,7 @@ def validation(form):
 # In case of Problem its adder id.
 # User has id field (owner)
 def check_permission(method):
-    """Checks if a user is allowed to invoke a method."""
+    """Check if a user is allowed to invoke decorated method."""
     message = 'Not allowed.'
 
     @wraps(method)
@@ -114,8 +114,10 @@ def check_permission(method):
 
 
 def get_owner_id(session, res_name, url_id):
-    """Gets the owner id. This function is called only in those methods,
-    that deal with models that have user_id field (or User model).
+    """Get the owner id.
+
+    Is called only in those methods, that deal with models
+    with user_id field (or User model that has id field).
     """
     if res_name == 'UserHandler':
         return int(url_id)
@@ -133,8 +135,10 @@ def get_owner_id(session, res_name, url_id):
 
 
 def get_modifiers(session, res_name, action, user_id):
-    """Returns a list of modifiers (if a user has multiple roles, he
-    can have multiple modifiers for the same resource-action as well).
+    """Return a list of modifiers.
+
+    If a user has multiple roles, he can have multiple
+    modifiers for the same resource-action as well.
     """
     mods = session.query(Permission.modifier).join(RolePermission).filter(
         RolePermission.role_name.in_(get_user_roles(session, user_id))).filter(

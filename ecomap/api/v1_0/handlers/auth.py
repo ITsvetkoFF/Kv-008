@@ -5,6 +5,7 @@ import tornado.escape
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.forms.user import UserRegisterForm, UserLoginForm
 from api.v1_0.bl.auth import *
+from api.v1_0.bl.decs import validation
 
 
 class RegisterHandler(BaseHandler):
@@ -49,6 +50,7 @@ class FacebookHandler(BaseHandler):
 
 
 class LoginHandler(BaseHandler):
+    @validation(UserLoginForm)
     def post(self):
         """Logs in a user.
         Sets a cookie ``user_id`` and writes user's ``first_name`` and
@@ -60,13 +62,9 @@ class LoginHandler(BaseHandler):
         If user authentication fails, a client gets 400 response status code
         and a message *"Invalid email/password."*.
         """
-        form = UserLoginForm.from_json(self.request.arguments)
-        if not form.validate():
-            return self.send_error(400, message=form.errors)
-
-        user = get_user_with_email(self, form.email.data)
+        user = get_user_with_email(self, self.request.arguments['email'])
         # check if user exists and her password matches
-        if user and user.password == form.password.data:
+        if user and user.password == self.request.arguments['password']:
             complete_auth(self, user)
         else:
             self.send_error(400, message='Invalid email/password.')

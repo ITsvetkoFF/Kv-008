@@ -4,8 +4,9 @@ from api.v1_0.models.permission import Permission
 
 
 def complete_auth(handler, user):
-    """Completes authentication process setting a cookie and writing some
-    user data to the client."""
+    """Complete authentication process: set cookie and
+    write some data.
+    """
     handler.set_cookie('user_id', str(user.id))
     handler.write({
         'first_name': user.first_name,
@@ -17,7 +18,7 @@ def complete_auth(handler, user):
 
 
 def get_user_perms(session, user_id):
-    """Returns a query obj of all permissions (distinct if a user has
+    """Return a query obj of all permissions (distinct if a user has
     multiple roles with common permissions).
     """
     return session.query(
