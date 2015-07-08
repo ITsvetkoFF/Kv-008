@@ -12,12 +12,14 @@
 
     <table border="2">
 
-      <td></td>
+      <tr>
+      <th></th>
       {% for role_name in role_names %}
-      <td align="center">
+      <th>
         {{role_name}}
-      </td>
+      </th>
       {% end %}
+      </tr>
 
       {% for res_meth in res_methods %}
       <tr>
@@ -36,7 +38,7 @@
       </tr>
 
     </table>
-    <input type="submit"  value="Submit">
+    <input type="submit"  value="Submit" style="font-weight:bold; font-size:16px">
 
   </form>
 </div>
