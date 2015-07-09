@@ -7,9 +7,6 @@ __all__ = [
     'run',
     'test',
     'upgrade',
-    'create_database',
-    'import_dump',
-    'drop_database',
     'populate_db',
     'runtests'
 ]
@@ -68,46 +65,22 @@ def upgrade():
     fab_run('pip install -r %s --upgrade' % reqs)
 
 
-def init_db():
+def init_db(dump=None):
+    """Initialize ecomap_db database.
+    If you set the dump configuration like fab init_db:from_dump,
+    you will receive the data from dump. Otherwise you will create a new db without data.
+    """
     fab_run('sudo -u postgres psql -f init_ecomap_db.sql;'
             'export PYTHONPATH=":/ecomap"')
-    Base.metadata.create_all(get_db_engine(settings))
-    fab_run('sudo -u postgres psql -f /ecomap/api/dal/view.sql;')
+    if dump == 'from_dump':
+        path_to_dal = '/ecomap/api/dal'
+        fab_run('sudo -u postgres psql ecomap_db < %s/dumps/ecomap_db_dump.sql;' % path_to_dal)
+    else:
+        Base.metadata.create_all(get_db_engine(settings))
+        fab_run('sudo -u postgres psql -f /ecomap/api/dal/view.sql;')
 
 
 def populate_db(problems_count):
     """Populate database with fake data."""
     fab_run('export PYTHONPATH=":/ecomap"')
     fab_run('python factories.py %s' % problems_count)
-
-
-def create_database(db_name):
-    """
-    Create empty database
-    """
-    fab_run('sudo -u postgres psql -c "CREATE DATABASE %s"' % db_name)
-
-
-def import_dump():
-    """
-    Import dump to database
-    """
-    while True:
-        try:
-            db_name = str(raw_input('Choose database (default "ecomap_db"): ')) or 'ecomap_db'
-            dump_name = str(raw_input('Dump name(only name): '))
-            fab_run('sudo -u postgres psql  %s < ../ecomap/api/dal/dumps/%s.sql' % (db_name, dump_name))
-            break
-        except:
-            answer = str(raw_input("Incorrect dump name. Try again? y/N: "))
-            if answer == 'y':
-                continue
-            else:
-                break
-
-
-def drop_database(db_name):
-    """
-    Drop selected database
-    """
-    fab_run('sudo -u postgres psql -c "DROP DATABASE IF EXISTS %s"' % db_name)
