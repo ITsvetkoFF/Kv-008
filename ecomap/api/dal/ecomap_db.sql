@@ -187,3 +187,4 @@ CREATE TABLE solutions
   FOREIGN KEY (problem_manager_id) REFERENCES users (id) ON DELETE CASCADE,
   FOREIGN KEY (problem_id) REFERENCES problems (id) ON DELETE CASCADE
 );
+\q

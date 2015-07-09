@@ -238,9 +238,9 @@ ALTER SEQUENCE pages_id_seq OWNED BY pages.id;
 
 CREATE TABLE permissions (
     id integer NOT NULL,
-    resource_id integer NOT NULL,
+    res_name character varying(100) NOT NULL,
     action actions NOT NULL,
-    modifier modifiers NOT NULL
+    modifier modifiers
 );
 
 
@@ -349,7 +349,7 @@ CREATE TABLE problems (
     severity severitytypes,
     location geography(Geometry,4326) NOT NULL,
     status status,
-    problem_type_id integer,
+    problem_type_id integer NOT NULL,
     region_id integer
 );
 
@@ -452,7 +452,6 @@ ALTER SEQUENCE regions_id_seq OWNED BY regions.id;
 --
 
 CREATE TABLE resources (
-    id integer NOT NULL,
     name character varying(100) NOT NULL
 );
 
@@ -460,33 +459,12 @@ CREATE TABLE resources (
 ALTER TABLE public.resources OWNER TO ecouser;
 
 --
--- Name: resources_id_seq; Type: SEQUENCE; Schema: public; Owner: ecouser
---
-
-CREATE SEQUENCE resources_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.resources_id_seq OWNER TO ecouser;
-
---
--- Name: resources_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ecouser
---
-
-ALTER SEQUENCE resources_id_seq OWNED BY resources.id;
-
-
---
 -- Name: role_permissions; Type: TABLE; Schema: public; Owner: ecouser; Tablespace: 
 --
 
 CREATE TABLE role_permissions (
-    role integer NOT NULL,
-    permission integer NOT NULL
+    role_name character varying(100) NOT NULL,
+    perm_id integer NOT NULL
 );
 
 
@@ -565,8 +543,8 @@ ALTER SEQUENCE solutions_id_seq OWNED BY solutions.id;
 --
 
 CREATE TABLE user_roles (
-    "user" integer NOT NULL,
-    role integer NOT NULL
+    user_id integer NOT NULL,
+    role_name character varying(100) NOT NULL
 );
 
 
@@ -671,13 +649,6 @@ ALTER TABLE ONLY regions ALTER COLUMN id SET DEFAULT nextval('regions_id_seq'::r
 -- Name: id; Type: DEFAULT; Schema: public; Owner: ecouser
 --
 
-ALTER TABLE ONLY resources ALTER COLUMN id SET DEFAULT nextval('resources_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: ecouser
---
-
 ALTER TABLE ONLY roles ALTER COLUMN id SET DEFAULT nextval('roles_id_seq'::regclass);
 
 
@@ -735,7 +706,7 @@ SELECT pg_catalog.setval('pages_id_seq', 6, true);
 -- Data for Name: permissions; Type: TABLE DATA; Schema: public; Owner: ecouser
 --
 
-COPY permissions (id, resource_id, action, modifier) FROM stdin;
+COPY permissions (id, res_name, action, modifier) FROM stdin;
 \.
 
 
@@ -825,22 +796,15 @@ SELECT pg_catalog.setval('regions_id_seq', 1, false);
 -- Data for Name: resources; Type: TABLE DATA; Schema: public; Owner: ecouser
 --
 
-COPY resources (id, name) FROM stdin;
+COPY resources (name) FROM stdin;
 \.
-
-
---
--- Name: resources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ecouser
---
-
-SELECT pg_catalog.setval('resources_id_seq', 1, false);
 
 
 --
 -- Data for Name: role_permissions; Type: TABLE DATA; Schema: public; Owner: ecouser
 --
 
-COPY role_permissions (role, permission) FROM stdin;
+COPY role_permissions (role_name, perm_id) FROM stdin;
 \.
 
 
@@ -886,7 +850,7 @@ COPY spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
 -- Data for Name: user_roles; Type: TABLE DATA; Schema: public; Owner: ecouser
 --
 
-COPY user_roles ("user", role) FROM stdin;
+COPY user_roles (user_id, role_name) FROM stdin;
 \.
 
 
@@ -994,7 +958,7 @@ ALTER TABLE ONLY regions
 --
 
 ALTER TABLE ONLY resources
-    ADD CONSTRAINT resources_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT resources_pkey PRIMARY KEY (name);
 
 
 --
@@ -1002,7 +966,7 @@ ALTER TABLE ONLY resources
 --
 
 ALTER TABLE ONLY role_permissions
-    ADD CONSTRAINT role_permissions_pkey PRIMARY KEY (role, permission);
+    ADD CONSTRAINT role_permissions_pkey PRIMARY KEY (role_name, perm_id);
 
 
 --
@@ -1034,7 +998,7 @@ ALTER TABLE ONLY solutions
 --
 
 ALTER TABLE ONLY user_roles
-    ADD CONSTRAINT user_roles_pkey PRIMARY KEY ("user", role);
+    ADD CONSTRAINT user_roles_pkey PRIMARY KEY (user_id, role_name);
 
 
 --
@@ -1120,11 +1084,11 @@ ALTER TABLE ONLY comments
 
 
 --
--- Name: permissions_resource_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ecouser
+-- Name: permissions_res_name_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ecouser
 --
 
 ALTER TABLE ONLY permissions
-    ADD CONSTRAINT permissions_resource_id_fkey FOREIGN KEY (resource_id) REFERENCES resources(id);
+    ADD CONSTRAINT permissions_res_name_fkey FOREIGN KEY (res_name) REFERENCES resources(name);
 
 
 --
@@ -1176,19 +1140,19 @@ ALTER TABLE ONLY problems
 
 
 --
--- Name: role_permissions_permission_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ecouser
+-- Name: role_permissions_perm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ecouser
 --
 
 ALTER TABLE ONLY role_permissions
-    ADD CONSTRAINT role_permissions_permission_fkey FOREIGN KEY (permission) REFERENCES permissions(id);
+    ADD CONSTRAINT role_permissions_perm_id_fkey FOREIGN KEY (perm_id) REFERENCES permissions(id);
 
 
 --
--- Name: role_permissions_role_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ecouser
+-- Name: role_permissions_role_name_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ecouser
 --
 
 ALTER TABLE ONLY role_permissions
-    ADD CONSTRAINT role_permissions_role_fkey FOREIGN KEY (role) REFERENCES roles(id);
+    ADD CONSTRAINT role_permissions_role_name_fkey FOREIGN KEY (role_name) REFERENCES roles(name);
 
 
 --
@@ -1216,19 +1180,19 @@ ALTER TABLE ONLY solutions
 
 
 --
--- Name: user_roles_role_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ecouser
+-- Name: user_roles_role_name_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ecouser
 --
 
 ALTER TABLE ONLY user_roles
-    ADD CONSTRAINT user_roles_role_fkey FOREIGN KEY (role) REFERENCES roles(id);
+    ADD CONSTRAINT user_roles_role_name_fkey FOREIGN KEY (role_name) REFERENCES roles(name);
 
 
 --
--- Name: user_roles_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ecouser
+-- Name: user_roles_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ecouser
 --
 
 ALTER TABLE ONLY user_roles
-    ADD CONSTRAINT user_roles_user_fkey FOREIGN KEY ("user") REFERENCES users(id);
+    ADD CONSTRAINT user_roles_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
