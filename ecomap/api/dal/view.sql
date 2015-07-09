@@ -1,5 +1,6 @@
 \c ecomap_db;
-DROP TABLE detailed_problem;
+DROP TABLE IF EXISTS detailed_problem;
+DROP VIEW IF EXISTS detailed_problem;
 CREATE VIEW detailed_problem AS
 SELECT problems.id,
 			 problems.title,
@@ -48,3 +49,4 @@ GROUP BY problems.id,
 				 first_name,
 				 last_name
 ORDER BY  problems.id;
+\q
