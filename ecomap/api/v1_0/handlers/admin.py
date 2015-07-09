@@ -57,7 +57,11 @@ class PermissionHandler(BaseHandler):
             return perm_data[(res,met,mod)]
 
         def get_modifier (role, res, method):
-            return data[role][res][method]
+           try:
+                d = data[role][res][method]
+           except KeyError:
+               return None
+           return d
 
         self.render(
             "/ecomap/api/templates/admin.html",
