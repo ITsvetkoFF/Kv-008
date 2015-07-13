@@ -126,7 +126,7 @@ def main():
         cm.Session.add(md.Permission(**dict(zip(arg_name, row))))
 
     # create problem types
-    types = [ProblemTypeFactory() for i in xrange(8)]
+    types = [ProblemTypeFactory() for i in xrange(7)]
 
     # create problems, votes and comments
     for i in xrange(int(sys.argv[1])):
