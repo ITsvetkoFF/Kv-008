@@ -17,7 +17,7 @@ class User(Base):
     email = Column(String(100), nullable=False,
                    info={'validators': Email()})
 
-    password = Column(String(100))
+    password = Column(String(100), nullable=False)
     region_id = Column(Integer, ForeignKey('regions.id'))
     google_id = Column(String(100))
     facebook_id = Column(String(100))

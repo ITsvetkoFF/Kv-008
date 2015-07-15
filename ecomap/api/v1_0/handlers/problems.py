@@ -51,9 +51,23 @@ class ProblemHandler(BaseHandler):
             self.send_error(400, message='Entry not found for the given id.')
         self.write(data)
 
-    @permission_control
+    # @permission_control
     @validation(ProblemForm)
     def put(self, problem_id):
+        """Update a problem in the database
+            {
+    "status": "SOLVED",
+    "severity": "3",
+    "title": "problem_14",
+    "problem_type_id": 3,
+    "content": "problem_test",
+    "proposal": "test_proposal",
+    "region_id": 1,
+    "latitude": 4,
+    "longitude":4
+    }
+
+        """
         x = self.request.arguments.pop('latitude')
         y = self.request.arguments.pop('longitude')
         self.request.arguments['location'] = create_location(x, y)
@@ -130,8 +144,20 @@ class ProblemsHandler(BaseHandler):
                             message='Your revision is greater than current')
 
     # @permission_control
+    @validation(ProblemForm)
     def post(self):
-        """Store a new problem to the database."""
+        """Store a new problem to the database.
+        {
+        "status": "SOLVED",
+        "severity": "3",
+        "title": "problem_14",
+        "problem_type_id": 3,
+        "content": "problem_test",
+        "proposal": "test_proposal",
+        "region_id": 1,
+        "latitude": 4,
+        "longitude":4
+        }"""
         arguments = self.request.arguments
         print arguments
         x = arguments['latitude']

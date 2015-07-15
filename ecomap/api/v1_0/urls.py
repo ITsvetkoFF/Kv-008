@@ -7,7 +7,7 @@ from api.v1_0.handlers.users import (
     UsersHandler,
     UserHandler
 )
-from api.v1_0.handlers.admin import PermissionHandler
+from api.v1_0.handlers.admin import PermissionHandler, RoleHandler
 from api.v1_0.handlers.pages import (
     PageHandler,
     PagesHandler
@@ -75,5 +75,6 @@ APIUrls = [
     URLSpec(r'/api/docs/(.*)', StaticFileHandler,
             {'path': os.path.join(docs.DOCS_ROOT, 'build', 'html')}),
 
-    URLSpec(r'/api/admin', PermissionHandler)
+    URLSpec(r'/api/admin', PermissionHandler),
+    URLSpec(r'/api/admin/role', RoleHandler)
 ]

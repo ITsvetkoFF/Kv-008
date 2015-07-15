@@ -97,7 +97,9 @@ def main():
     role_admin = md.Role(name='admin')
     UserRoleFactory(role=role_admin, user__first_name='admin')
     role_user = md.Role(name='user')
+    role_act = md.Role(name='activist')
     cm.Session.add(role_admin, role_user)
+    cm.Session.add(role_act)
 
     # create all resources and permissions
     for name in HANDLERS:

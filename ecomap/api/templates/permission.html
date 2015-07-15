@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="application/json; charset=UTF-8"/>
+    <title>Role user</title>
+  </head>
+  <body>
+    <div name="body">
+        <div>
+            {% if request.query_arguments.get('message') %}<h4>{{ request.arguments.get('message')[0] }}</h4>{% end %}
+            <form action="/api/admin/role" method="get">
+                <p>Search user by email: <input name='email' type="text" size="20" maxlength="30">
+                    <input type="submit" value="Search">
+                </p>
+            </form>
+        </div>
+        <div>
+            {% if info != [] %}
+            <form action="/api/admin/role" method="post">
+                <table border="2">
+                  <thead>
+                    {% for field in info %}
+                    <td>{{field[0]}}</td>
+                    {% end %}
+                  </thead>
+                     <tr>
+                    {% for elem in info  %}
+                         <td>
+                         {% if elem[0] == 'Role' %}
+                             <select name="{{user_id[0]}}">
+                                 {% for role in roles %}
+                                    {% if role == elem[1] %}
+                                    <option selected>{{role}}</option>
+                                    {% else %}
+                                    <option>{{role}}</option>
+                                    {% end%}
+                                 {% end %}
+                             </select>
+                         {% else %}
+                            {{elem[1]}}
+                         {% end %}
+                         </td>
+
+                    {% end %}
+
+                  </tr>
+                </table>
+                <input type="submit" value="Change the role">
+            </form>
+            {% end %}
+        </div>
+    </div>
+  </body>
+</html>

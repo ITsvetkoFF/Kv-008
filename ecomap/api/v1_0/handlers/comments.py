@@ -3,6 +3,8 @@ from api.v1_0.models.user import User
 from api.v1_0.models.comment import Comment
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.bl.utils import iso_datetime, conv_array_to_dict
+from api.v1_0.bl.decs import validation
+from api.v1_0.forms.comment import CommentForm
 
 
 class CommentHandler(BaseHandler):
@@ -37,7 +39,7 @@ class CommentHandler(BaseHandler):
             'modified_user_id': comment_query.modified_user_id
         }
         self.write(response)
-
+    @validation(CommentForm)
     def put(self, comment_id):
         """For modifying comment by its id.
 
@@ -121,6 +123,7 @@ class ProblemCommentsHandler(BaseHandler):
             json_response.append(response)
         self.write(conv_array_to_dict(json_response))
 
+    @validation(CommentForm)
     def post(self, problem_id):
         """For adding comment to current problem.
 

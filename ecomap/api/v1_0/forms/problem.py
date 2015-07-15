@@ -4,7 +4,6 @@ from wtforms import FloatField
 from wtforms.validators import NumberRange
 from api.v1_0.models import Problem
 
-
 wtforms_json.init()
 
 class ProblemForm(ModelForm):

@@ -63,7 +63,7 @@ def validation(model_form):
 
     def arguments_wrapper(method):
         @wraps(method)
-        def wrapper(handler):
+        def wrapper(handler, obj_id=None):
             try:
                 form = model_form.from_json(handler.request.arguments,
                                       skip_unknown_keys=False)
@@ -71,7 +71,10 @@ def validation(model_form):
                 message = e.message
                 handler.send_error(400, message=message)
             if form.validate():
-                method(handler)
+                if obj_id != None:
+                    method(handler, obj_id)
+                else:
+                    method(handler)
             else:
                 message = form.errors
                 handler.send_error(400, message=message)
