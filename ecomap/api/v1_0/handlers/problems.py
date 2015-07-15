@@ -4,7 +4,6 @@ import tornado.web
 
 from api.v1_0.bl.utils import create_location, define_values
 from api.v1_0.bl.decs import (
-    permission_control,
     validation,
     check_if_exists,
     check_permission
@@ -51,7 +50,7 @@ class ProblemHandler(BaseHandler):
             self.send_error(400, message='Entry not found for the given id.')
         self.write(data)
 
-    # @permission_control
+    @check_permission
     @validation(ProblemForm)
     def put(self, problem_id):
         """Update a problem in the database
@@ -86,7 +85,7 @@ class ProblemHandler(BaseHandler):
         self.sess.add(activity)
         self.sess.commit()
 
-    @permission_control
+    @check_permission
     def delete(self, problem_id):
         """Delete a problem from the database by given problem id."""
 
@@ -101,6 +100,7 @@ class ProblemHandler(BaseHandler):
 
 class ProblemsHandler(BaseHandler):
     def get(self):
+        """Returns the data for all the revisions in the database."""
         current_revision = (self.sess.query(func.max(ProblemsActivity.id)). \
                             first())[0]
         previous_revision = int(self.get_query_argument('rev', default=0))
@@ -143,7 +143,7 @@ class ProblemsHandler(BaseHandler):
             self.send_error(400,
                             message='Your revision is greater than current')
 
-    # @permission_control
+    @check_permission
     @validation(ProblemForm)
     def post(self):
         """Store a new problem to the database.
