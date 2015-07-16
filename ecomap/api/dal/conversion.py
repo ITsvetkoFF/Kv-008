@@ -152,6 +152,14 @@ class MigrateDB(object):
     def _migrate_user_roles(self, users):
         """Set up for all users role - ''user''.
         """
+
+        # set up admin role
+        admin_role = UserRole(
+            user_id=1,
+            role_name='admin'
+        )
+        self.session.add(admin_role)
+
         users_id = []
 
         self._set_roles()
@@ -180,6 +188,7 @@ class MigrateDB(object):
             region_id=1
         )
         self.session.add(admin)
+
         users = self.mysql_db.Users.all()
         for user in users:
             user_data = User(
@@ -234,12 +243,7 @@ class MigrateDB(object):
             lat = problem.Latitude
             lon = problem.Longtitude
 
-            # Used for check if some one of table field is empty
-            # for k, v in problem.__dict__.items():
-            #     if k is not '_sa_instance_state':
-            #         check_arr.append(problem.__dict__[k])
-
-            # After validate the problem
+            # Validate the problem
             if None in [lat, lon, problem.Title, problem.Severity]:
                 continue
 
