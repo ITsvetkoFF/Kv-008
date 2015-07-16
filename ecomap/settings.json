@@ -1,5 +1,5 @@
 {
-  "debug": false,
+  "debug": true,
   "tornado_start": 0,
   "bind_port": 8000,
   "bind_address": "0.0.0.0",

@@ -62,7 +62,7 @@ def store_thumbnail_to_hd(path_to_file):
     name, _ = os.path.splitext(filename)
 
     path_to_thumbnail = os.path.join(
-        STATIC_ROOT, 'thumbnails', name + '.thumbnail.jpeg')
+        STATIC_ROOT, 'thumbnails', name + '.jpeg')
 
     try:
         im = Image.open(path_to_file)

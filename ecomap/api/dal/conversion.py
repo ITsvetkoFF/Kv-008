@@ -10,6 +10,7 @@ from api import settings
 from api.dal.map import geo_ukraine
 from api.utils.db import get_db_session
 from api.v1_0.bl.utils import create_location
+from factories import roles
 from api.v1_0.models import (
     Region,
     Page,
@@ -67,6 +68,8 @@ class MigrateDB(object):
         self.session.execute('DELETE FROM user_roles;')
         self.session.execute('DELETE FROM users;')
         self.session.execute('DELETE FROM regions;')
+        self.session.execute('DELETE FROM role_permissions;')
+        self.session.execute('DELETE FROM permissions;')
         self.session.execute('DELETE FROM roles;')
         self.session.execute('DELETE FROM resources;')
         self.session.execute('DELETE FROM problem_types;')
@@ -166,6 +169,8 @@ class MigrateDB(object):
     def migrate_user(self):
         """Migrate all users in new db.
         """
+        # add admin_user
+        admin = User()
         users = self.mysql_db.Users.all()
         for user in users:
             user_data = User(
@@ -326,6 +331,7 @@ class MigrateDB(object):
         ecomap_db.migrate_photos()
         ecomap_db.migrate_activities()
         ecomap_db.close()
+        roles.main()
         MigrateDB.create_dump('ecomap_db_dump')
 
 
