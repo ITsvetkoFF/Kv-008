@@ -49,7 +49,6 @@ class PageHandler(BaseHandler):
 
 
 class PagesHandler(BaseHandler):
-
     def get(self):
         """Returns the data for all the pages in the database."""
         self.write(tornado.escape.json_encode(
