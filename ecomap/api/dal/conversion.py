@@ -7,6 +7,7 @@ from sqlalchemy import func
 from fabric.api import local
 
 from api import settings
+from api.utils.auth import hash_password
 from api.dal.map import geo_ukraine
 from api.utils.db import get_db_session
 from api.v1_0.bl.utils import create_location
@@ -170,7 +171,15 @@ class MigrateDB(object):
         """Migrate all users in new db.
         """
         # add admin_user
-        admin = User()
+        admin = User(
+            id=1,
+            first_name='admin',
+            last_name='admin_lastname',
+            email='admin@example.com',
+            password=hash_password('admin_pass'),
+            region_id=1
+        )
+        self.session.add(admin)
         users = self.mysql_db.Users.all()
         for user in users:
             user_data = User(
@@ -226,12 +235,12 @@ class MigrateDB(object):
             lon = problem.Longtitude
 
             # Used for check if some one of table field is empty
-            for k, v in problem.__dict__.items():
-                if k is not '_sa_instance_state':
-                    check_arr.append(problem.__dict__[k])
+            # for k, v in problem.__dict__.items():
+            #     if k is not '_sa_instance_state':
+            #         check_arr.append(problem.__dict__[k])
 
             # After validate the problem
-            if None in check_arr:
+            if None in [lat, lon, problem.Title, problem.Severity]:
                 continue
 
             # Another validator
