@@ -32,6 +32,8 @@ cm.Session.configure(bind=get_db_engine(settings))
 # * ProblemVoteHandler POST
 # * ProblemCommentsHandler POST
 # * PhotoHandler PUT, DELETE OWN
+# * PermissionHandler GET NONE, POST NONE
+# *RoleHandler GET NONE, POST NONE
 user_perms = dict()
 user_perms['UserHandler'] = [
     ('GET', 'OWN'),
@@ -52,6 +54,11 @@ user_perms['ProblemCommentsHandler'] = \
     user_perms['ProblemPhotosHandler'] = [
     ('POST', 'OWN')
 ]
+user_perms['PermissionHandler']= \
+    user_perms['RoleHandler']= [
+    ('GET','NONE'),
+    ('POST','NONE')
+]
 
 # Give role_admin permissions:
 # * UsersHandler GET
@@ -61,6 +68,8 @@ user_perms['ProblemCommentsHandler'] = \
 # * PageHandler PUT, DELETE
 # * CommentsHandler PUT, DELETE ANY
 # * PhotoHandler PUT, DELETE ANY
+# * PermissionHandler GET ANY, POST ANY
+# *RoleHandler GET ANY, POST ANY
 admin_perms = dict()
 admin_perms['UsersHandler'] = [
     ('GET', 'ANY'),
@@ -82,6 +91,11 @@ admin_perms['ProblemHandler'] = \
     ('PUT', 'ANY'),
     ('DELETE', 'ANY')
 ]
+admin_perms['PermissionHandler']= \
+    admin_perms['RoleHandler']= [
+    ('GET','ANY'),
+    ('POST','ANY')
+]
 
 
 def get_args(item, handler):
@@ -97,7 +111,9 @@ def main():
     role_admin = md.Role(name='admin')
     UserRoleFactory(role=role_admin, user__first_name='admin')
     role_user = md.Role(name='user')
+    role_act = md.Role(name='activist')
     cm.Session.add(role_admin, role_user)
+    cm.Session.add(role_act)
 
     # create all resources and permissions
     for name in HANDLERS:

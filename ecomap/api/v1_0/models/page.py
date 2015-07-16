@@ -7,7 +7,7 @@ class Page(Base):
     __tablename__ = 'pages'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    alias = Column(String(30), nullable=False)
+    alias = Column(String(30), nullable=False, unique=True)
     title = Column(String(150), nullable=False)
     content = Column(Text, nullable=False)
     is_resource = Column(Boolean, nullable=False)

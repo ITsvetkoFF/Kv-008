@@ -40,15 +40,6 @@ class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
         self.write(kwargs)
 
-    def get_action_modifier(self):
-        current_user = self.sess.query(User).get(self.current_user)
-
-        for role in current_user.roles:
-            for perm in role.permissions:
-                if (perm.resource.name == self.__class__.__name__ and
-                            perm.action == self.request.method):
-                    return perm.modifier
-
     def set_default_headers(self):
         if self.request.headers.get("Origin"):
             self.set_header("Access-Control-Allow-Origin",

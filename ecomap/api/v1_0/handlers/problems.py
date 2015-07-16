@@ -4,7 +4,6 @@ import tornado.web
 
 from api.v1_0.bl.utils import create_location, define_values
 from api.v1_0.bl.decs import (
-    permission_control,
     validation,
     check_if_exists,
     check_permission
@@ -35,6 +34,7 @@ from api.v1_0.bl.photo import *
 
 class ProblemHandler(BaseHandler):
 
+    @check_if_exists(DetailedProblem)
     def get(self, problem_id=None):
         """Returns the data for all the problems in the database.
 
@@ -45,15 +45,28 @@ class ProblemHandler(BaseHandler):
             DetailedProblem,
             func.ST_AsGeoJSON(DetailedProblem.location)).filter(
             DetailedProblem.id == problem_id)
-        try:
-            data = generate_data(problem)[0]
-        except IndexError:
-            self.send_error(400, message='Entry not found for the given id.')
+        data = generate_data(problem)[0]
         self.write(data)
 
-    @permission_control
+    @tornado.web.authenticated
+    @check_permission
+    @check_if_exists(DetailedProblem)
     @validation(ProblemForm)
     def put(self, problem_id):
+        """Update a problem in the database
+            {
+    "status": "SOLVED",
+    "severity": "3",
+    "title": "problem_14",
+    "problem_type_id": 3,
+    "content": "problem_test",
+    "proposal": "test_proposal",
+    "region_id": 1,
+    "latitude": 4,
+    "longitude":4
+    }
+
+        """
         x = self.request.arguments.pop('latitude')
         y = self.request.arguments.pop('longitude')
         self.request.arguments['location'] = create_location(x, y)
@@ -72,7 +85,9 @@ class ProblemHandler(BaseHandler):
         self.sess.add(activity)
         self.sess.commit()
 
-    @permission_control
+    @tornado.web.authenticated
+    @check_if_exists(DetailedProblem)
+    @check_permission
     def delete(self, problem_id):
         """Delete a problem from the database by given problem id."""
 
@@ -87,6 +102,7 @@ class ProblemHandler(BaseHandler):
 
 class ProblemsHandler(BaseHandler):
     def get(self):
+        """Returns the data for all the revisions in the database."""
         current_revision = (self.sess.query(func.max(ProblemsActivity.id)). \
                             first())[0]
         previous_revision = int(self.get_query_argument('rev', default=0))
@@ -129,9 +145,22 @@ class ProblemsHandler(BaseHandler):
             self.send_error(400,
                             message='Your revision is greater than current')
 
-    # @permission_control
+    @tornado.web.authenticated
+    @check_permission
+    @validation(ProblemForm)
     def post(self):
-        """Store a new problem to the database."""
+        """Store a new problem to the database.
+        {
+        "status": "SOLVED",
+        "severity": "3",
+        "title": "problem_14",
+        "problem_type_id": 3,
+        "content": "problem_test",
+        "proposal": "test_proposal",
+        "region_id": 1,
+        "latitude": 4,
+        "longitude":4
+        }"""
         arguments = self.request.arguments
         print arguments
         x = arguments['latitude']
@@ -159,8 +188,9 @@ class ProblemsHandler(BaseHandler):
 
 
 class VoteHandler(BaseHandler):
+
     @tornado.web.authenticated
-    @check_if_exists(Problem)
+    @check_if_exists(DetailedProblem)
     @check_permission
     def post(self, problem_id):
         """Creates a vote record for the specified problem."""
@@ -176,8 +206,8 @@ class VoteHandler(BaseHandler):
 
 
 class ProblemPhotosHandler(BaseHandler):
-    @tornado.web.authenticated
-    @check_if_exists(Problem)
+
+    @check_if_exists(DetailedProblem)
     def get(self, problem_id):
         """Returns all photo data for the specified problem."""
         photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
@@ -186,7 +216,7 @@ class ProblemPhotosHandler(BaseHandler):
             json.dumps([get_row_data(photo) for photo in photos]))
 
     @tornado.web.authenticated
-    @check_if_exists(Problem)
+    @check_if_exists(DetailedProblem)
     @check_permission
     def post(self, problem_id):
         """Stores uploaded photos to the hard drive, creates and stores
