@@ -39,6 +39,7 @@ class CommentHandler(BaseHandler):
             'modified_user_id': comment_query.modified_user_id
         }
         self.write(response)
+    
     @validation(CommentForm)
     def put(self, comment_id):
         """For modifying comment by its id.
@@ -136,7 +137,7 @@ class ProblemCommentsHandler(BaseHandler):
         }
 
         """
-        new_comment = Comment(content=str(self.request.arguments['content']),
+        new_comment = Comment(content=unicode(self.request.arguments['content']),
                               problem_id=problem_id,
                               user_id=self.current_user,
                               created_date=datetime.utcnow())

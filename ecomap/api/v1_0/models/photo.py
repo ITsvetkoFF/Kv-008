@@ -10,13 +10,11 @@ class Photo(Base):
                 autoincrement=True)
 
     name = Column(String(200), nullable=False)
-    datetime = Column(DateTime, nullable=False)
+    datetime = Column(DateTime)
     comment = Column(Text)
 
     problem_id = Column(Integer,
                         ForeignKey('problems.id'),
                         nullable=False)
 
-    user_id = Column(Integer,
-                     ForeignKey('users.id'),
-                     nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'))

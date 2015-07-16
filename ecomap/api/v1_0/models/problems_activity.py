@@ -14,7 +14,7 @@ class ProblemsActivity(Base):
                         ForeignKey('problems.id', ondelete='CASCADE'),
                         nullable=False)
 
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'))
     datetime = Column(DateTime, nullable=False)
 
     activity_type = Column(Enum(*ACTIVITY_TYPES, name='activitytype'),

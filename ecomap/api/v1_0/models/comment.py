@@ -11,8 +11,7 @@ class Comment(Base):
     problem_id = Column(Integer,
                         ForeignKey('problems.id', ondelete='CASCADE'),
                         nullable=False)
-    user_id = Column(Integer, ForeignKey(u'users.id'),
-                     nullable=False)
+    user_id = Column(Integer, ForeignKey(u'users.id'))
     created_date = Column(DateTime, nullable=False)
     modified_date = Column(DateTime, nullable=True)
     modified_user_id = Column(Integer, nullable=True)
