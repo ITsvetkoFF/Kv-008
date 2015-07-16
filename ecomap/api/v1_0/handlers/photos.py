@@ -10,7 +10,6 @@ import static
 
 
 class PhotoHandler(BaseHandler):
-    @tornado.web.authenticated
     @check_if_exists(Photo)
     def get(self, photo_id):
         """Returns data for the specified photo."""

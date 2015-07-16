@@ -2,7 +2,10 @@ from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models import *
 from api.v1_0.bl.auth import get_role_perms
 import tornado
+import tornado.web
 from api.v1_0.bl.revision import query_converter
+from api.v1_0.bl.decs import check_permission
+
 
 HANDLERS = [
     'UsersHandler',
@@ -15,11 +18,16 @@ HANDLERS = [
     'PagesHandler',
     'PageHandler',
     'CommentHandler',
-    'PhotoHandler'
+    'PhotoHandler',
+    'PermissionHandler',
+    'RoleHandler'
 ]
 
 
 class PermissionHandler(BaseHandler):
+
+    @tornado.web.authenticated
+    @check_permission
     def get(self):
         data = dict()
         for role in self.sess.query(Role):
@@ -74,6 +82,8 @@ class PermissionHandler(BaseHandler):
             resources=HANDLERS
         )
 
+    @tornado.web.authenticated
+    @check_permission
     def post(self):
         role_perm = []
         for role in self.request.arguments.keys():
@@ -88,6 +98,9 @@ class PermissionHandler(BaseHandler):
 
 
 class RoleHandler(BaseHandler):
+
+    @tornado.web.authenticated
+    @check_permission
     def get(self):
         email = self.get_argument('email', None)
         header = ['Id', 'Email', 'First name', 'Last name', 'Role']
@@ -115,6 +128,8 @@ class RoleHandler(BaseHandler):
             )
         self.render("/ecomap/api/templates/permission.html", info=[])
 
+    @tornado.web.authenticated
+    @check_permission
     def post(self):
         arg = self.request.arguments
         self.sess.query(UserRole).filter(UserRole.user_id==int(arg.keys()[0])).delete()

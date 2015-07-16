@@ -11,7 +11,7 @@ from api.v1_0.forms.page import PageForm, PutPageFrom
 
 
 class PageHandler(BaseHandler):
-    @tornado.web.authenticated
+
     @check_if_exists(Page)
     def get(self, page_id):
         """Return a page from the database by given page id."""
@@ -49,6 +49,7 @@ class PageHandler(BaseHandler):
 
 
 class PagesHandler(BaseHandler):
+
     def get(self):
         """Returns the data for all the pages in the database."""
         self.write(tornado.escape.json_encode(

@@ -52,6 +52,11 @@ user_perms['ProblemCommentsHandler'] = \
     user_perms['ProblemPhotosHandler'] = [
     ('POST', 'OWN')
 ]
+user_perms['PermissionHandler']= \
+    user_perms['RoleHandler']= [
+    ('GET','NONE'),
+    ('POST','NONE')
+]
 
 # Give role_admin permissions:
 # * UsersHandler GET
@@ -81,6 +86,11 @@ admin_perms['ProblemHandler'] = \
     admin_perms['PhotoHandler'] = [
     ('PUT', 'ANY'),
     ('DELETE', 'ANY')
+]
+admin_perms['PermissionHandler']= \
+    admin_perms['RoleHandler']= [
+    ('GET','ANY'),
+    ('POST','ANY')
 ]
 
 

@@ -34,6 +34,7 @@ from api.v1_0.bl.photo import *
 
 class ProblemHandler(BaseHandler):
 
+    @check_if_exists(DetailedProblem)
     def get(self, problem_id=None):
         """Returns the data for all the problems in the database.
 
@@ -44,13 +45,12 @@ class ProblemHandler(BaseHandler):
             DetailedProblem,
             func.ST_AsGeoJSON(DetailedProblem.location)).filter(
             DetailedProblem.id == problem_id)
-        try:
-            data = generate_data(problem)[0]
-        except IndexError:
-            self.send_error(400, message='Entry not found for the given id.')
+        data = generate_data(problem)[0]
         self.write(data)
 
+    @tornado.web.authenticated
     @check_permission
+    @check_if_exists(DetailedProblem)
     @validation(ProblemForm)
     def put(self, problem_id):
         """Update a problem in the database
@@ -85,6 +85,8 @@ class ProblemHandler(BaseHandler):
         self.sess.add(activity)
         self.sess.commit()
 
+    @tornado.web.authenticated
+    @check_if_exists(DetailedProblem)
     @check_permission
     def delete(self, problem_id):
         """Delete a problem from the database by given problem id."""
@@ -143,6 +145,7 @@ class ProblemsHandler(BaseHandler):
             self.send_error(400,
                             message='Your revision is greater than current')
 
+    @tornado.web.authenticated
     @check_permission
     @validation(ProblemForm)
     def post(self):
@@ -185,8 +188,9 @@ class ProblemsHandler(BaseHandler):
 
 
 class VoteHandler(BaseHandler):
+
     @tornado.web.authenticated
-    @check_if_exists(Problem)
+    @check_if_exists(DetailedProblem)
     @check_permission
     def post(self, problem_id):
         """Creates a vote record for the specified problem."""
@@ -202,8 +206,8 @@ class VoteHandler(BaseHandler):
 
 
 class ProblemPhotosHandler(BaseHandler):
-    @tornado.web.authenticated
-    @check_if_exists(Problem)
+
+    @check_if_exists(DetailedProblem)
     def get(self, problem_id):
         """Returns all photo data for the specified problem."""
         photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
@@ -212,7 +216,7 @@ class ProblemPhotosHandler(BaseHandler):
             json.dumps([get_row_data(photo) for photo in photos]))
 
     @tornado.web.authenticated
-    @check_if_exists(Problem)
+    @check_if_exists(DetailedProblem)
     @check_permission
     def post(self, problem_id):
         """Stores uploaded photos to the hard drive, creates and stores

@@ -9,7 +9,7 @@ from api.v1_0.bl.auth import get_user_roles
 def check_if_exists(model):
     """Checks if there is a row for the specified id in the url."""
     assert model in (
-        User, Photo, Problem, Comment, Page), 'Bad model argument.'
+        User, Photo, Problem, Comment, Page, DetailedProblem), 'Bad model argument.'
 
     def decorator(method):
         @wraps(method)
@@ -72,8 +72,6 @@ def check_permission(method):
             action=args[0].request.method,
             session=args[0].sess
         )
-        print format(mods, '#>30')
-
         if 'ANY' in mods:
             return method(*args)
 
