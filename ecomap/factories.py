@@ -32,6 +32,8 @@ cm.Session.configure(bind=get_db_engine(settings))
 # * ProblemVoteHandler POST
 # * ProblemCommentsHandler POST
 # * PhotoHandler PUT, DELETE OWN
+# * PermissionHandler GET NONE, POST NONE
+# *RoleHandler GET NONE, POST NONE
 user_perms = dict()
 user_perms['UserHandler'] = [
     ('GET', 'OWN'),
@@ -66,6 +68,8 @@ user_perms['PermissionHandler']= \
 # * PageHandler PUT, DELETE
 # * CommentsHandler PUT, DELETE ANY
 # * PhotoHandler PUT, DELETE ANY
+# * PermissionHandler GET ANY, POST ANY
+# *RoleHandler GET ANY, POST ANY
 admin_perms = dict()
 admin_perms['UsersHandler'] = [
     ('GET', 'ANY'),
