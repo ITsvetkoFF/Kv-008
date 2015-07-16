@@ -217,7 +217,7 @@ class ProblemPhotosHandler(BaseHandler):
 
     @tornado.web.authenticated
     @check_if_exists(DetailedProblem)
-    @check_permission
+    # @check_permission
     def post(self, problem_id):
         """Stores uploaded photos to the hard drive, creates and stores
         thumbnails, stores photo data to the database.

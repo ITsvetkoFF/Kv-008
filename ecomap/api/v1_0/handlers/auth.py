@@ -3,6 +3,7 @@ import tornado.auth
 import tornado.escape
 
 from api.v1_0.handlers.base import BaseHandler
+from api.utils.auth import hash_password
 from api.v1_0.forms.user import UserRegisterForm, UserLoginForm
 from api.v1_0.bl.auth import *
 
@@ -19,7 +20,15 @@ class RegisterHandler(BaseHandler):
         """
         form = UserRegisterForm.from_json(self.request.arguments)
         if form.validate():
-            new_user = store_new_user(self.sess, User(**form.data))
+            new_user = store_new_user(
+                self.sess,
+                User(
+                    first_name=form.data['first_name'],
+                    last_name=form.data['last_name'],
+                    email=form.data['email'],
+                    password=hash_password(form.data['password'])
+                )
+            )
             # if new_user is None then email is not unique
             if not new_user:
                 return self.send_error(400, message='Email already in use.')
@@ -66,7 +75,7 @@ class LoginHandler(BaseHandler):
 
         user = get_user_with_email(self, form.email.data)
         # check if user exists and her password matches
-        if user and user.password == form.password.data:
+        if user and user.password == hash_password(form.password.data):
             complete_auth(self, user)
         else:
             self.send_error(400, message='Invalid email/password.')
