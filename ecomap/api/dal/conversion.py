@@ -112,8 +112,9 @@ class MigrateDB(object):
         """
         admin_role = Role(id=1, name='admin')
         user_role = Role(id=2, name='user')
+        activist_role = Role(id=3, name='activist')
 
-        self.session.add_all([admin_role, user_role])
+        self.session.add_all([admin_role, user_role, activist_role])
         self.session.commit()
 
         self._fix_id(obj_res=Role)

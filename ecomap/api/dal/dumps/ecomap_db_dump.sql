@@ -1858,6 +1858,7 @@ admin	36
 COPY roles (id, name) FROM stdin;
 1	admin
 2	user
+3	activist
 \.
 
 
@@ -1865,7 +1866,7 @@ COPY roles (id, name) FROM stdin;
 -- Name: roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ecouser
 --
 
-SELECT pg_catalog.setval('roles_id_seq', 3, false);
+SELECT pg_catalog.setval('roles_id_seq', 4, false);
 
 
 --
