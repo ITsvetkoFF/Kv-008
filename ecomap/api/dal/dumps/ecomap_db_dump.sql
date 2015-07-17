@@ -1896,6 +1896,7 @@ COPY spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
 --
 
 COPY user_roles (user_id, role_name) FROM stdin;
+1	admin
 2	user
 3	user
 4	user
