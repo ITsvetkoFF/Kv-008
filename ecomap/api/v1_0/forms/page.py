@@ -14,7 +14,7 @@ class PageForm(ModelForm):
     def get_session(self):
         return session()
 
-class PutPageFrom(ModelForm):
+class PageUpdateFrom(ModelForm):
     class Meta:
         model = Page
         unique_validator = None

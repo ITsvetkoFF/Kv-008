@@ -1,4 +1,5 @@
 import datetime
+from api.v1_0.models import ProblemsActivity
 
 def get_datetime():
     return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
@@ -24,3 +25,9 @@ def define_values(arguments, key, default = None):
         return default
     else:
         return arguments[key]
+
+def check_vote(handler, problem_id):
+    return handler.sess.query(ProblemsActivity.id).filter(
+        ProblemsActivity.problem_id==problem_id,
+        ProblemsActivity.user_id==handler.current_user,
+        ProblemsActivity.activity_type=='VOTE').first()

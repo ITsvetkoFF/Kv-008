@@ -1,6 +1,7 @@
 from api.v1_0.models import UserRole, RolePermission
 from api.v1_0.models.user import User
 from api.v1_0.models.permission import Permission
+from api.v1_0.bl.utils import define_values
 
 
 def complete_auth(handler, user):
@@ -41,6 +42,9 @@ def get_user_roles(session, user_id):
 def store_new_user(session, new_user):
     if new_user.check_unique_email(session, new_user.email):
         session.add(new_user)
+        user_id = session.query(User.id).filter(
+            User.email == new_user.email).first()
+        session.add(UserRole(user_id=user_id, role_name='user'))
         session.commit()
         return new_user
 
@@ -48,8 +52,9 @@ def store_new_user(session, new_user):
 def create_fb_user(user_profile):
     return User(
         first_name=user_profile['first_name'],
-        last_name=user_profile['last_name'],
+        last_name=define_values(user_profile,'last_name'),
         email=user_profile['email'],
+        region_id=define_values(user_profile,'region_id'),
         facebook_id=user_profile['id']
     )
 

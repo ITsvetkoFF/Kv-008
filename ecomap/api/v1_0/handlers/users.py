@@ -4,8 +4,9 @@ import tornado.escape
 
 from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.models import User
-from api.v1_0.bl.decs import check_if_exists, check_permission
+from api.v1_0.bl.decs import check_if_exists, check_permission, validation
 from api.v1_0.bl.modeldict import get_row_data, update_row_data
+from api.v1_0.forms.user import UserUpdateForm
 
 
 class UsersHandler(BaseHandler):
@@ -35,6 +36,7 @@ class UserHandler(BaseHandler):
     @tornado.web.authenticated
     @check_if_exists(User)
     @check_permission
+    @validation(UserUpdateForm)
     def put(self, user_id):
         """Updates data for the specified user.
 

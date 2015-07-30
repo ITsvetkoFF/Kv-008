@@ -26,9 +26,10 @@ from api.v1_0.models import (
     Photo
 )
 from api.v1_0.forms.problem import (
-    ProblemForm
+    ProblemForm,
+    ProblemUpdateForm
 )
-from api.v1_0.bl.utils import get_datetime
+from api.v1_0.bl.utils import get_datetime, check_vote
 from api.v1_0.bl.photo import *
 
 
@@ -49,30 +50,30 @@ class ProblemHandler(BaseHandler):
         self.write(data)
 
     @tornado.web.authenticated
-    @check_permission
     @check_if_exists(DetailedProblem)
-    @validation(ProblemForm)
+    @check_permission
+    @validation(ProblemUpdateForm)
     def put(self, problem_id):
         """Update a problem in the database
-            {
-    "status": "SOLVED",
-    "severity": "3",
-    "title": "problem_14",
-    "problem_type_id": 3,
-    "content": "problem_test",
-    "proposal": "test_proposal",
-    "region_id": 1,
-    "latitude": 4,
-    "longitude":4
-    }
+        {
+            "status": "SOLVED",
+            "severity": "3",
+            "title": "problem_14",
+            "problem_type_id": 3,
+            "content": "problem_test",
+            "proposal": "test_proposal",
+            "region_id": 1,
+            "latitude": 4,
+            "longitude":4
+        }
 
         """
-        x = self.request.arguments.pop('latitude')
-        y = self.request.arguments.pop('longitude')
-        self.request.arguments['location'] = create_location(x, y)
-        self.request.arguments['id'] = problem_id
+        args = self.request.arguments
+        x = args.pop('latitude')
+        y = args.pop('longitude')
+        args['location'] = create_location(x, y)
         self.sess.query(Problem).filter_by(id=int(problem_id)). \
-            update(self.request.arguments)
+            update(args)
 
         self.sess.commit()
 
@@ -194,6 +195,11 @@ class VoteHandler(BaseHandler):
     @check_permission
     def post(self, problem_id):
         """Creates a vote record for the specified problem."""
+
+        if check_vote(self, problem_id):
+            return self.send_error(400, message=(
+                    'You can not vote twice!'))
+
         vote = ProblemsActivity(
             problem_id=int(problem_id),
             user_id=self.current_user,
@@ -211,13 +217,11 @@ class ProblemPhotosHandler(BaseHandler):
     def get(self, problem_id):
         """Returns all photo data for the specified problem."""
         photos = self.sess.query(Photo).filter(Photo.problem_id == problem_id)
-
         self.write(
             json.dumps([get_row_data(photo) for photo in photos]))
 
     @tornado.web.authenticated
-    @check_if_exists(DetailedProblem)
-    # @check_permission
+    @check_permission
     def post(self, problem_id):
         """Stores uploaded photos to the hard drive, creates and stores
         thumbnails, stores photo data to the database.

@@ -7,7 +7,7 @@ from api.v1_0.bl.decs import check_permission, check_if_exists
 from api.v1_0.models import Page
 from api.v1_0.bl.modeldict import get_row_data
 from api.v1_0.bl.decs import validation
-from api.v1_0.forms.page import PageForm, PutPageFrom
+from api.v1_0.forms.page import PageForm, PageUpdateFrom
 
 
 class PageHandler(BaseHandler):
@@ -20,7 +20,7 @@ class PageHandler(BaseHandler):
     @tornado.web.authenticated
     @check_if_exists(Page)
     @check_permission
-    @validation(PutPageFrom)
+    @validation(PageUpdateFrom)
     def put(self, page_id):
         """Update a page in the database
         {

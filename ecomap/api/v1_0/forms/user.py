@@ -9,8 +9,26 @@ class UserRegisterForm(ModelForm):
     class Meta:
         # need to add password_required check here
         model = User
+        exclude = ['facebook_id', 'google_id']
+        include = ['region_id']
+
+class UserRegisterFbForm(ModelForm):
+    class Meta:
+        # need to add password_required check here
+        model = User
+        exclude = ['google_id']
+        include = ['region_id']
 
 class UserLoginForm(ModelForm):
     class Meta:
         model = User
         only = ['email', 'password']
+
+
+class UserUpdateForm(ModelForm):
+    class Meta:
+        model = User
+        exclude = ['facebook_id', 'google_id']
+        include = ['region_id']
+        optional_validator = None
+
