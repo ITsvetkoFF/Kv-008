@@ -4,11 +4,18 @@ import tornado.escape
 
 from api.v1_0.handlers.base import BaseHandler
 from api.utils.auth import hash_password
-from api.v1_0.forms.user import UserRegisterForm, UserLoginForm
+from api.v1_0.forms.user import (
+    UserRegisterForm,
+    UserLoginForm,
+    UserRegisterFbForm
+)
 from api.v1_0.bl.auth import *
+from api.v1_0.bl.decs import validation
+from api.v1_0.bl.utils import define_values
 
 
 class RegisterHandler(BaseHandler):
+    @validation(UserRegisterForm)
     def post(self):
         """Registers a new user.
 
@@ -17,28 +24,33 @@ class RegisterHandler(BaseHandler):
 
         ``first_name``, ``last_name``, ``email`` and ``password`` key-value
         pairs are required.
+        {
+         "first_name":"Jon",
+         "last_name":"Snow",
+         "email": "jon_snow@mil.om",
+         "password":"111",
+         "region_id":1
+        }
         """
-        form = UserRegisterForm.from_json(self.request.arguments)
-        if form.validate():
-            new_user = store_new_user(
-                self.sess,
-                User(
-                    first_name=form.data['first_name'],
-                    last_name=form.data['last_name'],
-                    email=form.data['email'],
-                    password=hash_password(form.data['password'])
-                )
+        args = self.request.arguments
+        new_user = store_new_user(
+            self.sess,
+            User(
+                first_name=args['first_name'],
+                last_name=define_values(args,'last_name'),
+                email=args['email'],
+                password=hash_password(args['password']),
+                region_id=define_values(args,'region_id')
             )
-            # if new_user is None then email is not unique
-            if not new_user:
-                return self.send_error(400, message='Email already in use.')
+        )
+        if not new_user:
+            return self.send_error(400, message='Email already in use.')
 
-            complete_auth(self, new_user)
-        else:
-            self.send_error(400, message=form.errors)
+        complete_auth(self, new_user)
 
 
 class FacebookHandler(BaseHandler):
+    @validation(UserRegisterFbForm)
     def post(self):
         user = self.sess.query(User).filter(
             User.facebook_id == self.request.arguments['id']).first()
@@ -58,6 +70,7 @@ class FacebookHandler(BaseHandler):
 
 
 class LoginHandler(BaseHandler):
+    @validation(UserLoginForm)
     def post(self):
         """Logs in a user.
         Sets a cookie ``user_id`` and writes user's ``first_name`` and
@@ -68,14 +81,14 @@ class LoginHandler(BaseHandler):
 
         If user authentication fails, a client gets 400 response status code
         and a message *"Invalid email/password."*.
+        {
+        "email": "admin@example.com",
+        "password":"admin_pass"
+        }
         """
-        form = UserLoginForm.from_json(self.request.arguments)
-        if not form.validate():
-            return self.send_error(400, message=form.errors)
-
-        user = get_user_with_email(self, form.email.data)
-        # check if user exists and her password matches
-        if user and user.password == hash_password(form.password.data):
+        args = self.request.arguments
+        user = get_user_with_email(self, args['email'])
+        if user and user.password == hash_password(args['password']):
             complete_auth(self, user)
         else:
             self.send_error(400, message='Invalid email/password.')

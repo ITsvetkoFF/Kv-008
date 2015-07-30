@@ -5,6 +5,7 @@ from api.v1_0.handlers.base import BaseHandler
 from api.v1_0.bl.utils import iso_datetime, conv_array_to_dict
 from api.v1_0.bl.decs import validation
 from api.v1_0.forms.comment import CommentForm
+import json
 
 
 class CommentHandler(BaseHandler):
@@ -101,7 +102,8 @@ class ProblemCommentsHandler(BaseHandler):
         comments_query = self.sess.query(Comment).filter_by(
             problem_id=problem_id).all()
         if not comments_query:
-            self.send_error(status_code=404, message='Not Found')
+            self.write(json.dumps(json_response))
+            return
 
         for comment_query in comments_query:
             user_query = self.sess.query(User).get(comment_query.user_id)

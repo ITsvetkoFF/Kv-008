@@ -13,3 +13,12 @@ class ProblemForm(ModelForm):
             include = ['problem_type_id','region_id']
         latitude = FloatField(validators=[NumberRange()])
         longitude = FloatField(validators=[NumberRange()])
+
+class ProblemUpdateForm(ModelForm):
+        class Meta:
+            model = Problem
+            exclude = ['location']
+            include = ['problem_type_id','region_id']
+        optional_validator = None
+        latitude = FloatField(validators=[NumberRange()])
+        longitude = FloatField(validators=[NumberRange()])
