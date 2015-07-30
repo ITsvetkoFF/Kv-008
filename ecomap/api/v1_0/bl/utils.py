@@ -6,7 +6,7 @@ def get_datetime():
 
 def iso_datetime(date):
     if date is not None:
-        return date.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        return date.strftime("%Y-%m-%dT%H:%M:%S.000%z")
     else:
         return date
 
