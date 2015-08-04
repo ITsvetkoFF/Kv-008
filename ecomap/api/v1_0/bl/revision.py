@@ -20,6 +20,7 @@ def generate_data(query):
             region_id=problem.region_id,
             number_of_comments=problem.number_of_comments,
             number_of_votes=problem.number_of_votes,
+            user_id=problem.users_id,
             first_name=problem.first_name,
             last_name=problem.last_name
 

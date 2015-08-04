@@ -13,6 +13,7 @@ SELECT problems.id,
        problems.region_id,
 			 number_of_votes,
 			 datetime,
+			 users_id,
 			 first_name,
 			 last_name ,
 			 COUNT( comments.id) AS number_of_comments
@@ -28,13 +29,15 @@ LEFT OUTER JOIN (SELECT problems_activities.problem_id AS id,
 						WHERE problems_activities.activity_type  = 'ADDED' ) AS B
 						ON problems.id = B.id
 LEFT OUTER JOIN (SELECT problems_activities.problem_id,
+						users.id AS users_id,
 						users.first_name,
 						users.last_name
 						FROM problems_activities
 						LEFT OUTER JOIN users
 						ON users.id = problems_activities.user_id
 						WHERE  problems_activities.activity_type =  'ADDED'
-						GROUP BY problem_id, users.first_name, users.last_name) as C
+						GROUP BY problem_id, users.first_name, users.last_name, users.id)
+						AS C
 						ON C.problem_id = problems.id
 LEFT OUTER JOIN comments ON problems.id = comments.problem_id
 
@@ -46,6 +49,7 @@ GROUP BY problems.id,
 				 problems.proposal,
 				 number_of_votes,
 				 datetime,
+				 users_id,
 				 first_name,
 				 last_name
 ORDER BY  problems.id;
