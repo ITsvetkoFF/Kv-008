@@ -16,6 +16,7 @@ class DetailedProblem(Base):
     status = Column(Enum(*STATUSES, name='status'))
     problem_type_id = Column(Integer, ForeignKey('problem_types.id'))
     region_id = Column(Integer, ForeignKey('regions.id'))
+    users_id = Column(Integer, ForeignKey('users.id'))
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     datetime = Column(DateTime, nullable=False)
