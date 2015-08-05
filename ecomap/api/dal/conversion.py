@@ -6,8 +6,9 @@ import json
 from sqlalchemy import func
 from fabric.api import local
 
-from api import settings
+# from api import settings
 from api.utils.auth import hash_password
+import api
 from api.dal.map import geo_ukraine
 from api.utils.db import get_db_session
 from api.v1_0.bl.utils import create_location
@@ -54,7 +55,7 @@ class MigrateDB(object):
         # Instance of MySQL db cursor.
         self.mysql_db = sqlsoup.SQLSoup(MYSQL_URL)
         # Initializing of psql session.
-        self.session = get_db_session(settings)()
+        self.session = get_db_session(api.settings)()
         # Need for remembering the valid problems.
         self.problems_id = []
 
@@ -81,7 +82,7 @@ class MigrateDB(object):
         """Create a dump for current migration.
         """
         local(
-            "sudo -u {user} pg_dump -d {db} > dumps/{file_name}.sql".format(
+            "sudo -u {user} pg_dump -d {db} > api/dal/dumps/{file_name}.sql".format(
                 user='postgres',
                 db='ecomap_db',
                 file_name=file_name

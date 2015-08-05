@@ -188,6 +188,7 @@ CREATE TABLE detailed_problem (
     region_id integer,
     number_of_votes bigint,
     datetime timestamp without time zone,
+    users_id integer,
     first_name character varying(100),
     last_name character varying(100),
     number_of_comments bigint
@@ -2274,18 +2275,18 @@ SELECT pg_catalog.setval('users_id_seq', 180, false);
 SET search_path = topology, pg_catalog;
 
 --
--- Data for Name: layer; Type: TABLE DATA; Schema: topology; Owner: postgres
---
-
-COPY layer (topology_id, layer_id, schema_name, table_name, feature_column, feature_type, level, child_id) FROM stdin;
-\.
-
-
---
 -- Data for Name: topology; Type: TABLE DATA; Schema: topology; Owner: postgres
 --
 
 COPY topology (id, name, srid, "precision", hasz) FROM stdin;
+\.
+
+
+--
+-- Data for Name: layer; Type: TABLE DATA; Schema: topology; Owner: postgres
+--
+
+COPY layer (topology_id, layer_id, schema_name, table_name, feature_column, feature_type, level, child_id) FROM stdin;
 \.
 
 
@@ -2449,6 +2450,7 @@ CREATE RULE "_RETURN" AS
     problems.region_id,
     a.number_of_votes,
     b.datetime,
+    c.users_id,
     c.first_name,
     c.last_name,
     count(comments.id) AS number_of_comments
@@ -2463,17 +2465,18 @@ CREATE RULE "_RETURN" AS
            FROM problems_activities
           WHERE (problems_activities.activity_type = 'ADDED'::activitytype)) b ON ((problems.id = b.id)))
      LEFT JOIN ( SELECT problems_activities.problem_id,
+            users.id AS users_id,
             users.first_name,
             users.last_name
            FROM (problems_activities
              LEFT JOIN users ON ((users.id = problems_activities.user_id)))
           WHERE (problems_activities.activity_type = 'ADDED'::activitytype)
-          GROUP BY problems_activities.problem_id, users.first_name, users.last_name) c ON ((c.problem_id = problems.id)))
+          GROUP BY problems_activities.problem_id, users.first_name, users.last_name, users.id) c ON ((c.problem_id = problems.id)))
      LEFT JOIN comments ON ((problems.id = comments.problem_id)))
   WHERE (NOT (problems.id IN ( SELECT problems_activities.problem_id
            FROM problems_activities
           WHERE (problems_activities.activity_type = 'REMOVED'::activitytype))))
-  GROUP BY problems.id, problems.title, problems.proposal, a.number_of_votes, b.datetime, c.first_name, c.last_name
+  GROUP BY problems.id, problems.title, problems.proposal, a.number_of_votes, b.datetime, c.users_id, c.first_name, c.last_name
   ORDER BY problems.id;
 
 
