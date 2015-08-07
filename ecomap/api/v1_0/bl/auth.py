@@ -9,6 +9,7 @@ def complete_auth(handler, user):
     user data to the client."""
     handler.set_cookie('user_id', str(user.id))
     handler.write({
+        'user_id': user.id,
         'first_name': user.first_name,
         'last_name': user.last_name,
         'user_roles': ':'.join(get_user_roles(handler.sess, user.id)),
