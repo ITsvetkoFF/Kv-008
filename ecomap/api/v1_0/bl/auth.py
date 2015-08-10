@@ -56,7 +56,7 @@ def create_fb_user(user_profile):
         last_name=define_values(user_profile,'last_name'),
         email=user_profile['email'],
         region_id=define_values(user_profile,'region_id'),
-        facebook_id=user_profile['id']
+        facebook_id=user_profile['facebook_id']
     )
 
 
