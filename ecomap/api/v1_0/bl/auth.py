@@ -2,6 +2,7 @@ from api.v1_0.models import UserRole, RolePermission
 from api.v1_0.models.user import User
 from api.v1_0.models.permission import Permission
 from api.v1_0.bl.utils import define_values
+from api.utils.auth import hash_password
 
 
 def complete_auth(handler, user):
@@ -57,7 +58,7 @@ def create_fb_user(user_profile):
         email=user_profile['email'],
         region_id=define_values(user_profile,'region_id'),
         facebook_id=user_profile['facebook_id'],
-        password="facebookpassword"
+        password=hash_password("facebookpassword")
     )
 
 
