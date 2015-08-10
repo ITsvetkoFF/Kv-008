@@ -53,7 +53,7 @@ class FacebookHandler(BaseHandler):
     @validation(UserRegisterFbForm)
     def post(self):
         user = self.sess.query(User).filter(
-            User.facebook_id == self.request.arguments['id']).first()
+            User.facebook_id == self.request.arguments['facebook_id']).first()
 
         if user:
             complete_auth(self, user)
