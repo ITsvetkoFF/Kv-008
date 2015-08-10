@@ -16,7 +16,7 @@ class UserRegisterFbForm(ModelForm):
     class Meta:
         # need to add password_required check here
         model = User
-        exclude = ['google_id']
+        exclude = ['google_id', 'password']
         include = ['region_id']
 
 class UserLoginForm(ModelForm):
