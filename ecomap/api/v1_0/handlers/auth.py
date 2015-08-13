@@ -68,6 +68,25 @@ class FacebookHandler(BaseHandler):
 
             complete_auth(self, new_user)
 
+class GooglePlusHandler(BaseHandler):
+    @validation(UserRegisterGpForm)
+    def post(self):
+        user = self.sess.query(User).filter(
+            User.google_id == self.request.arguments['google_id']).first()
+
+        if user:
+            complete_auth(self, user)
+        else:
+            new_user = store_new_user(
+                self.sess, create_gp_user(self.request.arguments))
+            # If new_user is None, then her email is already in the database,
+            # and that means, that she has registered directly using our
+            # registration form.
+            if not new_user:
+                return self.send_error(400, message='Email already in use.')
+
+            complete_auth(self, new_user)
+
 
 class LoginHandler(BaseHandler):
     @validation(UserLoginForm)

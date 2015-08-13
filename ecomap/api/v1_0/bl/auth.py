@@ -61,6 +61,16 @@ def create_fb_user(user_profile):
         password=hash_password("facebookpassword")
     )
 
+def create_gp_user(user_profile):
+    return User(
+        first_name=user_profile['first_name'],
+        last_name=define_values(user_profile,'last_name'),
+        email=user_profile['email'],
+        region_id=define_values(user_profile,'region_id'),
+        google_id=user_profile['google_id'],
+        password=hash_password("googlepassword")
+    )
+
 
 def get_absolute_redirect_uri(handler, url_name):
     """Use reverse_url and settings to create a redirect uri."""
