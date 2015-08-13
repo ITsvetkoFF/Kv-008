@@ -7,6 +7,7 @@ from api.utils.auth import hash_password
 from api.v1_0.forms.user import (
     UserRegisterForm,
     UserLoginForm,
+    UserRegisterGpForm,
     UserRegisterFbForm
 )
 from api.v1_0.bl.auth import *

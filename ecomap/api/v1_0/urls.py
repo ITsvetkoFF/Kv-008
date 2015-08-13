@@ -43,8 +43,8 @@ APIUrls = [
     URLSpec(r'/api/register', RegisterHandler),
     URLSpec(r'/api/login', LoginHandler),
     URLSpec(r'/api/logout', LogoutHandler),
-    URLSpec(r'/api/auth/facebook', FacebookHandler, name='fb_auth'),
-    URLSpec(r'/api/auth/google', GooglePlusHandler, name='gp_auth'),
+    URLSpec(r'/api/auth/facebook', FacebookHandler),
+    URLSpec(r'/api/auth/google', GooglePlusHandler),
 
     # UsersHandler.get
     URLSpec(r'/api/users', UsersHandler),
