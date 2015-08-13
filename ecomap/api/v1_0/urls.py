@@ -15,6 +15,7 @@ from api.v1_0.handlers.pages import (
 from api.v1_0.handlers.allproblems import AllProblemsHandler
 from api.v1_0.handlers.auth import (
     FacebookHandler,
+    GooglePlusHandler,
     RegisterHandler,
     LoginHandler,
     LogoutHandler
