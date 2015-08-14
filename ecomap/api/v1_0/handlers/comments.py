@@ -118,6 +118,7 @@ class ProblemCommentsHandler(BaseHandler):
             response = {
                 'id': comment_query.id,
                 'content': comment_query.content,
+                'user_id': comment_query.user_id,
                 'created_by': user_query.first_name,
                 'created_date': iso_datetime(comment_query.created_date),
                 'modified_date': iso_datetime(comment_query.modified_date),
