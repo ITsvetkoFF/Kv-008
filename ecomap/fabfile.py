@@ -71,16 +71,16 @@ def init_db(dump=None):
     you will receive the data from dump. Otherwise you will create a new db without data.
     """
     fab_run('sudo -u postgres psql -f init_ecomap_db.sql;'
-            'export PYTHONPATH=":/ecomap"')
+            'export PYTHONPATH=":/KV008/backend/ecomap"')
     if dump == 'from_dump':
-        path_to_dal = '/ecomap/api/dal'
+        path_to_dal = '/KV008/backend/ecomap/api/dal'
         fab_run('sudo -u postgres psql ecomap_db < %s/dumps/ecomap_db_dump.sql;' % path_to_dal)
     else:
         Base.metadata.create_all(get_db_engine(settings))
-        fab_run('sudo -u postgres psql -f /ecomap/api/dal/view.sql;')
+        fab_run('sudo -u postgres psql -f /KV008/backend/ecomap/api/dal/view.sql;')
 
 
 def populate_db(problems_count):
     """Populate database with fake data."""
-    fab_run('export PYTHONPATH=":/ecomap"')
+    fab_run('export PYTHONPATH=":/KV008/backend/ecomap"')
     fab_run('python factories.py %s' % problems_count)
